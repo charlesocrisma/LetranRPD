@@ -1,0 +1,249 @@
+﻿@{
+    ViewData["Title"] = "Account";
+}
+@{
+    ViewBag.Title = "Account";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentUser = Context.Session.GetObject<Account>("account") ?? null;
+    if (currentUser == null)
+    {
+        Context.Response.Redirect("Home");
+    }
+
+}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<title>Account</title>
+<link rel="stylesheet" href="~/css/Account.css" asp-append-version="true" />
+
+<div class="container">
+
+    <header class="header">
+        <div class="header-content">
+            <h1>Account Settings</h1>
+        </div>
+    </header>
+
+
+    <main class="main-content">
+        <div class="settings-container">
+  
+
+            <nav class="settings-nav">
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a href="#profile" class="nav-link">
+                            <i class="fa-solid fa-address-card"></i>
+                            <span style="padding-left:10px;">Account</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#academic" class="nav-link">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span style="padding-left:10px;">Certificates</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#security" class="nav-link">
+                            <i class="fa-solid fa-lock"></i>
+                            <span style="padding-left:10px;">Security</span>
+                        </a>
+                    </li>                  
+                </ul>
+            </nav>
+
+
+
+            <div class="settings-content">
+                <section id="profile" class="settings-section active">
+                    <h2>Profile Information</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" Value="@currentUser.FirstName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" value="@currentUser.LastName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentId">Student ID</label>
+                            <input type="text" id="studentId" value="@currentUser.StudentNumber" class="form-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <input type="text" id="studentId" value="@currentUser.Level" class="form-input" readonly>
+                        </div>
+
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" value="@currentUser.Email" class="form-input">
+                    </div>       
+
+                    <button class="save-btn">Save Changes</button>
+                </section>
+
+				<!-- Certificates -->
+                <section id="academic" class="settings-section">
+                        <h2 class="section-title">Certificates</h2>
+
+                        <div class="certificate-container">
+                            <!-- Sample Certificate -->
+                            <div class="certificate-tile" id="cert1" onclick="downloadPDF('cert1','SR02A - Ocrisma.pdf')">
+                                <div class="certificate-content">
+                                    <h3>Certificate of Originality (Proposal Manuscript)</h3>
+                                <p class="subtitle">I/We hereby declare that this submission entitled</p>
+                                    <div class="research-name">INTEGRATED RESEARCH SERVICES MANAGEMENT SYSTEM (IRSMS)
+FOR RESEARCH AND PUBLICATION DEPARTMENT OF LETRAN-MANILA</div>
+                                    <p class="subtitle">has successfully completed by</p>
+                                    <div class="authors-name">
+                                    <p style="margin-bottom:2px;">Ocrisma, Charles Dominick A.</p>
+                                    <p style="margin-bottom:2px;">Penalber, Ace V.</p>
+                                    <p style="margin-bottom:2px;">Bonifacio, Luiz</p>
+                                </div>
+                                    <p class="subtitle">with a similarity index of</p>
+                                    <div class="grade">7%</div>                                    
+                                    <div class="completion-date">
+                                        <p>Completed on: August 19, 2025</p>
+                                        <p>CLICK TILE TO DOWNLOAD PDF</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <div class="certificate-tile" id="cert1" onclick="downloadPDF('cert1','SR02A - Ocrisma.pdf')">
+                            <div class="certificate-content">
+                                <h3>Certificate of Originality (Proposal Manuscript)</h3>
+                                <p class="subtitle">I/We hereby declare that this submission entitled</p>
+                                <div class="research-name">
+									INTEGRATED GAMING PLATFORM FOR LETRAN-MANILA STUDENTS
+                                </div>
+                                <p class="subtitle">has successfully completed by</p>
+                                <div class="authors-name">
+                                    <p style="margin-bottom:2px;">Ocrisma, Charles Dominick A.</p>
+                                    <p style="margin-bottom:2px;">Penalber, Ace V.</p>
+                                    <p style="margin-bottom:2px;">Bonifacio, Luiz</p>
+                                </div>
+                                <p class="subtitle">with a similarity index of</p>
+                                <div class="grade">9%</div>
+                                <div class="completion-date">
+                                    <p>Completed on: November 10, 1620</p>
+                                    <p>CLICK TILE TO DOWNLOAD PDF</p>
+                                </div>
+                            </div>
+                        </div>
+
+                          
+
+
+
+                </section>
+
+                <!-- Security Section -->
+                <section id="security" class="settings-section">
+                    <h2>Security</h2>
+
+                    <div class="security-item">
+                        <h3>Change Password</h3>
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" class="form-input">
+                        </div>
+                        <button class="secondary-btn">Update Password</button>
+                    </div>
+                </section>
+             
+                
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Navigation functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.settings-section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Remove active class from all nav items and sections
+                navLinks.forEach(l => l.parentElement.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+
+                // Add active class to clicked nav item
+                this.parentElement.classList.add('active');
+
+                // Show corresponding section
+                const targetId = this.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+            });
+        });
+
+        // Form submission handlers
+        const saveButtons = document.querySelectorAll('.save-btn, .secondary-btn');
+        saveButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Add a simple feedback animation
+                const originalText = this.textContent;
+                this.textContent = 'Saved!';
+                this.style.background = '#28a745';
+
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.background = '';
+                }, 2000);
+            });
+        });
+
+        // File upload simulation
+        const uploadBtn = document.querySelector('.upload-btn');
+        if (uploadBtn) {
+            uploadBtn.addEventListener('click', function() {
+                // Simulate file selection
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.click();
+
+                input.addEventListener('change', function() {
+                    if (this.files[0]) {
+                        alert('Profile photo updated successfully!');
+                    }
+                });
+            });
+        }
+    });
+</script>
+
+<!-- Certificate Download Tile -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function downloadPDF(elementId, filename) {
+      const element = document.getElementById(elementId);
+      const opt = {
+        margin:       0.5,
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+</script>

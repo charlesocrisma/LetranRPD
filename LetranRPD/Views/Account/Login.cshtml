@@ -1,0 +1,23 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+@model LetranRPD.Models.Account
+<link rel="stylesheet" href="~/css/login.css">
+
+<div class="login-container">
+    <div class="logo-container">
+        <img src="~/Gallery/Research logo.png" alt="Research & Publication Department Logo">
+    </div>
+    <h1>Welcome To Research & Public Department</h1>
+    <form asp-action="LoginButton" method="post">
+        <input type="email" id="email" placeholder="Student Email" asp-for="Email" required>
+        <input type="password" id="password" placeholder="Password" asp-for="password" required>
+        <button type="submit" class="btn">Login</button>
+    </form>
+    <div class="extra">
+        <p>Forgot your password? <a asp-action="ForgotPassword" class="ForgotPassword" style="color:dimgrey; font-style:italic;">Reset</a>
+        <p>New here? <a asp-action="Register" class="register" style="color:dimgrey; font-style:italic;">Create Account</a>
+    </div>
+</div>
+

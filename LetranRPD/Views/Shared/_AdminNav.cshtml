@@ -1,0 +1,229 @@
+﻿@{
+    var hideLayout = ViewData["HideLayout"] as bool? ?? false;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    <link rel="stylesheet" href="~/css/admin/AdminNav.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+
+    <!-- Admin Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-section">
+            <div class="logo">
+                <div class="logo-pic">
+                    <img src="~/Gallery/Research logo.png" alt="RPD Logo">
+                </div>
+                <div class="logo-text-group">
+                    <div class="logo-text">Letran Research & Publication Department</div>
+                    <div class="logo-subtitle">=== Admin (Name) ===</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Main</div>
+            <div class="nav-item">
+                <a href="/Admin/Dashboard" class="nav-link active" onclick="setActiveNav(this)">
+                    <div class="nav-main">
+                    <div class="nav-icon">📊 </div>
+                    <div class="nav-text">Dashboard</div>
+                    <div class="nav-tooltip">Dashboard & Analytics</div>     
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Management</div>
+            <div class="nav-item">
+                <a href="/Admin/user" class="nav-link" onclick="setActiveNav(this)">
+                    <div class="nav-main">
+                    <div class="nav-icon">👥</div>
+                    <div class="nav-text">Account & Roles</div>
+                    <div class="nav-tooltip">Users, Departments, Permissions</div>
+					</div>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="setActiveNav(this)">
+                    <div class="nav-main">
+                    <div class="nav-icon">📝</div>
+                    <div class="nav-text">Research Progress</div>
+                    <div class="nav-tooltip">Status, Remarks, Files, Requests</div>
+                    </div>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="setActiveNav(this)">
+                    <div class="nav-main">
+                    <div class="nav-icon">🏆</div>
+                    <div class="nav-text">Certificates</div>
+                    <div class="nav-tooltip">Upload/Manage per student</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Content</div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="setActiveNav(this)">
+                    <div class="nav-main">
+                    <div class="nav-icon">📰</div>
+                    <div class="nav-text">Content</div>
+                    <div class="nav-tooltip">News, Library, Announcements</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">System</div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="setActiveNav(this)">
+                    <div class="nav-main">
+                    <div class="nav-icon">🔍</div>
+                    <div class="nav-text">Audit & Logs</div>
+                    <div class="nav-tooltip">History, Security</div>
+                    </div>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="setActiveNav(this)">
+                    <div class="nav-main">
+                    <div class="nav-icon">⚙️</div>
+                    <div class="nav-text">Settings</div>
+                    <div class="nav-tooltip">System Configuration</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </nav>
+   
+
+    <main>
+        @RenderBody()
+    </main>
+
+
+    <script>
+
+        // Navigation functionality
+        function setActiveNav(clickedLink) {
+            // Remove active class from all nav links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Add active class to clicked link
+            clickedLink.classList.add('active');
+
+            // Get the nav text for demo purposes
+            const navText = clickedLink.querySelector('.nav-text').textContent;
+            console.log(`Navigated to: ${navText}`);
+        }
+
+        // Mobile responsiveness
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        // Add mobile menu button for smaller screens
+        function addMobileMenuButton() {
+            if (window.innerWidth <= 768 && !document.querySelector('.mobile-menu-btn')) {
+                const demoContent = document.querySelector('.demo-content');
+                const mobileMenuBtn = document.createElement('button');
+                mobileMenuBtn.className = 'mobile-menu-btn';
+                mobileMenuBtn.innerHTML = '☰';
+                mobileMenuBtn.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 20px;
+                    z-index: 1001;
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    padding: 10px;
+                    border-radius: 8px;
+                    font-size: 18px;
+                    cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                `;
+                mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+                document.body.appendChild(mobileMenuBtn);
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('mobile-open');
+                const mobileBtn = document.querySelector('.mobile-menu-btn');
+                if (mobileBtn) {
+                    mobileBtn.remove();
+                }
+            } else {
+                addMobileMenuButton();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addMobileMenuButton();
+        });
+
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
+
+            if (window.innerWidth <= 768 &&
+                sidebar.classList.contains('mobile-open') &&
+                !sidebar.contains(event.target) &&
+                event.target !== mobileBtn) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + B to toggle sidebar
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                e.preventDefault();
+                toggleSidebar();
+            }
+
+            // Number keys 1-7 to switch navigation
+            const moduleKeys = {
+                '1': 0, // Dashboard
+                '2': 1, // Account & Roles
+                '3': 2, // Research Progress
+                '4': 3, // Certificates
+                '5': 4, // Content
+                '6': 5, // Audit & Logs
+                '7': 6  // Settings
+            };
+
+            if (e.altKey && moduleKeys.hasOwnProperty(e.key)) {
+                e.preventDefault();
+                const navLinks = document.querySelectorAll('.nav-link');
+                if (navLinks[moduleKeys[e.key]]) {
+                    navLinks[moduleKeys[e.key]].click();
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

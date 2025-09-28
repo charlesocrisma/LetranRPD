@@ -1,0 +1,68 @@
+﻿@{
+	ViewBag.Title = "Originality";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var currentUser = Context.Session.GetObject<Account>("account") ?? null;
+	if (currentUser == null)
+	{
+		Context.Response.Redirect("/Home");
+		return;
+	}
+
+	@model LetranRPD.Models.ServiceInformation
+}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="~/css/Forms.css" asp-append-version="true" />
+
+<div class="main-content">
+	<div class="form-container">
+		<h1>ORIGINALITY CHECK FORM</h1>
+		<form asp-action="OriginalityButton" method="post">
+
+			<input type="hidden" asp-for="StudentNumber" value="@currentUser.StudentNumber" />
+			<div class="form-row">
+				<div class="form-group">
+					<label for="email">Email</label>
+					<input type="email" asp-for="Email" placeholder="Email Address">
+				</div>
+			</div>
+			<div class="form-group full-width">
+				<label for="researchTitle">Thesis Title</label>
+				<input type="text" asp-for="Title" placeholder="Research Title">
+			</div>
+			<div class="form-group full-width">
+				<label for="author">Proponent(s)/Author(s)</label>
+				<input type="text" asp-for="Author" placeholder="Name(s)">
+			</div>
+			<div class="form-group full-width">
+				<label for="contact_person">Contact Person</label>
+				<input type="text" asp-for="ContactPerson" placeholder="Name">
+			</div>
+			<div class="form-group full-width">
+				<label for="contact_number">Contact Number</label>
+				<input type="text" asp-for="ContactNumber" placeholder="e.g.09124567890">
+			</div>
+
+			<div class="form-group full-width">
+				<label for="adviser">Research Adviser</label>
+				<input type="text" asp-for="ResearchAdviser" placeholder="Name">
+			</div>
+
+			<div class="form-group full-width">
+				<label>Thesis Subject</label>
+				<select required asp-for="Subject">
+					<option disabled selected>Select your Subject</option>
+					<option>Thesis 1/RM 1/Research 1</option>
+					<option>Thesis 2/RM 2/Research 2</option>
+					<option>Business Plan/Strama</option>
+					<option>Feasibility Study/Capstone Project (Lab)</option>
+					<option>Capstone Project 1</option>
+					<option>Capstone Project 2</option>
+				</select>
+			</div>
+
+			<a href="/Home/Tracker"><button type="submit" class="submit-button">PROCEED</button></a>
+		</form>
+	</div>
+</div>

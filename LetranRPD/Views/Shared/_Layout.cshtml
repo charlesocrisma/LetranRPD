@@ -1,0 +1,95 @@
+﻿@{
+    var hideLayout = ViewData["HideLayout"] as bool? ?? false;
+    var currentUser = Context.Session.GetObject<Account>("account") ?? null;
+}
+@{
+
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LetranRPD</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/Nav.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebApplication2.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="main-nav-container">
+        <div class="nav-row">
+
+            <div class="left-nav-links">
+                <a href="/Home/Home" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Home" ? "active" : "")">HOME</a>
+                <a href="/Home/Services" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Services" ? "active" : "")">SERVICES</a>
+                @if (currentUser != null)
+                {
+                    <a href="/Home/Tracker" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Tracker" ? "active" : "")">TRACKING</a>
+                }
+                
+                
+                <a href="/Home/Journals" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Journals" ? "active" : "")">JOURNALS</a>
+            </div>
+
+
+            <div class="logo-container">
+                <img class="logo-top" src="~/Gallery/Research logo.png" alt="Letran" style="height: 40px">
+                <span class="logo-text">RESEARCH & PUBLICATION DEPARTMENT</span>
+            </div>
+
+
+            <div class="right-nav-links">
+                <a href="/Home/Downloads" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Downloads" ? "active" : "")">DOWNLOADS</a>
+                <a href="/Home/About" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "About" ? "active" : "")">ABOUT</a>
+                @if (currentUser != null)
+                {
+                    <div class="dropdown">
+                        <div class="avatar">@currentUser.FirstName[0]</div>
+                        <div class="dropdown-content">
+
+                            <a href="/User/Account" )>
+                                <i class="fa-solid fa-user"></i>
+                                <span>Account</span>
+                            </a>
+
+                            <a href="/account/logout">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
+                }
+                else {
+                    <a href="/account/login" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Login" ? "active" : "")">Login</a>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container main-content">
+        <main>
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <img src="~/Gallery/Letran-Logo.png" alt="Letran" style="height: 50px">
+            <p>&copy; <span id="current-year"></span> All Rights Reserved</p>
+            <p>Muralla Street, Intramuros, Manila, Philippines</p>
+            <p>Tel: (632) 8527-1653 | Email: info@letran.edu</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

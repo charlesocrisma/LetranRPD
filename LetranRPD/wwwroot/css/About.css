@@ -1,0 +1,86 @@
+﻿body {
+    font-family: sans-serif; 
+    line-height: 1.6;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.about-hero {
+    background: url('../BG/Letran Night.jpg') no-repeat center center/cover;
+    color: white;
+    text-align: center;
+    padding: 100px 20px 60px;
+}
+
+    .about-hero h1 {
+        font-size: 48px;
+        margin: 0;
+    }
+
+    .about-hero p {
+        font-size: 18px;
+        margin-top: 10px;
+        opacity: 0.8;
+    }
+
+.about-content {
+    padding: 60px 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.text-image-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+}
+
+    .text-image-section .text {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .text-image-section .image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+
+.signature {
+    margin-top: 20px;
+    font-family: 'Brush Script MT', cursive;
+    font-size: 20px;
+}
+
+.features-section {
+    text-align: center;
+}
+
+    .features-section .features {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+.feature {
+    flex: 1 1 250px;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fafafa;
+}
+
+    .feature span {
+        font-size: 30px;
+        display: block;
+        margin-bottom: 10px;
+    }
+

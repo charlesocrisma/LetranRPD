@@ -1,0 +1,76 @@
+﻿@{
+    ViewBag.Title = "Data Analysis";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentUser = Context.Session.GetObject<Account>("account") ?? null;
+    if (currentUser == null)
+    {
+        Context.Response.Redirect("/Home");
+
+    }
+
+    @model LetranRPD.Models.ServiceInformation
+}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="~/css/Forms.css" asp-append-version="true" />
+
+<div class="main-content">
+    <div class="form-container" style="width:1000px;">
+		<h1>DATA ANALYSIS FORM</h1>
+            <form asp-action="DataButton" method="post"  style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 1200px; margin: 0 auto;">
+                <input type="hidden" asp-for="StudentNumber" value="@currentUser.StudentNumber" />
+
+                <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="email" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Email</label>
+                        <input type="email" asp-for="Email" id ="email" placeholder="Email Address" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="researchTitle" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Thesis/Dissertation Title</label>
+                        <input type="text" asp-for="Title" id=" researchTitle" placeholder="Research Title" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="author" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Proponent(s)/Author(s)</label>
+                        <input type="text" asp-for="Author" id="author" placeholder="Name(s)" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="contact_person" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Contact Person</label>
+                        <input type="text" asp-for="ContactPerson" id="contact_person" placeholder="Name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="contact_number" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Contact Number</label>
+                        <input type="text" asp-for="ContactNumber" id="contact_number" placeholder="e.g.09124567890" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="adviser" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Research Adviser</label>
+                        <input type="text" asp-for="ResearchAdviser" id="adviser" placeholder="Name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="research_variables" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Research Variables</label>
+                        <input type="text" asp-for="DA_Variable" id="research_variables" placeholder="Research Variables" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="statistical_tool" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Statistical Tool/s</label>
+                        <input type="text" asp-for="DA_Tool" id="statistical_tool" placeholder="Statistical Tool/s" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 6px; border-left: 4px solid #007bff;">
+                    <p style="font-size: 13px; margin: 0; font-style: italic; color: #666; line-height: 1.5;">
+                        Kindly specify what and how many specific statistical tools you will request.
+                        (e.g., Basic Statistical Tool: Correlation and ANOVA).<br><br>
+                        For your reference, the available statistical tools of the RPD are as follows: (NOTE: If your statistical tool is not listed below, please type it in the answer box and include it in your submission of documents)
+                    </p>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <img src="~/Services/statistical_tools.jpg" alt="Statistical Tools Reference" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    </div>
+                </div>
+                <a href="/Home/Tracker"><button type="submit" class="submit-button">PROCEED</button></a>
+
+            </form>
+	</div>
+</div>

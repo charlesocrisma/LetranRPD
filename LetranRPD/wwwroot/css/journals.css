@@ -1,0 +1,463 @@
+﻿body {
+    background-image: url('../BG/Letran Bg Cont.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    color: white;
+    overflow-x: hidden;
+}
+
+.main-nav-container {
+    margin-bottom: 30px;
+}
+
+.container {
+    margin-top: 30px;
+}
+
+.main-content {
+    margin-top: 3rem;
+    padding: 1rem;
+    max-width: 1720px;
+    margin: 0 auto;
+    background: white;
+    height: 100%;
+}
+
+.page-title {
+    color: black;
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.doc-section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: black;
+    margin-bottom: 1rem;
+}
+
+.doc-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+    .doc-row::-webkit-scrollbar {
+        display: none;
+    }
+
+.doc-card {
+    position: relative;
+    min-width: 200px;
+    height: 112px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+    .doc-card.featured {
+        min-width: 400px;
+        height: 555px;
+    }
+
+    .doc-card:hover {
+        transform: scale(1.05);
+        z-index: 100;
+    }
+
+.doc-image {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+    .doc-image:not(.doc-card.featured .doc-image)::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 100%);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+
+.luz-y-saber .doc-image {
+    background-image: url('../journals/luzysaber.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.antorcha .doc-image {
+    background-image: url('../journals/antorcha.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.letran-business-and-economics-review .doc-image {
+    background-image: url('../journals/letranbusinessandeconomics.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.brillar .doc-image {
+    background-image: url('../journals/brillar.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.the-horizon .doc-image {
+    background-image: url('../journals/thehorizon.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+
+.doc-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #e50914;
+    color: white;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 2px;
+    z-index: 2;
+}
+/**/
+
+.doc-content-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    z-index: 1;
+}
+
+
+
+.doc-title-overlay {
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.doc-card.featured .doc-title-overlay {
+    font-size: 1.2rem;
+}
+
+.view-doc {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.9);
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 3;
+}
+
+.doc-card:hover .view-doc {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.doc-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    padding: 2rem 1rem 1rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.doc-card.featured .doc-info {
+    opacity: 1;
+}
+
+.doc-info h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.doc-meta {
+    font-size: 0.8rem;
+    color: #46d369;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.doc-info .view-doc {
+    position: static;
+    background: white;
+    color: #000;
+    border-radius: 4px;
+    width: auto;
+    height: auto;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 1;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+}
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+.modal-content {
+    background: #1a1a1a;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.4s ease;
+}
+
+.modal-header {
+    background: linear-gradient(15deg, #9B1C31 0%, #101a38 75%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+.close {
+    font-size: 1.8rem;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+    .close:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+.modal-body {
+    padding: 2rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #e6e6e6;
+}
+
+.document-viewer {
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 2rem;
+    min-height: 400px;
+    border: 1px solid #333;
+}
+
+.doc-content {
+    line-height: 1.8;
+    color: dimgrey;
+}
+
+    .doc-content h3 {
+        color: Black;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .doc-content h4 {
+        color: black;
+        margin: 1.5rem 0 0.5rem 0;
+        font-size: 1.2rem;
+    }
+
+    .doc-content p {
+        margin-bottom: 1rem;
+        text-align: justify;
+        color: black;
+    }
+
+    .doc-content .highlight {
+        background: linear-gradient(120deg, rgba(229, 9, 20, 0.1) 0%, rgba(30, 136, 229, 0.1) 100%);
+        padding: 1rem;
+        border-left: 4px solid #e50914;
+        margin: 1rem 0;
+        border-radius: 0 8px 8px 0;
+    }
+
+.modal-footer {
+    background: linear-gradient(15deg, #9B1C31 0%, #101a38 75%);
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-top: 1px solid #333;
+}
+
+.modal-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .modal-btn.primary {
+        background: #2a54d1;
+        color: white;
+    }
+
+    .modal-btn.secondary {
+        background: #333;
+        color: #e5e5e5;
+        border: 1px solid #555;
+    }
+
+    .modal-btn:hover {
+        transform: translateY(-1px);
+        opacity: 0.9;
+    }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 1rem 2%;
+    }
+
+    .nav-left {
+        gap: 1.5rem;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .main-content {
+        padding: 1rem 2%;
+    }
+
+    .doc-card {
+        min-width: 150px;
+        height: 85px;
+    }
+
+        .doc-card.featured {
+            min-width: 300px;
+            height: 170px;
+        }
+
+    .modal-content {
+        width: 95%;
+        margin: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-brand h1 {
+        font-size: 1.4rem;
+    }
+
+    .doc-card {
+        min-width: 120px;
+        height: 68px;
+    }
+
+        .doc-card.featured {
+            min-width: 240px;
+            height: 135px;
+        }
+
+ 
+
+    .doc-title-overlay {
+        font-size: 0.7rem;
+    }
+}

@@ -1,0 +1,154 @@
+﻿body {
+    background-image: url('../BG/Letran Bg Cont.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    font-family: sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* ~/css/Downloads.css */
+
+#downloads-page-content {
+    font-family: sans-serif;
+    max-width: 960px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+    #downloads-page-content > h1 {
+        text-align: center;
+        font-size: 2.8rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #333;
+        margin-bottom: 1.5rem;
+    }
+
+
+
+    #downloads-page-content .downloads-section {
+        margin-bottom: 30px;
+    }
+
+        #downloads-page-content .downloads-section > h2 {
+            color: #555;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+    #downloads-page-content .download-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    #downloads-page-content .download-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+        #downloads-page-content .download-item:last-child {
+            border-bottom: none;
+        }
+
+    #downloads-page-content .platform {
+        width: 40px;
+        margin-right: 15px;
+    }
+
+        #downloads-page-content .icon.windows::before {
+            content: "";
+        }
+
+        #downloads-page-content .icon.apple::before {
+            content: "";
+        }
+
+    #downloads-page-content .details {
+        flex-grow: 1;
+    }
+
+    #downloads-page-content .title-version {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 5px;
+    }
+
+    #downloads-page-content .title {
+        font-weight: bold;
+        color: #333;
+    }
+
+    #downloads-page-content .version {
+        color: #777;
+        font-size: 0.9em;
+    }
+
+    #downloads-page-content .meta {
+        color: #777;
+        font-size: 0.9em;
+        margin-bottom: 5px;
+    }
+
+        #downloads-page-content .meta span {
+            margin-right: 10px;
+        }
+
+    #downloads-page-content .checksum {
+        color: #999;
+        font-size: 0.8em;
+        margin-bottom: 8px;
+    }
+
+    #downloads-page-content .links {
+        font-size: 0.85em;
+    }
+
+    #downloads-page-content .list-toggle {
+        color: #007bff;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+
+    #downloads-page-content .download-button {
+        margin-left: 20px;
+    }
+
+    #downloads-page-content .button {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 0.9em;
+    }
+
+        #downloads-page-content .button:hover {
+            background-color: #0056b3;
+        }
+
+@media (max-width: 600px) {
+    #downloads-page-content .download-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #downloads-page-content .platform {
+        margin-bottom: 10px;
+    }
+
+    #downloads-page-content .download-button {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}

@@ -1,0 +1,125 @@
+﻿body {
+    background-image: url('../BG/Letran Bg Cont.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.form-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 920px;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-stretch: bold;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    flex: 1;
+}
+
+    .form-group.full-width {
+        flex: 1 0 100%;
+    }
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+select,
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    color: #333;
+}
+
+select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg fill="%23333" viewBox="0 0 14 9" xmlns="http://www.w3.org/2000/svg"><path d="m1 1 6 6 6-6" stroke-width="2"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 12px;
+    padding-right: 30px;
+}
+
+.upload-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.upload-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.submit-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 100%;
+    margin-top: 25px;
+}
+
+    .submit-button:hover {
+        background-color: #0056b3;
+    }
+
+
+@media (max-width: 500px) {
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-group {
+        flex: 1 0 100%;
+    }
+
+    .upload-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .upload-button {
+        width: 100%;
+    }
+}

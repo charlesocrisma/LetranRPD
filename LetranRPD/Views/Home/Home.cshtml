@@ -1,0 +1,108 @@
+@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentUser = Context.Session.GetObject<Account>("account") ?? null;
+}
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/css/Home.css" />
+
+<div class="banner">
+    <div class="banner-image">
+        <img src="@Url.Content("~/BG/Letran Night.jpg")" alt="Banner">
+    </div>
+    <div class="banner-content">
+        <h5>@if (currentUser != null)
+            {
+                <div>Welcome @currentUser.FirstName, to</div>
+            }
+            else {
+                <div>Login to use the services.</div>
+            }
+        </h5>
+        <h1>LETRAN RESEARCH &<br>PUBLICATION DEPARTMENT</h1>
+        <p>Let's Get You Started!</p>
+        <a href="/Home/Services" class="btn">VIEW SERVICES</a>
+    </div>
+</div>
+
+<div class="News-section">
+    <div class="breaking-news">
+    <h5>RESEARCH & PUBLICATION DEPARTMENT</h5>
+    <h1>NEWS</h1>
+    <div class="divider"></div>
+    </div>
+<div class="news-grid">
+
+    <div class="news-item large image-overlay">
+            <img src="@Url.Content("~/News/News1.png")" alt="News 1">
+            <div class="overlay-content">
+                    <h2>Project TORCH: Research Ethics Training: Beyond Compliance - Embracing Ethics for Responsible Research</h2>
+                <p>The Research and Publication Department recently conducted the Project TORCH: Research Ethics Training: Beyond Compliance - Embracing Ethics for Responsible Research under the guidance of Dr. Elizabeth Bautista, RN, Ph.D. former chair of Research Ethics Committee (REC) of Saint Louis University, Baguio, on Friday, February 28, 2025, in the RICH Room (Research, Innovation, and Creatives Hub) and via Zoom</p>
+                    <span class="category">LETRAN MANILA</span>
+            </div>
+    </div>
+
+    <div class="news-column-right">
+        <div class="news-item small image-overlay">
+                    <img src="@Url.Content("~/News/News2.png")" alt="News 2">
+                <div class="overlay-content">
+                        <h3>Project TORCH: Research Ethics Training: Beyond Compliance - Embracing Ethics for Responsible Research</h3>
+                    <span class="category">LETRAN MANILA</span>
+                </div>
+        </div>
+
+        <div class="news-item small image-overlay">
+                    <img src="@Url.Content("~/News/News3.png")" alt="News 3">
+                <div class="overlay-content">
+                        <h3>PLM and Letran Explore Potential Collaboration</h3>
+                        <span class="category">LETRAN MANILA</span>
+                </div>
+        </div>
+
+        <div class="news-item small image-overlay">
+                    <img src="@Url.Content("~/News/News4.png")" alt="News 4">
+                <div class="overlay-content">
+                        <h3>Research and Publication Department Conducts Benchmarking Activity in Baguio City</h3>
+                        <span class="category">LETRAN MANILA</span>
+                </div>
+        </div>
+
+        <div class="news-item small image-overlay">
+                    <img src="@Url.Content("~/News/News5.png")" alt="News 5">
+                <div class="overlay-content">
+                        <h3>Grade 12 Students Underwent Final Research Defense</h3>
+                        <span class="category">LETRAN MANILA</span>
+                </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<div class="research-section">
+    <div class="research-container">
+        <div class="research-content">
+            <h1>PUBLISH WITH US!</h1>
+            <div class="divider"></div>
+            <p>
+                There is no doubt that research is one of the pillars of education, alongside instruction and community services. Through research, we can gather new knowledge and information for the enhancement of intellectual understanding and guide in decision-making abilities.
+            </p>
+            <p>
+                Letran Research Center is responsible in providing quality researches and publications to intensify the research culture of the Colegio. Along with its mission to become the torch of light and knowledge, the center aims to:
+            </p>
+            <ul class="benefits">
+                <li>Push the frontiers of knowledge across the identified higher education disciplines in the country</li>
+                <li>Enhance the research capability of the members of the institution</li>
+                <li>Provide accurate and updated information to academic departments regarding responsive and relevant program of studies</li>
+                <li>Promote professional growth through research</li>
+            </ul>
+        </div>
+        <div class="research-image">
+            <img src="@Url.Content("~/Gallery/Research Center.png")" alt="RPD News">
+        </div>
+    </div>
+</div>
+
+
+
