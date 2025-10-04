@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Org.BouncyCastle.Bcpg;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace LetranRPD.Models
 
 {
@@ -18,13 +20,18 @@ namespace LetranRPD.Models
     public class ServiceProgress
     {
         public int Id { get; set; }
-        public bool Progress1 { get; set; } = false;
-        public bool Progress2 { get; set; } = false;
-        public bool Progress3 { get; set; } = false;
-        public bool Progress4 { get; set; } = false;
+
         public ServiceInformation SI { get; set; } = null!;
 
-    }
+        [ForeignKey("SI")]
+        public int ServiceId { get; set; }
+        public int Progress1 { get; set; } = 1;
+        public int Progress2 { get; set; } = 0;
+        public int Progress3 { get; set; } = 0;
+        public int Progress4 { get; set; } = 0;
+
+        public DateTime AppliedDate { get; set; }
+}
     public class ServiceInformation
     {
         [Key]
@@ -38,13 +45,12 @@ namespace LetranRPD.Models
         public string ContactNumber { get; set; } = "";
         public string ResearchAdviser { get; set; } = "";
         public string Subject { get; set; } = "";
-
         public string? LE_Index { get; set; }
         public int? LE_Pages { get; set; }
         public string? DA_Variable { get; set; }
         public string? DA_Tool { get; set; }
 
-        public ICollection<ServiceProgress> ServiceProgress { get; set; } = new List<ServiceProgress>();
+        public ServiceProgress ServiceProgress { get; set; } = new ServiceProgress();
 
     }
 

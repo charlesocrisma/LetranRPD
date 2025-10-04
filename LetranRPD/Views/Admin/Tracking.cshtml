@@ -1,0 +1,1044 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminNav.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Progress Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/admin/tracking.css" asp-append-version="true" />
+
+</head>
+<body data-color-scheme="light">
+    <div class="main-container">
+
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-clipboard-list"></i>
+                Research Progress Management
+            </h1>
+            <p class="page-subtitle">Monitor and update student research submissions across all departments</p>
+        </div>
+
+        <!-- Statistics Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-number" id="totalStudents">6</div>
+                <div class="stat-label">Total Submissions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="processingCount">3</div>
+                <div class="stat-label">Processing</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedCount">2</div>
+                <div class="stat-label">Complete</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="failedCount">1</div>
+                <div class="stat-label">Failed</div>
+            </div>
+        </div>
+
+        <!-- Collapsible Filter Section -->
+        <div class="filter-section collapsed" id="filterSection">
+            <div class="filter-toggle" id="filterToggle">
+                <span class="filter-toggle-text">
+                    <i class="fas fa-filter"></i>
+                    Filter & Search
+                </span>
+                <i class="fas fa-chevron-down filter-toggle-icon"></i>
+            </div>
+            <div class="filter-content" id="filterContent">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search by name, student number, or service..." />
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Department:</label>
+                        <div class="filter-tabs" id="departmentTabs">
+                            <!-- Tabs will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Service:</label>
+                        <div class="filter-tabs" id="serviceTabs">
+                            <!-- Tabs will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Table Container -->
+        <div class="table-wrapper" id="studentsTableContainer">
+            <!-- Table will be populated by JavaScript -->
+        </div>
+
+        <!-- Service Steps Modal -->
+        <div id="serviceStepsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Service Steps</h3>
+                    <span class="close" onclick="closeServiceStepsModal()">&times;</span>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Service steps will be populated here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Application data with dual status system
+        const applicationData = {
+            "students": [
+                {
+                    "id": "JO",
+                    "name": "John Ocrisma",
+                    "studentNumber": "CS2021-001",
+                    "department": "College of Engineering and Information Technology",
+                    "course": "Computer Science",
+                    "service": "originality-check",
+                    "serviceName": "Originality Check",
+                    "status": "failed",
+                    "currentStep": 3,
+                    "totalSteps": 4,
+                    "runCount": 4,
+                    "dateSubmitted": "2024-03-15",
+                    "lastUpdated": "2024-03-20",
+                    "receivedFiles": 2,
+                    "sendFiles": 1,
+                    "remarks": "Similarity index too high, requires revision",
+                    "stepStatuses": ["complete", "complete", "failed", "pending"]
+                },
+                {
+                    "id": "MS",
+                    "name": "Maria Santos",
+                    "studentNumber": "EN2021-045",
+                    "department": "College of Engineering and Information Technology",
+                    "course": "Engineering",
+                    "service": "instrument-validation",
+                    "serviceName": "Instrument Validation",
+                    "status": "complete",
+                    "currentStep": 4,
+                    "totalSteps": 4,
+                    "runCount": 2,
+                    "dateSubmitted": "2024-03-10",
+                    "lastUpdated": "2024-03-25",
+                    "receivedFiles": 3,
+                    "sendFiles": 1,
+                    "remarks": "Validation completed successfully",
+                    "stepStatuses": ["complete", "complete", "complete", "complete"]
+                },
+                {
+                    "id": "RD",
+                    "name": "Robert Dela Cruz",
+                    "studentNumber": "BS2020-023",
+                    "department": "College of Business Administration and Accountancy",
+                    "course": "Business Administration",
+                    "service": "language-editing",
+                    "serviceName": "Language Editing",
+                    "status": "processing",
+                    "currentStep": 1,
+                    "totalSteps": 4,
+                    "runCount": 1,
+                    "dateSubmitted": "2024-03-18",
+                    "lastUpdated": "2024-03-18",
+                    "receivedFiles": 0,
+                    "sendFiles": 0,
+                    "remarks": "Language editing in progress",
+                    "stepStatuses": ["current", "pending", "pending", "pending"]
+                },
+                {
+                    "id": "AM",
+                    "name": "Anna Mae Lopez",
+                    "studentNumber": "ED2021-087",
+                    "department": "College of Education",
+                    "course": "Elementary Education",
+                    "service": "data-analysis",
+                    "serviceName": "Data Analysis",
+                    "status": "processing",
+                    "currentStep": 2,
+                    "totalSteps": 4,
+                    "runCount": 1,
+                    "dateSubmitted": "2024-03-16",
+                    "lastUpdated": "2024-03-22",
+                    "receivedFiles": 1,
+                    "sendFiles": 0,
+                    "remarks": "Statistical analysis in progress",
+                    "stepStatuses": ["complete", "current", "pending", "pending"]
+                },
+                {
+                    "id": "JR",
+                    "name": "Jose Rizal Mendoza",
+                    "studentNumber": "LA2020-156",
+                    "department": "College of Liberal Arts and Sciences",
+                    "course": "Psychology",
+                    "service": "ethics-review",
+                    "serviceName": "Ethics Review",
+                    "status": "processing",
+                    "currentStep": 3,
+                    "totalSteps": 6,
+                    "runCount": 3,
+                    "dateSubmitted": "2024-03-12",
+                    "lastUpdated": "2024-03-24",
+                    "receivedFiles": 2,
+                    "sendFiles": 2,
+                    "remarks": "Ethics review in progress",
+                    "stepStatuses": ["complete", "complete", "current", "pending", "pending", "pending"]
+                },
+                {
+                    "id": "MG",
+                    "name": "Mark Gabriel Torres",
+                    "studentNumber": "SH2023-045",
+                    "department": "Senior High School Department",
+                    "course": "STEM",
+                    "service": "student-research-clearance",
+                    "serviceName": "Research Clearance",
+                    "status": "complete",
+                    "currentStep": 3,
+                    "totalSteps": 3,
+                    "runCount": 1,
+                    "dateSubmitted": "2024-03-14",
+                    "lastUpdated": "2024-03-21",
+                    "receivedFiles": 1,
+                    "sendFiles": 1,
+                    "remarks": "Clearance approved",
+                    "stepStatuses": ["complete", "complete", "complete"]
+                }
+            ],
+            "departments": [
+                "Senior High School Department",
+                "College of Business Administration and Accountancy",
+                "College of Engineering and Information Technology",
+                "College of Education",
+                "College of Liberal Arts and Sciences"
+            ],
+            "services": [
+                { "key": "originality-check", "name": "Originality Check" },
+                { "key": "instrument-validation", "name": "Instrument Validation" },
+                { "key": "language-editing", "name": "Language Editing" },
+                { "key": "data-analysis", "name": "Data Analysis" },
+                { "key": "student-research-clearance", "name": "Research Clearance" },
+                { "key": "ethics-review", "name": "Ethics Review" }
+            ],
+            "generalStatusTypes": [
+                { "key": "processing", "name": "Processing", "color": "#3b82f6" },
+                { "key": "complete", "name": "Complete", "color": "#10b981" },
+                { "key": "failed", "name": "Failed", "color": "#ef4444" }
+            ],
+            "stepStatusTypes": [
+                { "key": "pending", "name": "PENDING", "color": "#94a3b8" },
+                { "key": "current", "name": "CURRENT", "color": "#3b82f6" },
+                { "key": "complete", "name": "COMPLETE", "color": "#10b981" },
+                { "key": "failed", "name": "FAILED", "color": "#ef4444" }
+            ],
+            "serviceSteps": {
+                "originality-check": {
+                    "title": "Originality Check Process",
+                    "steps": [
+                        {
+                            "number": 1,
+                            "title": "Submission of Requirements",
+                            "details": "Requirements:<br>• SR01 - Originality Checking Service Form<br>• SR02 - Certificate of originality for proposal Manuscript, If applicable<br>• SR12 - Approval Sheet signed by all the panelists<br>• Word file of the Research Manuscript (without the table of contents and references/appendices/bibliography page)",
+                            "processingTime": "30 minutes"
+                        },
+                        {
+                            "number": 2,
+                            "title": "Submission of Official Receipt",
+                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 600 (JHS, SHS and Collegiate)",
+                            "processingTime": "20 minutes - 1 hour"
+                        },
+                        {
+                            "number": 3,
+                            "title": "Wait for the Originality Check Service Result",
+                            "details": "Note: If the similarity index is 10% above in the first run, revise the manuscript according to the similarity index results for another round of originality checking.",
+                            "processingTime": "2-3 days"
+                        },
+                        {
+                            "number": 4,
+                            "title": "Receive the Originality Check results and SR02 - Certificate of Originality",
+                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
+                            "processingTime": "15 Minutes"
+                        }
+                    ],
+                    "note": "If similarity index is above 10%, the student shall edit the paper and repeat steps 3 - 4 twice."
+                },
+                "instrument-validation": {
+                    "title": "Instrument Validation Process",
+                    "steps": [
+                        {
+                            "number": 1,
+                            "title": "Submission of Requirements",
+                            "details": "Requirements:<br>• SR03 - Instrument Validation Service Form<br>• SR02A - Certificate of Originality for Proposal Manuscript<br>• SR12A - Approval Sheet for Proposal Manuscript<br>• Research instrument/s<br>• Research manuscript",
+                            "processingTime": "30 minutes"
+                        },
+                        {
+                            "number": 2,
+                            "title": "Submission of Official Receipt",
+                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 600 (JHS, SHS, and Collegiate)",
+                            "processingTime": "20 minutes - 1 hour"
+                        },
+                        {
+                            "number": 3,
+                            "title": "Wait for the Instrument Validation Service Result",
+                            "details": "Note: Await the validation, review, revision needed and approval of the Instrument Validator. Once approved, the Instrument Validator or the student researcher/s must forward the approved and signed SR03 - Instrument Validation Service Form to the RPD.",
+                            "processingTime": "2-5 days"
+                        },
+                        {
+                            "number": 4,
+                            "title": "Receive the Instrument Validation results and SR04 - Certificate of Instrument Validation",
+                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
+                            "processingTime": "15 Minutes"
+                        }
+                    ]
+                },
+                "language-editing": {
+                    "title": "Language Editing Process",
+                    "steps": [
+                        {
+                            "number": 1,
+                            "title": "Submission of Requirements",
+                            "details": "Requirements:<br>• SR07 - Language Editing Service Form<br>• SR02A & SR02B - Certificate of Originality (Proposal and Final Manuscript)<br>• SR12B - Approval Sheet of Final Manuscript<br>• SR04 - Certificate of Instrument Validation/Exemption, if applicable<br>• SR06 - Certificate of Data Analysis, if applicable<br>• MSWord file of the Research Manuscript in RPD Language Editing Format",
+                            "processingTime": "30 minutes"
+                        },
+                        {
+                            "number": 2,
+                            "title": "Submission of Official Receipt",
+                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 30 (JHS, SHS, and Collegiate) Per page",
+                            "processingTime": "20 minutes - 1 hour"
+                        },
+                        {
+                            "number": 3,
+                            "title": "Wait for the Language Editing Service Result",
+                            "details": "Note: Await the Language Editor's proofreading, editing, revision, and approval of the research manuscript. Once approved, the Editor or the student researcher/s must forward the approved and signed SR07 - Language Editing Service Form to the RPD",
+                            "processingTime": "2-5 days"
+                        },
+                        {
+                            "number": 4,
+                            "title": "Receive the SR08 - Certificate of Language Editing",
+                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
+                            "processingTime": "15 Minutes"
+                        }
+                    ]
+                },
+                "data-analysis": {
+                    "title": "Data Analysis Process",
+                    "steps": [
+                        {
+                            "number": 1,
+                            "title": "Submission of Requirements",
+                            "details": "Requirements:<br>• SR05 - Data Analysis Service Form<br>• SR04 - Certificate of Instrument Validation/Exemption<br>• SR02A - Certificate of Originality for Proposal Manuscript<br>• Encoded Data Set (Number Coded Format)<br>• Statistical Tool/Treatment to be availed<br>• Research Manuscript",
+                            "processingTime": "30 minutes"
+                        },
+                        {
+                            "number": 2,
+                            "title": "Submission of Official Receipt",
+                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees:<br>• Basic statistical tools: Php 2,500<br>• Advanced statistical tools: Php 3,000",
+                            "processingTime": "20 minutes - 1 hour"
+                        },
+                        {
+                            "number": 3,
+                            "title": "Wait for the Data Analysis Service Result",
+                            "details": "Note: Await the Data Analyst's review, discussion, and analysis of the dataset. Once approved, the Analyst or the student researcher/s must forward the approved and signed SR05 - Data Analysis Service Form to the RPD.",
+                            "processingTime": "2-3 days"
+                        },
+                        {
+                            "number": 4,
+                            "title": "Receive the SR06 - Certificate of Data Analysis",
+                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
+                            "processingTime": "15 Minutes"
+                        }
+                    ]
+                },
+                "student-research-clearance": {
+                    "title": "Student Research Clearance Process",
+                    "steps": [
+                        {
+                            "number": 1,
+                            "title": "Submission of Requirements",
+                            "details": "Requirements:<br>• SR02A & SR02B - Certificate of Originality (Proposal and Final Manuscript)<br>• SR04 - Certificate of Instrument Validation/Exemption, if applicable<br>• SR06 - Certificate of Data Analysis, if applicable<br>• SR08 - Certificate of Language Editing<br>• Final Manuscript, incorporating the language-edited version",
+                            "processingTime": "1-2 days"
+                        },
+                        {
+                            "number": 2,
+                            "title": "Receive the SR09 - Student Research Clearance",
+                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
+                            "processingTime": "15 Minutes"
+                        }
+                    ]
+                },
+                "ethics-review": {
+                    "title": "Ethics Review Process",
+                    "steps": [
+                        {
+                            "number": 1,
+                            "title": "Submission of Requirements",
+                            "details": "Requirements:<br>• ERB01 - Ethics Review Application Form<br>• ERB02 - Ethics Review Application Submission Checklist Form<br>• ERB03 - Application for Ethics Review Exemption Form<br>• Research Protocol - Title, researchers and affiliations, research objectives, significance, brief literature review, and conceptual framework, methods (including sample, locate, recruitment of participants and/or respondents, inclusion criteria, instruments, and procedures), ethical considerations relevant to the study, research budget<br>• Participants and/or Respondents recruitment materials, letters, scripts and templates<br>• Informed Consent Forms and Assent Forms (if applicable)<br>• Ethical considerations relevant to the study<br>• Funding/Grant/Sponsor letter or contract and/or Memorandum of Agreement among collaborating institutions (if applicable)<br>• Additional materials relevant to justifying the exemption category<br>• Instruments, questionnaires, interview or FGD scripts and protocols",
+                            "processingTime": "30 minutes"
+                        },
+                        {
+                            "number": 2,
+                            "title": "Submission of Official Receipt",
+                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 700 (initial payment for exemption)",
+                            "processingTime": "30 minutes - 1 hour"
+                        },
+                        {
+                            "number": 3,
+                            "title": "Wait for the Ethics Review Result",
+                            "details": "Note: Await the result, revision needed and approval of the ethics review. <b>ONCE APPROVED</b>, the Reviewer or the student researcher/s must forward the approved and signed ERB02 and ERB03.<br>If <b>NOT APPROVED</b>, the student will receive an email regarding if the paper will undergo expedited or full review and will receive the additional payment advice.<br>*Please note that Form ERB04 must be filed before the payment advice can be issued.",
+                            "processingTime": "5-7 days"
+                        },
+                        {
+                            "number": 4,
+                            "title": "Submission of Official Receipt (Additional Payment)",
+                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees:<br>• Php 1,750 (expedited)<br>• Php 3,500 (full review)",
+                            "processingTime": "30 minutes - 1 hour"
+                        },
+                        {
+                            "number": 5,
+                            "title": "Wait for the Ethics Review Result",
+                            "details": "Note: Await the result, revision needed and approval of the Ethics Reviewer. <b>ONCE APPROVED</b>, the Reviewer or the student researcher/s must forward the approved and signed ERB02 and ERB04.<br>If <b>NOT APPROVED</b>, the researcher/s will make the necessary revision until the RPD will issue ERB07 - Certificate of Ethics Review",
+                            "processingTime": "7-14 days (expedited), 14 days - 1 month (full review)"
+                        },
+                        {
+                            "number": 6,
+                            "title": "Receive the ERB07 - Certificate of Ethical Review",
+                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
+                            "processingTime": "15 Minutes"
+                        }
+                    ]
+                }
+            }
+        };
+
+        // Global variables
+        let currentDepartment = 'all';
+        let currentService = 'all';
+        let expandedRow = null;
+        let filteredStudents = [...applicationData.students];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            renderTable();
+            setupEventListeners();
+            updateStatistics();
+
+            // Start with filter section collapsed
+            const filterSection = document.getElementById('filterSection');
+            if (filterSection) {
+                filterSection.classList.add('collapsed');
+            }
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', handleSearch);
+            }
+
+            // Filter toggle
+            const filterToggle = document.getElementById('filterToggle');
+            if (filterToggle) {
+                filterToggle.addEventListener('click', toggleFilterSection);
+            }
+
+            // Setup department and service filters
+            setupFilterTabs();
+        }
+
+        function setupFilterTabs() {
+            // Department filter tabs
+            const departmentContainer = document.getElementById('departmentTabs');
+            if (departmentContainer) {
+                departmentContainer.innerHTML = '';
+
+                // All departments option
+                const allDeptTab = createFilterTab('All Departments', 'all', currentDepartment === 'all');
+                allDeptTab.onclick = () => filterByDepartment('all');
+                departmentContainer.appendChild(allDeptTab);
+
+                // Individual departments
+                applicationData.departments.forEach(dept => {
+                    const tab = createFilterTab(dept, dept, currentDepartment === dept);
+                    tab.onclick = () => filterByDepartment(dept);
+                    departmentContainer.appendChild(tab);
+                });
+            }
+
+            // Service filter tabs
+            const serviceContainer = document.getElementById('serviceTabs');
+            if (serviceContainer) {
+                serviceContainer.innerHTML = '';
+
+                // All services option
+                const allServiceTab = createFilterTab('All Services', 'all', currentService === 'all');
+                allServiceTab.onclick = () => filterByService('all');
+                serviceContainer.appendChild(allServiceTab);
+
+                // Individual services
+                applicationData.services.forEach(service => {
+                    const tab = createFilterTab(service.name, service.key, currentService === service.key);
+                    tab.onclick = () => filterByService(service.key);
+                    serviceContainer.appendChild(tab);
+                });
+            }
+        }
+
+        function createFilterTab(text, value, isActive) {
+            const tab = document.createElement('button');
+            tab.className = `filter-tab ${isActive ? 'active' : ''}`;
+            tab.textContent = text;
+            tab.setAttribute('data-value', value);
+            return tab;
+        }
+
+        function toggleFilterSection() {
+            const filterSection = document.getElementById('filterSection');
+            const toggleIcon = document.querySelector('.filter-toggle-icon');
+
+            if (filterSection && toggleIcon) {
+                filterSection.classList.toggle('collapsed');
+            }
+        }
+
+        function handleSearch(event) {
+            const searchTerm = event.target.value.toLowerCase().trim();
+
+            if (searchTerm === '') {
+                filteredStudents = [...applicationData.students];
+            } else {
+                filteredStudents = applicationData.students.filter(student => {
+                    return student.name.toLowerCase().includes(searchTerm) ||
+                        student.studentNumber.toLowerCase().includes(searchTerm) ||
+                        student.serviceName.toLowerCase().includes(searchTerm) ||
+                        student.department.toLowerCase().includes(searchTerm);
+                });
+            }
+
+            applyFilters();
+        }
+
+        function filterByDepartment(department) {
+            currentDepartment = department;
+
+            // Update tab states
+            document.querySelectorAll('#departmentTabs .filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-value') === department) {
+                    tab.classList.add('active');
+                }
+            });
+
+            applyFilters();
+        }
+
+        function filterByService(service) {
+            currentService = service;
+
+            // Update tab states
+            document.querySelectorAll('#serviceTabs .filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-value') === service) {
+                    tab.classList.add('active');
+                }
+            });
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let filtered = [...filteredStudents];
+
+            // Apply department filter
+            if (currentDepartment !== 'all') {
+                filtered = filtered.filter(student => student.department === currentDepartment);
+            }
+
+            // Apply service filter
+            if (currentService !== 'all') {
+                filtered = filtered.filter(student => student.service === currentService);
+            }
+
+            renderTable(filtered);
+            updateStatistics(filtered);
+        }
+
+        function renderTable(students = applicationData.students) {
+            const tableContainer = document.getElementById('studentsTableContainer');
+            if (!tableContainer) return;
+
+            const table = `
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3 class="table-title">
+                            <i class="fas fa-users"></i>
+                            Research Submissions (${students.length})
+                        </h3>
+                    </div>
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Department</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                                <th>Last Updated</th>
+                                <th>Guide</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${students.map(student => createStudentRow(student)).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            tableContainer.innerHTML = table;
+            setupTableEventListeners();
+        }
+
+        function createStudentRow(student) {
+            const progressPercentage = Math.round((student.currentStep / student.totalSteps) * 100);
+            const statusClass = `status-${student.status}`;
+            const initials = student.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+
+            return `
+                <tr class="student-row" onclick="toggleStudentDetails('${student.id}')" data-student-id="${student.id}">
+                    <td>
+                        <div class="student-info">
+                            <div class="student-avatar">${initials}</div>
+                            <div class="student-details">
+                                <h4>${student.name}</h4>
+                                <p>${student.studentNumber} • ${student.course}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="department-text">${student.department}</span>
+                    </td>
+                    <td>
+                        <span class="service-badge">${student.serviceName}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${student.status}</span>
+                    </td>
+                    <td>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill ${statusClass}" style="width: ${progressPercentage}%"></div>
+                            </div>
+                            <div class="progress-text">${student.currentStep}/${student.totalSteps} steps</div>
+                        </div>
+                    </td>
+                    <td>${formatDate(student.lastUpdated)}</td>
+                    <td>
+                        <button class="action-btn info-btn" onclick="event.stopPropagation(); showServiceSteps('${student.service}')" title="View Service Steps">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="expanded-content hidden" id="expanded-${student.id}">
+                    <td colspan="7">
+                        ${createExpandedContent(student)}
+                    </td>
+                </tr>
+            `;
+        }
+
+        function createExpandedContent(student) {
+            return `
+                <div class="expanded-inner">
+                    <div class="control-section">
+                        <div class="section-header">
+                            <i class="fas fa-cogs"></i>
+                            Progress Control
+                        </div>
+
+                        <div class="progress-controls">
+                            <div class="control-group">
+                                <label class="control-label">General Status:</label>
+                                <select class="status-select" onchange="updateGeneralStatus('${student.id}', this.value)">
+                                    ${applicationData.generalStatusTypes.map(status =>
+                `<option value="${status.key}" ${student.status === status.key ? 'selected' : ''}>
+                                            ${status.name}
+                                        </option>`
+            ).join('')}
+                                </select>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">Run Count:</label>
+                                <div class="run-count-controls">
+                                    <button class="run-count-btn" onclick="updateRunCount('${student.id}', -1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="run-count-display" id="runCount-${student.id}">${student.runCount}</span>
+                                    <button class="run-count-btn" onclick="updateRunCount('${student.id}', 1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-management">
+                            <div class="section-header">
+                                <i class="fas fa-list-ol"></i>
+                                Step Management
+                            </div>
+
+                            <div class="step-indicator">
+                                ${student.stepStatuses.map((status, index) =>
+                `<div class="step-dot ${status}" title="Step ${index + 1}: ${status.toUpperCase()}">${index + 1}</div>`
+            ).join('')}
+                            </div>
+
+                            <div class="step-status-controls">
+                                ${student.stepStatuses.map((status, index) => `
+                                    <div class="step-status-item">
+                                        <span class="step-label">Step ${index + 1}:</span>
+                                        <select class="step-status-select" onchange="updateStepStatus('${student.id}', ${index}, this.value)">
+                                            ${applicationData.stepStatusTypes.map(stepStatus =>
+                    `<option value="${stepStatus.key}" ${status === stepStatus.key ? 'selected' : ''}>
+                                                    ${stepStatus.name}
+                                                </option>`
+                ).join('')}
+                                        </select>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="section-header">
+                            <i class="fas fa-folder-open"></i>
+                            File Management
+                        </div>
+
+                        <div class="file-tabs">
+                            <button class="file-tab active" onclick="switchFileTab('${student.id}', 'received')">
+                                Received Files <span class="file-count">${student.receivedFiles}</span>
+                            </button>
+                            <button class="file-tab" onclick="switchFileTab('${student.id}', 'send')">
+                                Send to Student <span class="file-count">${student.sendFiles}</span>
+                            </button>
+                        </div>
+
+                        <div class="file-content" id="fileContent-${student.id}">
+                            ${createReceivedFilesContent(student)}
+                        </div>
+
+                        <div class="section-header" style="margin-top: 1.5rem;">
+                            <i class="fas fa-comment-alt"></i>
+                            Remarks
+                        </div>
+
+                        <textarea class="remarks-textarea" placeholder="Add remarks..." onchange="updateRemarks('${student.id}', this.value)">${student.remarks}</textarea>
+
+                        <div class="action-buttons">
+                            <button class="action-btn btn-primary" onclick="saveChanges('${student.id}')">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <button class="action-btn btn-secondary" onclick="toggleStudentDetails('${student.id}')">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createReceivedFilesContent(student) {
+            return `
+                <div class="file-list">
+                    ${student.receivedFiles > 0 ?
+                    Array(student.receivedFiles).fill().map((_, index) => `
+                        <div class="file-item">
+                            <div class="file-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="file-info">
+                                <div class="file-name">Document_${index + 1}.pdf</div>
+                                <div class="file-size">2.3 MB</div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="file-action-btn btn-download" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('') :
+                    '<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>'
+                }
+                </div>
+            `;
+        }
+
+        function createSendFilesContent(student) {
+            return `
+                <div class="drag-drop-area" onclick="document.getElementById('fileInput-${student.id}').click()">
+                    <div class="drag-drop-text">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 1rem; color: #3b82f6;"></i><br>
+                        Click to upload files or drag and drop<br>
+                        <small>PDF, DOC, DOCX files up to 10MB</small>
+                    </div>
+                    <input type="file" id="fileInput-${student.id}" multiple accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileUpload('${student.id}', this.files)">
+                </div>
+
+                <div class="file-list">
+                    ${student.sendFiles > 0 ?
+                    Array(student.sendFiles).fill().map((_, index) => `
+                        <div class="file-item">
+                            <div class="file-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="file-info">
+                                <div class="file-name">Response_${index + 1}.pdf</div>
+                                <div class="file-size">1.8 MB</div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="file-action-btn btn-send" title="Send to Student">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                                <button class="file-action-btn btn-delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('') :
+                    '<p style="text-align: center; color: #6b7280; padding: 1rem;">No files to send</p>'
+                }
+                </div>
+            `;
+        }
+
+        function setupTableEventListeners() {
+            // Event listeners are set up via onclick attributes in HTML
+        }
+
+        function toggleStudentDetails(studentId) {
+            const expandedRow = document.getElementById(`expanded-${studentId}`);
+            const studentRow = document.querySelector(`[data-student-id="${studentId}"]`);
+
+            if (expandedRow && studentRow) {
+                const isExpanded = !expandedRow.classList.contains('hidden');
+
+                // Close any other expanded rows
+                document.querySelectorAll('.expanded-content').forEach(row => {
+                    row.classList.add('hidden');
+                });
+
+                document.querySelectorAll('.student-row').forEach(row => {
+                    row.classList.remove('expanded');
+                });
+
+                if (!isExpanded) {
+                    expandedRow.classList.remove('hidden');
+                    studentRow.classList.add('expanded');
+                    expandedRow = studentId;
+                } else {
+                    expandedRow = null;
+                }
+            }
+        }
+
+        function switchFileTab(studentId, tabType) {
+            const student = applicationData.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            // Update tab states
+            const tabContainer = document.querySelector(`#expanded-${studentId} .file-tabs`);
+            if (tabContainer) {
+                tabContainer.querySelectorAll('.file-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                const activeTab = tabType === 'received' ? tabContainer.firstElementChild : tabContainer.lastElementChild;
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+            }
+
+            // Update content
+            const contentContainer = document.getElementById(`fileContent-${studentId}`);
+            if (contentContainer) {
+                if (tabType === 'received') {
+                    contentContainer.innerHTML = createReceivedFilesContent(student);
+                } else {
+                    contentContainer.innerHTML = createSendFilesContent(student);
+                }
+            }
+        }
+
+        function updateGeneralStatus(studentId, newStatus) {
+            const student = applicationData.students.find(s => s.id === studentId);
+            if (student) {
+                student.status = newStatus;
+                student.lastUpdated = new Date().toISOString().split('T')[0];
+
+                // Re-render the table to reflect changes
+                applyFilters();
+
+                // Re-expand the row if it was expanded
+                setTimeout(() => {
+                    if (expandedRow === studentId) {
+                        toggleStudentDetails(studentId);
+                    }
+                }, 100);
+            }
+        }
+
+        function updateRunCount(studentId, delta) {
+            const student = applicationData.students.find(s => s.id === studentId);
+            if (student) {
+                const newCount = Math.max(0, student.runCount + delta);
+                student.runCount = newCount;
+
+                // Update the display
+                const display = document.getElementById(`runCount-${studentId}`);
+                if (display) {
+                    display.textContent = newCount;
+                }
+            }
+        }
+
+        function updateStepStatus(studentId, stepIndex, newStatus) {
+            const student = applicationData.students.find(s => s.id === studentId);
+            if (student && stepIndex >= 0 && stepIndex < student.stepStatuses.length) {
+                student.stepStatuses[stepIndex] = newStatus;
+
+                // Update the visual indicator
+                const stepDot = document.querySelector(`#expanded-${studentId} .step-dot:nth-child(${stepIndex + 1})`);
+                if (stepDot) {
+                    stepDot.className = `step-dot ${newStatus}`;
+                    stepDot.title = `Step ${stepIndex + 1}: ${newStatus.toUpperCase()}`;
+                }
+            }
+        }
+
+        function updateRemarks(studentId, remarks) {
+            const student = applicationData.students.find(s => s.id === studentId);
+            if (student) {
+                student.remarks = remarks;
+            }
+        }
+
+        function handleFileUpload(studentId, files) {
+            // Simulate file upload
+            console.log(`Uploading ${files.length} files for student ${studentId}`);
+
+            const student = applicationData.students.find(s => s.id === studentId);
+            if (student) {
+                student.sendFiles += files.length;
+
+                // Refresh the file content
+                switchFileTab(studentId, 'send');
+            }
+        }
+
+        function saveChanges(studentId) {
+            // Simulate saving changes
+            console.log(`Saving changes for student ${studentId}`);
+
+            // Show success message (you can implement a toast notification here)
+            alert('Changes saved successfully!');
+        }
+
+        function updateStatistics(students = applicationData.students) {
+            const stats = {
+                total: students.length,
+                processing: students.filter(s => s.status === 'processing').length,
+                complete: students.filter(s => s.status === 'complete').length,
+                failed: students.filter(s => s.status === 'failed').length
+            };
+
+            // Update the display
+            const elements = {
+                totalStudents: document.getElementById('totalStudents'),
+                processingCount: document.getElementById('processingCount'),
+                completedCount: document.getElementById('completedCount'),
+                failedCount: document.getElementById('failedCount')
+            };
+
+            if (elements.totalStudents) elements.totalStudents.textContent = stats.total;
+            if (elements.processingCount) elements.processingCount.textContent = stats.processing;
+            if (elements.completedCount) elements.completedCount.textContent = stats.complete;
+            if (elements.failedCount) elements.failedCount.textContent = stats.failed;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Service Steps Modal Functions
+        function showServiceSteps(serviceKey) {
+            const modal = document.getElementById('serviceStepsModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            const serviceData = applicationData.serviceSteps[serviceKey];
+            if (!serviceData) return;
+
+            modalTitle.textContent = serviceData.title;
+
+            let stepsHTML = '<div class="service-steps-container">';
+
+            serviceData.steps.forEach(step => {
+                stepsHTML += `
+                    <div class="service-step-item">
+                        <div class="service-step-number">${step.number}</div>
+                        <div class="service-step-content">
+                            <h4 class="service-step-title">${step.title}</h4>
+                            <div class="service-step-details">${step.details}</div>
+                            <div class="service-step-time"><strong>Processing Time:</strong> ${step.processingTime}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            stepsHTML += '</div>';
+
+            if (serviceData.note) {
+                stepsHTML += `<div class="service-note">${serviceData.note}</div>`;
+            }
+
+            stepsHTML += '<div class="service-end-transaction">END OF TRANSACTION</div>';
+
+            modalBody.innerHTML = stepsHTML;
+            modal.style.display = 'block';
+
+            // Close modal when clicking outside
+            modal.onclick = function (event) {
+                if (event.target === modal) {
+                    closeServiceStepsModal();
+                }
+            };
+        }
+
+        function closeServiceStepsModal() {
+            const modal = document.getElementById('serviceStepsModal');
+            modal.style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>

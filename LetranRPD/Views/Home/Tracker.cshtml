@@ -1,9 +1,953 @@
-﻿@{
+﻿@model List<ServiceInformation>
+@{
 	ViewData["Title"] = "Account";
+	var currentUser = Context.Session.GetObject<Account>("account") ?? null;
+	if (currentUser == null)
+	{
+		Context.Response.Redirect("/Home");
+
+	}
 }
 @{
 	ViewBag.Title = "Account";
 	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	void originalityBlock(ServiceInformation service)
+	{
+		string p1 ="";
+		string p2 = "";
+		string p3 = "";
+		string p4 = "";
+		switch (service.ServiceProgress.Progress1)
+		{
+			case 0:
+				p1 = "pending";
+				break;
+			case 1:
+				p1 = "current";
+				break;
+			case 2:
+				p1 = "revision";
+				break;
+			case 3:
+				p1 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress2)
+		{
+			case 0:
+				p2 = "pending";
+				break;
+			case 1:
+				p2 = "current";
+				break;
+			case 2:
+				p2 = "revision";
+				break;
+			case 3:
+				p2 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress3)
+		{
+			case 0:
+				p3 = "pending";
+				break;
+			case 1:
+				p3 = "current";
+				break;
+			case 2:
+				p3 = "revision";
+				break;
+			case 3:
+				p3 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress4)
+		{
+			case 0:
+				p4 = "pending";
+				break;
+			case 1:
+				p4 = "current";
+				break;
+			case 2:
+				p4 = "revision";
+				break;
+			case 3:
+				p4 = "completed";
+				break;
+
+		}
+		<!--First Service-->
+		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
+			<div class="service-header">
+				<h2 class="service-title">Originality Checking Progress</h2>
+				<span class="service-status status-failed">Failed</span>
+			</div>
+			<div class="progress-container">
+				<div class="progress-header">
+					<h3>PROGRESS</h3>
+					<div class="status-badges">
+						<span>Status:</span>
+						<span class="status-badge badge-complete">Complete</span>
+						<span class="status-badge badge-revision">Revision</span>
+						<span class="status-badge badge-current">Current</span>
+						<span class="status-badge badge-pending">Pending</span>
+					</div>
+				</div>
+
+				<div class="progress-steps">
+					<div class="step">
+						<div class="step-circle @p1">1</div>
+						<div class="step-content">
+							<div class="step-title">Submision of requirments</div>
+							<div class="step-details">
+								<div class="step-details">Requirements:</div>
+								<ul>
+									<li><div class="step-details">SR01 - Originality Checking Service Form</div></li>
+									<li><div class="step-details">SR02 - Certificate of originality for proposal Manuscript, If applicable</div></li>
+									<li><div class="step-details">SR12- Approval Sheet signed by all the panelists</div></li>
+									<li><div class="step-details">Word file of the Research Manuscript(without the table of contents andreferences/appendices/bibliography page)</div></li>
+								</ul>
+							</div>
+							<div class="step-time">Processing Time: 30 minutes</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p2">2</div>
+						<div class="step-content">
+							<div class="step-title">Submission of official receipt</div>
+							<div class="step-details">
+								<div class="step-details">Payment Instructions:</div>
+								<ul>
+									<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
+									<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
+									<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
+								</ul>
+								Fees: Php 600 (JHS, SHS and Collegiate)
+							</div>
+							<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p3">3</div>
+						<div class="step-content">
+							<div class="step-title">Wait for the Originality Check Service Result</div>
+							<div class="step-details">
+								Note: If the similarity index is 10% above in the first
+								run, revise the manuscript according to the
+								similarity index results for another round of
+								originality checking.
+
+								<div class="step-run-count">
+									<strong>Run Count:</strong> <span id="runCount">4</span>
+								</div>
+								<div class="step-time">Processing Time: 2-3 days</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p4">4</div>
+						<div class="step-content">
+							<div class="step-title">
+								Receive the Originality Check results and SR02 -
+								Certificate of Originality.
+							</div>
+							<div class="step-details">
+								Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
+							</div>
+							<div class="step-time">Processing Time: 15 Minutes</div>
+						</div>
+					</div>
+
+					<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
+						END OF TRANSACTION
+					</div>
+
+					<div style="font-size: 12px; color: #6c757d; font-style: italic; margin-top: 20px;">
+						* If similarity index is above 10%, the student shall edit the paper and repeat steps 3 - 4 twice.*
+					</div>
+				</div>
+
+				<div class="upload-section" id="uploadSection">
+					<h5>Upload Research Papers & Documents</h5>
+					<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
+
+					<div class="files-container" id="filesContainer-@service.ServiceId" style="display: none;">
+						<!-- Files will be added here -->
+					</div>
+
+					<div class="upload-progress" id="uploadProgress" style="display: none;">
+						<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
+					</div>
+
+					<div>
+						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
+						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+					</div>
+
+					<div class="upload-instructions">
+						Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
+					</div>
+				</div>
+
+				<div class="received-files-section">
+					<div class="received-files-header">
+						<span style="font-size: 20px;">📥</span>
+						<h5>Received Files from Admin</h5>
+					</div>
+
+					<div id="receivedFilesContainer">
+						<div class="received-file-item">
+							<div class="received-file-info">
+								<div class="received-file-icon">📋</div>
+								<div class="received-file-details">
+									<div class="received-file-name">Ocrisma-For_Revision.docx</div>
+									<div class="received-file-meta">Received: Feb 11, 2025 | Size: 2.3 MB | From: Research & Publication Department</div>
+								</div>
+							</div>
+							<div>
+								<button class="download-btn" onclick="downloadFile('turnitin-report')">Download</button>
+							</div>
+						</div>
+
+						<div class="received-file-item">
+							<div class="received-file-info">
+								<div class="received-file-icon">📝</div>
+								<div class="received-file-details">
+									<div class="received-file-name">Ocrisma-Complete.pdf</div>
+									<div class="received-file-meta">Received: April 11, 2025 | Size: 856 KB | From: Research & Publication Department</div>
+								</div>
+							</div>
+							<div>
+								<button class="download-btn" onclick="downloadFile('revision-notes')">Download</button>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<div class="panel">
+					<div class="panel-header">
+						<h2>Admin Remarks</h2>
+					</div>
+					<div class="panel-content remarks-area">
+						<div id="remarks-content">
+							<div class="remark info">
+								<div class="remark-header">
+									<span class="remark-author">RPD Espinosa</span>
+									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+								</div>
+								<div class="remark-message">
+									Your paper exceededed 4 Runs, you must avail another Originality Check Service.
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+	}
+	void InstrumentBlock(ServiceInformation service)
+	{
+		string p1 = "";
+		string p2 = "";
+		string p3 = "";
+		string p4 = "";
+		switch (service.ServiceProgress.Progress1)
+		{
+			case 0:
+				p1 = "pending";
+				break;
+			case 1:
+				p1 = "current";
+				break;
+			case 2:
+				p1 = "revision";
+				break;
+			case 3:
+				p1 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress2)
+		{
+			case 0:
+				p2 = "pending";
+				break;
+			case 1:
+				p2 = "current";
+				break;
+			case 2:
+				p2 = "revision";
+				break;
+			case 3:
+				p2 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress3)
+		{
+			case 0:
+				p3 = "pending";
+				break;
+			case 1:
+				p3 = "current";
+				break;
+			case 2:
+				p3 = "revision";
+				break;
+			case 3:
+				p3 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress4)
+		{
+			case 0:
+				p4 = "pending";
+				break;
+			case 1:
+				p4 = "current";
+				break;
+			case 2:
+				p4 = "revision";
+				break;
+			case 3:
+				p4 = "completed";
+				break;
+
+		}
+
+		<!-- Second Service -->
+		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
+			<div class="service-header">
+				<h2 class="service-title">Instrument Validation Progress</h2>
+				<span class="service-status status-completed">Completed</span>
+			</div>
+
+			<div class="progress-container">
+				<div class="progress-header">
+					<h3>PROGRESS</h3>
+					<div class="status-badges">
+						<span>Status:</span>
+						<span class="status-badge badge-complete">Complete</span>
+						<span class="status-badge badge-revision">Revision</span>
+						<span class="status-badge badge-current">Current</span>
+						<span class="status-badge badge-pending">Pending</span>
+					</div>
+				</div>
+
+				<div class="progress-steps">
+					<div class="step">
+						<div class="step-circle @p1">1</div>
+						<div class="step-content">
+							<div class="step-title">Submision of requirments</div>
+							<div class="step-details">
+								<div class="step-details">Requirements:</div>
+								<ul>
+									<li><div class="step-details">SR03 - Instrument Validation Service Form</div></li>
+									<li><div class="step-details">SR02A - Certificate of Originality for Proposal Manuscript</div></li>
+									<li><div class="step-details">SR12A - Approval Sheet for Proposal Manuscript</div></li>
+									<li><div class="step-details">Research instrument/s</div></li>
+									<li><div class="step-details">Research manuscript</div></li>
+								</ul>
+							</div>
+							<div class="step-time">Processing Time: 30 minutes</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p2">2</div>
+						<div class="step-content">
+							<div class="step-title">Submission of official receipt</div>
+							<div class="step-details">
+								<div class="step-details">Payment Instructions:</div>
+								<ul>
+									<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
+									<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
+									<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
+								</ul>
+								Fees: Php 600 (JHS, SHS, and Collegiate)
+							</div>
+							<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p3">3</div>
+						<div class="step-content">
+							<div class="step-title">Wait for the Insturment Validation Service Result</div>
+							<div class="step-details">
+								Note: Await the validation, review, revision needed and approval of the Instrument Validator.Once approved, the Instrument Validator or thestudent researcher/s must forward the approvedand signed SR03- Instrument Validation ServiceForm to the RPD.
+								<div class="step-run-count">
+									<strong>Run Count:</strong> <span id="runCount">2</span>
+								</div>
+								<div class="step-time">Processing Time: 2-5 days</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p4">4</div>
+						<div class="step-content">
+							<div class="step-title">
+								Receive the Originality Check results and SR04 -
+								Certificate of Instrument Validation.
+							</div>
+							<div class="step-details">
+								Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
+							</div>
+							<div class="step-time">Processing Time: 15 Minutes</div>
+						</div>
+					</div>
+
+					<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
+						END OF TRANSACTION
+					</div>
+
+				</div>
+
+				<div class="upload-section" id="uploadSection">
+					<h5>Upload Research Papers & Documents</h5>
+					<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
+
+					<div class="files-container" id="filesContainer-@service.ServiceId" style="display: none;">
+						<!-- Files will be added here -->
+					</div>
+
+					<div class="upload-progress" id="uploadProgress" style="display: none;">
+						<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
+					</div>
+
+					<div>
+						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
+						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+					</div>
+
+					<div class="upload-instructions">
+						Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
+					</div>
+				</div>
+
+				<div class="received-files-section">
+					<div class="received-files-header">
+						<span style="font-size: 20px;">📥</span>
+						<h5>Received Files from Admin</h5>
+					</div>
+
+					<div id="receivedFilesContainer">
+
+						<div class="received-file-item">
+							<div class="received-file-info">
+								<div class="received-file-icon">📝</div>
+								<div class="received-file-details">
+									<div class="received-file-name">Ocrisma-Complete.pdf</div>
+									<div class="received-file-meta">Received: April 11, 2025 | Size: 856 KB | From: Research & Publication Department</div>
+								</div>
+							</div>
+							<div>
+								<button class="download-btn" onclick="downloadFile('revision-notes')">Download</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel">
+					<div class="panel-header">
+						<h2>Admin Remarks</h2>
+					</div>
+					<div class="panel-content remarks-area">
+						<div id="remarks-content">
+							<div class="remark info">
+								<div class="remark-header">
+									<span class="remark-author">RPD Espinosa</span>
+									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+								</div>
+								<div class="remark-message">
+									Congratulations, You can now view yout certificate at Account>Certificates
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	}
+	void LanguageBlock(ServiceInformation service)
+	{
+		string p1 = "";
+		string p2 = "";
+		string p3 = "";
+		string p4 = "";
+		switch (service.ServiceProgress.Progress1)
+		{
+			case 0:
+				p1 = "pending";
+				break;
+			case 1:
+				p1 = "current";
+				break;
+			case 2:
+				p1 = "revision";
+				break;
+			case 3:
+				p1 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress2)
+		{
+			case 0:
+				p2 = "pending";
+				break;
+			case 1:
+				p2 = "current";
+				break;
+			case 2:
+				p2 = "revision";
+				break;
+			case 3:
+				p2 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress3)
+		{
+			case 0:
+				p3 = "pending";
+				break;
+			case 1:
+				p3 = "current";
+				break;
+			case 2:
+				p3 = "revision";
+				break;
+			case 3:
+				p3 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress4)
+		{
+			case 0:
+				p4 = "pending";
+				break;
+			case 1:
+				p4 = "current";
+				break;
+			case 2:
+				p4 = "revision";
+				break;
+			case 3:
+				p4 = "completed";
+				break;
+
+		}
+
+		<!-- Third Service -->
+		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
+			<div class="service-header">
+				<h2 class="service-title">Language Editing Progress</h2>
+				<span class="service-status status-pending">Pending</span>
+			</div>
+
+			<div class="progress-container">
+
+				<div class="progress-header">
+					<h3>PROGRESS</h3>
+					<div class="status-badges">
+						<span>Status:</span>
+						<span class="status-badge badge-complete">Complete</span>
+						<span class="status-badge badge-revision">Revision</span>
+						<span class="status-badge badge-current">Current</span>
+						<span class="status-badge badge-pending">Pending</span>
+					</div>
+				</div>
+
+				<div class="progress-steps">
+					<div class="step">
+						<div class="step-circle @p1">1</div>
+						<div class="step-content">
+							<div class="step-title">Submision of requirments</div>
+							<div class="step-details">
+								<div class="step-details">Requirements:</div>
+								<ul>
+									<li><div class="step-details">SR07 - Language Editing Service Form</div></li>
+									<li><div class="step-details">SR02A & SR02B - Certificate of Originality(Proposal and Final Manuscript)</div></li>
+									<li><div class="step-details">SR12B - Approval Sheet of Final Manuscript</div></li>
+									<li><div class="step-details">SR04 - Certificate of Instrument Validation/Exemption, if applicable</div></li>
+									<li><div class="step-details">SR06 - Certificate of Data Analysis, if applicable</div></li>
+									<li><div class="step-details">MSWord file of the Research Manuscript in RPD Language Editing Format</div></li>
+								</ul>
+							</div>
+							<div class="step-time">Processing Time: 30 minutes</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p2">2</div>
+						<div class="step-content">
+							<div class="step-title">Submission of official receipt</div>
+							<div class="step-details">
+								<div class="step-details">Payment Instructions:</div>
+								<ul>
+									<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
+									<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
+									<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
+								</ul>
+								Fees: Php 30(JHS, SHS, and Collegiate) Per page
+							</div>
+							<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p3">3</div>
+						<div class="step-content">
+							<div class="step-title">Wait for the Language Editing Service Result</div>
+							<div class="step-details">
+								Note: Await the Language Editor’s proofreading, editing,revision, and approval of the research manuscript.Once approved, the Editor or the studentresearcher/s must forward the approved andsigned SR07-Language Editing Service Form to theRPD
+								<div class="step-run-count">
+									<strong>Run Count:</strong> <span id="runCount">0</span>
+								</div>
+								<div class="step-time">Processing Time: 2-5 days</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p4">4</div>
+						<div class="step-content">
+							<div class="step-title">Receive the SR08- Certificate of Language Editing</div>
+							<div class="step-details">
+								Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
+							</div>
+							<div class="step-time">Processing Time: 15 Minutes</div>
+						</div>
+					</div>
+
+					<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
+						END OF TRANSACTION
+					</div>
+
+				</div>
+
+				<div class="upload-section" id="uploadSection">
+					<h5>Upload Research Papers & Documents</h5>
+					<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
+
+					<div class="files-container" id="filesContainer" style="display: none;">
+						<!-- Files will be added here -->
+					</div>
+
+					<div class="upload-progress" id="uploadProgress" style="display: none;">
+						<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
+					</div>
+
+					<div>
+						<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
+						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+					</div>
+
+					<div class="upload-instructions">
+						Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
+					</div>
+				</div>
+
+				<div class="received-files-section">
+					<div class="received-files-header">
+						<span style="font-size: 20px;">📥</span>
+						<h5>Received Files from Admin</h5>
+					</div>
+
+					<div id="receivedFilesContainer">
+
+						<div class="received-file-item">
+							<div class="received-file-info">
+								<div class="received-file-icon">📝</div>
+								<div class="received-file-details">
+									<div class="received-file-name">No Files</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<div class="panel">
+					<div class="panel-header">
+						<h2>Admin Remarks</h2>
+					</div>
+					<div class="panel-content remarks-area">
+						<div id="remarks-content">
+							<div class="remark info">
+								<div class="remark-header">
+									<span class="remark-author">RPD Espinosa</span>
+									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+								</div>
+								<div class="remark-message">
+									Kindly submit the requirments to proceed with the Language Editing Service, Thank you.
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+	}
+	void DataBlock(ServiceInformation service)
+	{
+		string p1 = "";
+		string p2 = "";
+		string p3 = "";
+		string p4 = "";
+		switch (service.ServiceProgress.Progress1)
+		{
+			case 0:
+				p1 = "pending";
+				break;
+			case 1:
+				p1 = "current";
+				break;
+			case 2:
+				p1 = "revision";
+				break;
+			case 3:
+				p1 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress2)
+		{
+			case 0:
+				p2 = "pending";
+				break;
+			case 1:
+				p2 = "current";
+				break;
+			case 2:
+				p2 = "revision";
+				break;
+			case 3:
+				p2 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress3)
+		{
+			case 0:
+				p3 = "pending";
+				break;
+			case 1:
+				p3 = "current";
+				break;
+			case 2:
+				p3 = "revision";
+				break;
+			case 3:
+				p3 = "completed";
+				break;
+
+		}
+
+		switch (service.ServiceProgress.Progress4)
+		{
+			case 0:
+				p4 = "pending";
+				break;
+			case 1:
+				p4 = "current";
+				break;
+			case 2:
+				p4 = "revision";
+				break;
+			case 3:
+				p4 = "completed";
+				break;
+
+		}
+
+		<!-- Fourth Service -->
+		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
+			<div class="service-header">
+				<h2 class="service-title">Data Analysis Progress</h2>
+				<span class="service-status status-processing">Processing</span>
+			</div>
+
+			<div class="progress-container">
+				<div class="progress-header">
+					<h3>PROGRESS</h3>
+					<div class="status-badges">
+						<span>Status:</span>
+						<span class="status-badge badge-complete">Complete</span>
+						<span class="status-badge badge-revision">Revision</span>
+						<span class="status-badge badge-current">Current</span>
+						<span class="status-badge badge-pending">Pending</span>
+					</div>
+				</div>
+
+				<div class="progress-steps">
+					<div class="step">
+						<div class="step-circle @p1">1</div>
+						<div class="step-content">
+							<div class="step-title">Submision of requirments</div>
+							<div class="step-details">
+								<div class="step-details">Requirements:</div>
+								<ul>
+									<li><div class="step-details">SR05 - Data Analysis Service Form</div></li>
+									<li><div class="step-details">SR04 - Certificate of Instrument Validation/Exemption</div></li>
+									<li><div class="step-details">SR02A - Certificate of Originality for Proposal Manuscript</div></li>
+									<li><div class="step-details">Encoded Data Set (Number Coded Format)</div></li>
+									<li><div class="step-details">Statistical Tool/Treatment to be availed</div></li>
+									<li><div class="step-details">Research Manuscript</div></li>
+								</ul>
+							</div>
+							<div class="step-time">Processing Time: 30 minutes</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p2">2</div>
+						<div class="step-content">
+							<div class="step-title">Submission of official receipt</div>
+							<div class="step-details">
+								<div class="step-details">Payment Instructions:</div>
+								<ul>
+									<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
+									<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
+									<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
+								</ul>
+								<div class="step-details">Fees:</div>
+								<ul>
+									<li><div class="step-details">Basic statistical tools: Php 2,500 </div></li>
+									<li><div class="step-details">Advanced statistical tools: Php 3,000 </div></li>
+								</ul>
+							</div>
+							<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p3">3</div>
+						<div class="step-content">
+							<div class="step-title">Wait for the Language Editing Service Result</div>
+							<div class="step-details">
+								Note: Await the Data Analyst’s review, discussion, andanalysis of the dataset. Once approved, the Analystor the student researcher/s must forward theapproved and signed SR05-Data Analysis ServiceForm to the RPD.
+								<div class="step-run-count">
+									<strong>Run Count:</strong> <span id="runCount">0</span>
+								</div>
+								<div class="step-time">Processing Time: 2-3 days</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="step">
+						<div class="step-circle @p4">4</div>
+						<div class="step-content">
+							<div class="step-title">Receive the SR06 - Certificate of Data Analysis.</div>
+							<div class="step-details">
+								Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
+							</div>
+							<div class="step-time">Processing Time: 15 Minutes</div>
+						</div>
+					</div>
+
+					<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
+						END OF TRANSACTION
+					</div>
+
+				</div>
+
+				<div class="upload-section" id="uploadSection">
+					<h5>Upload Research Papers & Documents</h5>
+					<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
+
+					<div class="files-container" id="filesContainer" style="display: none;">
+						<!-- Files will be added here -->
+					</div>
+
+					<div class="upload-progress" id="uploadProgress" style="display: none;">
+						<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
+					</div>
+
+					<div>
+						<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
+						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+					</div>
+
+					<div class="upload-instructions">
+						Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
+					</div>
+				</div>
+
+				<div class="received-files-section">
+					<div class="received-files-header">
+						<span style="font-size: 20px;">📥</span>
+						<h5>Received Files from Admin</h5>
+					</div>
+
+					<div id="receivedFilesContainer">
+
+						<div class="received-file-item">
+							<div class="received-file-info">
+								<div class="received-file-icon">📝</div>
+								<div class="received-file-details">
+									<div class="received-file-name">No Files</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<div class="panel">
+					<div class="panel-header">
+						<h2>Admin Remarks</h2>
+					</div>
+					<div class="panel-content remarks-area">
+						<div id="remarks-content">
+							<div class="remark info">
+								<div class="remark-header">
+									<span class="remark-author">RPD Espinosa</span>
+									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+								</div>
+								<div class="remark-message">
+									Proceed to the finance department for the payment of Data Analysis Service, Thank you.
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+	}
+
 }
 
 
@@ -19,26 +963,21 @@
 		<div class="sidebar">
 			<h3>Availed Services</h3>
 
-			<div class="service-item active" onclick="showService('originality-check')">
-				<h4>Originality Check Service</h4>
-				<p>Application Date: Feb 11, 2025</p>
-			</div>
-
-			<div class="service-item" onclick="showService('instrument-validation')">
-				<h4>Instrument Validation</h4>
-				<p>Application Date: April 11, 2025</p>
-			</div>
-
-			<div class="service-item" onclick="showService('language-editing')">
-				<h4>Language Editing</h4>
-				<p>Application Date: November 10, 1620</p>
-			</div>
-
-			<div class="service-item" onclick="showService('data-analysis')">
-				<h4>Data Analysis</h4>
-				<p>Application Date: May 22, 1959</p>
-			</div>
-
+			@{
+				foreach (var services in Model)
+				{
+					if (currentUser.StudentNumber != services.StudentNumber)
+					{
+						continue;
+					}
+					<div class="service-item" onclick="showService('@services.ServiceType-@services.ServiceId')">
+						<h4>@services.ServiceType</h4>
+						<p>Application Date: @services.ServiceProgress.AppliedDate</p>
+					</div>
+				}
+			}
+			
+			<!--
 			<div class="service-item" onclick="showService('student-research-clearance')">
 				<h4>Student Research Clearance</h4>
 				<p>Application Date: Jan 1, 2025</p>
@@ -48,9 +987,9 @@
 				<h4>Ethics Review</h4>
 				<p>Application Date: Jan 1, 2025</p>
 			</div>
-
+			-->
 		</div>
-
+			
 
 		<div class="content-area">
 			<div id="service-content">
@@ -60,655 +999,37 @@
 					<p>You haven't availed any services yet. Contact the office to start a new service request.</p>
 				</div>
 
-				<!--First Service-->
-				<div class="service-detail" data-service="originality-check">
-					<div class="service-header">
-						<h2 class="service-title">Originality Checking Progress</h2>
-						<span class="service-status status-failed">Failed</span>
-					</div>
-					<div class="progress-container">
-						<div class="progress-header">
-							<h3>PROGRESS</h3>
-							<div class="status-badges">
-								<span>Status:</span>
-								<span class="status-badge badge-complete">Complete</span>
-								<span class="status-badge badge-revision">Revision</span>
-								<span class="status-badge badge-current">Current</span>
-								<span class="status-badge badge-pending">Pending</span>
-							</div>
-						</div>
 
-						<div class="progress-steps">
-							<div class="step">
-								<div class="step-circle current">1</div>
-								<div class="step-content">
-									<div class="step-title">Submision of requirments</div>
-									<div class="step-details">
-										<div class="step-details">Requirements:</div>
-										<ul>
-											<li><div class="step-details">SR01 - Originality Checking Service Form</div></li>
-											<li><div class="step-details">SR02 - Certificate of originality for proposal Manuscript, If applicable</div></li>
-											<li><div class="step-details">SR12- Approval Sheet signed by all the panelists</div></li>
-											<li><div class="step-details">Word file of the Research Manuscript(without the table of contents andreferences/appendices/bibliography page)</div></li>
-										</ul>
-									</div>
-									<div class="step-time">Processing Time: 30 minutes</div>
-								</div>
-							</div>
-
-							<div class="step">
-								<div class="step-circle completed">2</div>
-								<div class="step-content">
-									<div class="step-title">Submission of official receipt</div>
-									<div class="step-details">
-										<div class="step-details">Payment Instructions:</div>
-										<ul>
-											<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
-											<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
-											<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
-										</ul>
-										Fees: Php 600 (JHS, SHS and Collegiate)
-									</div>
-									<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
-								</div>
-							</div>
-
-							<div class="step">
-								<div class="step-circle revision">3</div>
-								<div class="step-content">
-									<div class="step-title">Wait for the Originality Check Service Result</div>
-									<div class="step-details">
-										Note: If the similarity index is 10% above in the first
-										run, revise the manuscript according to the
-										similarity index results for another round of
-										originality checking.
-
-										<div class="step-run-count">
-											<strong>Run Count:</strong> <span id="runCount">4</span>
-										</div>
-										<div class="step-time">Processing Time: 2-3 days</div>
-									</div>
-								</div>
-							</div>
-
-							<div class="step">
-								<div class="step-circle pending">4</div>
-								<div class="step-content">
-									<div class="step-title">
-										Receive the Originality Check results and SR02 -
-										Certificate of Originality.
-									</div>
-									<div class="step-details">
-										Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
-									</div>
-									<div class="step-time">Processing Time: 15 Minutes</div>
-								</div>
-							</div>
-
-							<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
-								END OF TRANSACTION
-							</div>
-
-							<div style="font-size: 12px; color: #6c757d; font-style: italic; margin-top: 20px;">
-								* If similarity index is above 10%, the student shall edit the paper and repeat steps 3 - 4 twice.*
-							</div>
-						</div>
-
-						<div class="upload-section" id="uploadSection">
-							<h5>Upload Research Papers & Documents</h5>
-							<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
-
-							<div class="files-container" id="filesContainer" style="display: none;">
-								<!-- Files will be added here -->
-							</div>
-
-							<div class="upload-progress" id="uploadProgress" style="display: none;">
-								<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
-							</div>
-
-							<div>
-								<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
-								<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
-							</div>
-
-							<div class="upload-instructions">
-								Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
-							</div>
-						</div>
-
-						<div class="received-files-section">
-							<div class="received-files-header">
-								<span style="font-size: 20px;">📥</span>
-								<h5>Received Files from Admin</h5>
-							</div>
-
-							<div id="receivedFilesContainer">
-								<div class="received-file-item">
-									<div class="received-file-info">
-										<div class="received-file-icon">📋</div>
-										<div class="received-file-details">
-											<div class="received-file-name">Ocrisma-For_Revision.docx</div>
-											<div class="received-file-meta">Received: Feb 11, 2025 | Size: 2.3 MB | From: Research & Publication Department</div>
-										</div>
-									</div>
-									<div>
-										<button class="download-btn" onclick="downloadFile('turnitin-report')">Download</button>
-									</div>
-								</div>
-
-								<div class="received-file-item">
-									<div class="received-file-info">
-										<div class="received-file-icon">📝</div>
-										<div class="received-file-details">
-											<div class="received-file-name">Ocrisma-Complete.pdf</div>
-											<div class="received-file-meta">Received: April 11, 2025 | Size: 856 KB | From: Research & Publication Department</div>
-										</div>
-									</div>
-									<div>
-										<button class="download-btn" onclick="downloadFile('revision-notes')">Download</button>
-									</div>
-								</div>
-
-							</div>
-						</div>
-
-						<div class="panel">
-							<div class="panel-header">
-								<h2>Admin Remarks</h2>
-							</div>
-							<div class="panel-content remarks-area">
-								<div id="remarks-content">
-									<div class="remark info">
-										<div class="remark-header">
-											<span class="remark-author">RPD Espinosa</span>
-											<span class="remark-timestamp">2025-10-16 11:30 AM</span>
-										</div>
-										<div class="remark-message">
-											Your paper exceededed 4 Runs, you must avail another Originality Check Service.
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-					</div>
-				</div>
 
 			</div>
 
 
 
-
-
-			<!-- Second Service -->
-			<div class="service-detail" data-service="instrument-validation">
-				<div class="service-header">
-					<h2 class="service-title">Instrument Validation Progress</h2>
-					<span class="service-status status-completed">Completed</span>
-				</div>
-
-				<div class="progress-container">
-					<div class="progress-header">
-						<h3>PROGRESS</h3>
-						<div class="status-badges">
-							<span>Status:</span>
-							<span class="status-badge badge-complete">Complete</span>
-							<span class="status-badge badge-revision">Revision</span>
-							<span class="status-badge badge-current">Current</span>
-							<span class="status-badge badge-pending">Pending</span>
-						</div>
-					</div>
-
-					<div class="progress-steps">
-						<div class="step">
-							<div class="step-circle completed">1</div>
-							<div class="step-content">
-								<div class="step-title">Submision of requirments</div>
-								<div class="step-details">
-									<div class="step-details">Requirements:</div>
-									<ul>
-										<li><div class="step-details">SR03 - Instrument Validation Service Form</div></li>
-										<li><div class="step-details">SR02A - Certificate of Originality for Proposal Manuscript</div></li>
-										<li><div class="step-details">SR12A - Approval Sheet for Proposal Manuscript</div></li>
-										<li><div class="step-details">Research instrument/s</div></li>
-										<li><div class="step-details">Research manuscript</div></li>
-									</ul>
-								</div>
-								<div class="step-time">Processing Time: 30 minutes</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle completed">2</div>
-							<div class="step-content">
-								<div class="step-title">Submission of official receipt</div>
-								<div class="step-details">
-									<div class="step-details">Payment Instructions:</div>
-									<ul>
-										<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
-										<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
-										<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
-									</ul>
-									Fees: Php 600 (JHS, SHS, and Collegiate)
-								</div>
-								<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle completed">3</div>
-							<div class="step-content">
-								<div class="step-title">Wait for the Insturment Validation Service Result</div>
-								<div class="step-details">
-									Note: Await the validation, review, revision needed and approval of the Instrument Validator.Once approved, the Instrument Validator or thestudent researcher/s must forward the approvedand signed SR03- Instrument Validation ServiceForm to the RPD.
-									<div class="step-run-count">
-										<strong>Run Count:</strong> <span id="runCount">2</span>
-									</div>
-									<div class="step-time">Processing Time: 2-5 days</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle completed">4</div>
-							<div class="step-content">
-								<div class="step-title">
-									Receive the Originality Check results and SR04 -
-									Certificate of Instrument Validation.
-								</div>
-								<div class="step-details">
-									Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
-								</div>
-								<div class="step-time">Processing Time: 15 Minutes</div>
-							</div>
-						</div>
-
-						<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
-							END OF TRANSACTION
-						</div>
-
-					</div>
-
-					<div class="upload-section" id="uploadSection">
-						<h5>Upload Research Papers & Documents</h5>
-						<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
-
-						<div class="files-container" id="filesContainer" style="display: none;">
-							<!-- Files will be added here -->
-						</div>
-
-						<div class="upload-progress" id="uploadProgress" style="display: none;">
-							<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
-						</div>
-
-						<div>
-							<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
-							<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
-						</div>
-
-						<div class="upload-instructions">
-							Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
-						</div>
-					</div>
-
-					<div class="received-files-section">
-						<div class="received-files-header">
-							<span style="font-size: 20px;">📥</span>
-							<h5>Received Files from Admin</h5>
-						</div>
-
-						<div id="receivedFilesContainer">
-
-							<div class="received-file-item">
-								<div class="received-file-info">
-									<div class="received-file-icon">📝</div>
-									<div class="received-file-details">
-										<div class="received-file-name">Ocrisma-Complete.pdf</div>
-										<div class="received-file-meta">Received: April 11, 2025 | Size: 856 KB | From: Research & Publication Department</div>
-									</div>
-								</div>
-								<div>
-									<button class="download-btn" onclick="downloadFile('revision-notes')">Download</button>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="panel">
-						<div class="panel-header">
-							<h2>Admin Remarks</h2>
-						</div>
-						<div class="panel-content remarks-area">
-							<div id="remarks-content">
-								<div class="remark info">
-									<div class="remark-header">
-										<span class="remark-author">RPD Espinosa</span>
-										<span class="remark-timestamp">2025-10-16 11:30 AM</span>
-									</div>
-									<div class="remark-message">
-										Congratulations, You can now view yout certificate at Account>Certificates
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</div>
-
-
-
-			<!-- Third Service -->
-			<div class="service-detail" data-service="language-editing">
-				<div class="service-header">
-					<h2 class="service-title">Language Editing Progress</h2>
-					<span class="service-status status-pending">Pending</span>
-				</div>
-
-				<div class="progress-container">
-
-					<div class="progress-header">
-						<h3>PROGRESS</h3>
-						<div class="status-badges">
-							<span>Status:</span>
-							<span class="status-badge badge-complete">Complete</span>
-							<span class="status-badge badge-revision">Revision</span>
-							<span class="status-badge badge-current">Current</span>
-							<span class="status-badge badge-pending">Pending</span>
-						</div>
-					</div>
-
-					<div class="progress-steps">
-						<div class="step">
-							<div class="step-circle current">1</div>
-							<div class="step-content">
-								<div class="step-title">Submision of requirments</div>
-								<div class="step-details">
-									<div class="step-details">Requirements:</div>
-									<ul>
-										<li><div class="step-details">SR07 - Language Editing Service Form</div></li>
-										<li><div class="step-details">SR02A & SR02B - Certificate of Originality(Proposal and Final Manuscript)</div></li>
-										<li><div class="step-details">SR12B - Approval Sheet of Final Manuscript</div></li>
-										<li><div class="step-details">SR04 - Certificate of Instrument Validation/Exemption, if applicable</div></li>
-										<li><div class="step-details">SR06 - Certificate of Data Analysis, if applicable</div></li>
-										<li><div class="step-details">MSWord file of the Research Manuscript in RPD Language Editing Format</div></li>
-									</ul>
-								</div>
-								<div class="step-time">Processing Time: 30 minutes</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle pending">2</div>
-							<div class="step-content">
-								<div class="step-title">Submission of official receipt</div>
-								<div class="step-details">
-									<div class="step-details">Payment Instructions:</div>
-									<ul>
-										<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
-										<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
-										<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
-									</ul>
-									Fees: Php 30(JHS, SHS, and Collegiate) Per page
-								</div>
-								<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle pending">3</div>
-							<div class="step-content">
-								<div class="step-title">Wait for the Language Editing Service Result</div>
-								<div class="step-details">
-									Note: Await the Language Editor’s proofreading, editing,revision, and approval of the research manuscript.Once approved, the Editor or the studentresearcher/s must forward the approved andsigned SR07-Language Editing Service Form to theRPD
-									<div class="step-run-count">
-										<strong>Run Count:</strong> <span id="runCount">0</span>
-									</div>
-									<div class="step-time">Processing Time: 2-5 days</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle pending">4</div>
-							<div class="step-content">
-								<div class="step-title">Receive the SR08- Certificate of Language Editing</div>
-								<div class="step-details">
-									Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
-								</div>
-								<div class="step-time">Processing Time: 15 Minutes</div>
-							</div>
-						</div>
-
-						<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
-							END OF TRANSACTION
-						</div>
-
-					</div>
-
-					<div class="upload-section" id="uploadSection">
-						<h5>Upload Research Papers & Documents</h5>
-						<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
-
-						<div class="files-container" id="filesContainer" style="display: none;">
-							<!-- Files will be added here -->
-						</div>
-
-						<div class="upload-progress" id="uploadProgress" style="display: none;">
-							<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
-						</div>
-
-						<div>
-							<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
-							<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
-						</div>
-
-						<div class="upload-instructions">
-							Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
-						</div>
-					</div>
-
-					<div class="received-files-section">
-						<div class="received-files-header">
-							<span style="font-size: 20px;">📥</span>
-							<h5>Received Files from Admin</h5>
-						</div>
-
-						<div id="receivedFilesContainer">
-
-							<div class="received-file-item">
-								<div class="received-file-info">
-									<div class="received-file-icon">📝</div>
-									<div class="received-file-details">
-										<div class="received-file-name">No Files</div>
-									</div>
-								</div>
-							</div>
-
-						</div>
-					</div>
-
-					<div class="panel">
-						<div class="panel-header">
-							<h2>Admin Remarks</h2>
-						</div>
-						<div class="panel-content remarks-area">
-							<div id="remarks-content">
-								<div class="remark info">
-									<div class="remark-header">
-										<span class="remark-author">RPD Espinosa</span>
-										<span class="remark-timestamp">2025-10-16 11:30 AM</span>
-									</div>
-									<div class="remark-message">
-										Kindly submit the requirments to proceed with the Language Editing Service, Thank you.
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</div>
-
-
-
-
-
-
-			<!-- Fourth Service -->
-			<div class="service-detail" data-service="data-analysis">
-				<div class="service-header">
-					<h2 class="service-title">Data Analysis Progress</h2>
-					<span class="service-status status-processing">Processing</span>
-				</div>
-
-				<div class="progress-container">
-					<div class="progress-header">
-						<h3>PROGRESS</h3>
-						<div class="status-badges">
-							<span>Status:</span>
-							<span class="status-badge badge-complete">Complete</span>
-							<span class="status-badge badge-revision">Revision</span>
-							<span class="status-badge badge-current">Current</span>
-							<span class="status-badge badge-pending">Pending</span>
-						</div>
-					</div>
-
-					<div class="progress-steps">
-						<div class="step">
-							<div class="step-circle completed">1</div>
-							<div class="step-content">
-								<div class="step-title">Submision of requirments</div>
-								<div class="step-details">
-									<div class="step-details">Requirements:</div>
-									<ul>
-										<li><div class="step-details">SR05 - Data Analysis Service Form</div></li>
-										<li><div class="step-details">SR04 - Certificate of Instrument Validation/Exemption</div></li>
-										<li><div class="step-details">SR02A - Certificate of Originality for Proposal Manuscript</div></li>
-										<li><div class="step-details">Encoded Data Set (Number Coded Format)</div></li>
-										<li><div class="step-details">Statistical Tool/Treatment to be availed</div></li>
-										<li><div class="step-details">Research Manuscript</div></li>
-									</ul>
-								</div>
-								<div class="step-time">Processing Time: 30 minutes</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle current">2</div>
-							<div class="step-content">
-								<div class="step-title">Submission of official receipt</div>
-								<div class="step-details">
-									<div class="step-details">Payment Instructions:</div>
-									<ul>
-										<li><div class="step-details">If at Letran Cashier, send a picture of the official receipt.</div></li>
-										<li><div class="step-details">If bank deposit, send a picture of the transaction slip.</div></li>
-										<li><div class="step-details">If online payment, send a screenshot of the email/text confirmation of the online payment.</div></li>
-									</ul>
-									<div class="step-details">Fees:</div>
-									<ul>
-										<li><div class="step-details">Basic statistical tools: Php 2,500 </div></li>
-										<li><div class="step-details">Advanced statistical tools: Php 3,000 </div></li>
-									</ul>
-								</div>
-								<div class="step-time">Procesing Time: 20 minutes - 1 hour</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle pending">3</div>
-							<div class="step-content">
-								<div class="step-title">Wait for the Language Editing Service Result</div>
-								<div class="step-details">
-									Note: Await the Data Analyst’s review, discussion, andanalysis of the dataset. Once approved, the Analystor the student researcher/s must forward theapproved and signed SR05-Data Analysis ServiceForm to the RPD.
-									<div class="step-run-count">
-										<strong>Run Count:</strong> <span id="runCount">0</span>
-									</div>
-									<div class="step-time">Processing Time: 2-3 days</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="step">
-							<div class="step-circle pending">4</div>
-							<div class="step-content">
-								<div class="step-title">Receive the SR06 - Certificate of Data Analysis.</div>
-								<div class="step-details">
-									Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates
-								</div>
-								<div class="step-time">Processing Time: 15 Minutes</div>
-							</div>
-						</div>
-
-						<div style="text-align: center; margin: 30px 0; font-weight: bold; color: #2c3e50;">
-							END OF TRANSACTION
-						</div>
-
-					</div>
-
-					<div class="upload-section" id="uploadSection">
-						<h5>Upload Research Papers & Documents</h5>
-						<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
-
-						<div class="files-container" id="filesContainer" style="display: none;">
-							<!-- Files will be added here -->
-						</div>
-
-						<div class="upload-progress" id="uploadProgress" style="display: none;">
-							<div class="upload-progress-bar" id="progressBar" style="width: 0%"></div>
-						</div>
-
-						<div>
-							<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
-							<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
-						</div>
-
-						<div class="upload-instructions">
-							Accepted formats: .pdf, .doc, .docx, .txt, .jpg, .jpeg, .png | Max size: 10MB per file
-						</div>
-					</div>
-
-					<div class="received-files-section">
-						<div class="received-files-header">
-							<span style="font-size: 20px;">📥</span>
-							<h5>Received Files from Admin</h5>
-						</div>
-
-						<div id="receivedFilesContainer">
-
-							<div class="received-file-item">
-								<div class="received-file-info">
-									<div class="received-file-icon">📝</div>
-									<div class="received-file-details">
-										<div class="received-file-name">No Files</div>
-									</div>
-								</div>
-							</div>
-
-						</div>
-					</div>
-
-					<div class="panel">
-						<div class="panel-header">
-							<h2>Admin Remarks</h2>
-						</div>
-						<div class="panel-content remarks-area">
-							<div id="remarks-content">
-								<div class="remark info">
-									<div class="remark-header">
-										<span class="remark-author">RPD Espinosa</span>
-										<span class="remark-timestamp">2025-10-16 11:30 AM</span>
-									</div>
-									<div class="remark-message">
-										Proceed to the finance department for the payment of Data Analysis Service, Thank you.
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</div>
+			@{
+				foreach (var services in Model)
+				{
+					switch (services.ServiceType)
+					{
+						case "Originality Check":
+							originalityBlock(services);
+							break;
+						case "Instrument Validation":
+							InstrumentBlock(services);
+							break;
+						case "Language Editing":
+							LanguageBlock(services);
+							break;
+						case "Data Analysis":
+							DataBlock(services);
+							break;
+					}
+				}
+
+				
+			}
+
+
+			
 
 
 
@@ -1107,250 +1428,212 @@
 
 
 <script>
-	let selectedFiles = [];
-		 let uploadedFiles = [];
+    // Store files per service using service ID as key
+    let serviceFiles = {};
+    let uploadedServiceFiles = {};
+    let remarksData = {};
+    let receivedFilesData = {};
 
-		 function showService(serviceId) {
-			 // Remove active class from all sidebar items
-			 const sidebarItems = document.querySelectorAll('.service-item');
-			 sidebarItems.forEach(item => item.classList.remove('active'));
+    function initializeServiceArrays(serviceId) {
+        if (!serviceFiles[serviceId]) {
+            serviceFiles[serviceId] = [];
+        }
+        if (!uploadedServiceFiles[serviceId]) {
+            uploadedServiceFiles[serviceId] = [];
+        }
+        if (!remarksData[serviceId]) {
+            remarksData[serviceId] = [];
+        }
+        if (!receivedFilesData[serviceId]) {
+            receivedFilesData[serviceId] = [];
+        }
+    }
 
-			 // Add active class to clicked item
-			 event.target.closest('.service-item').classList.add('active');
+    function showService(serviceId) {
+        const sidebarItems = document.querySelectorAll('.service-item');
+        sidebarItems.forEach(item => item.classList.remove('active'));
+        event.target.closest('.service-item').classList.add('active');
 
-			 // Hide all service details
-			 const serviceDetails = document.querySelectorAll('.service-detail');
-			 serviceDetails.forEach(detail => detail.classList.remove('active'));
+        const serviceDetails = document.querySelectorAll('.service-detail');
+        serviceDetails.forEach(detail => detail.classList.remove('active'));
 
-			 // Show selected service detail
-			 const selectedService = document.querySelector(`.service-detail[data-service="${serviceId}"]`);
-			 if (selectedService) {
-				 selectedService.classList.add('active');
-			 }
-		 }
+        const selectedService = document.querySelector(`.service-detail[data-service="${serviceId}"]`);
+        if (selectedService) {
+            selectedService.classList.add('active');
+            // Initialize arrays for this specific service
+            initializeServiceArrays(serviceId);
+        }
+    }
 
-		 function selectMultipleFiles() {
-			 const input = document.createElement('input');
-			 input.type = 'file';
-			 input.multiple = true;
-			 input.accept = '.pdf,.doc,.docx,.txt';
+    function selectMultipleFiles(serviceId) {
+        initializeServiceArrays(serviceId);
 
-			 input.onchange = function(e) {
-				 const files = Array.from(e.target.files);
-				 files.forEach(file => {
-					 if (file.size <= 10 * 1024 * 1024) { // 10MB limit
-						 selectedFiles.push({
-							 file: file,
-							 id: Date.now() + Math.random(),
-							 uploaded: false
-						 });
-					 } else {
-						 alert(`${file.name} is too large. Maximum file size is 10MB.`);
-					 }
-				 });
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png';
 
-				 updateFilesDisplay();
-				 updateSubmitButton();
-			 };
+        input.onchange = function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                if (file.size <= 10 * 1024 * 1024) {
+                    serviceFiles[serviceId].push({
+                        file: file,
+                        id: Date.now() + Math.random(),
+                        uploaded: false
+                    });
+                } else {
+                    alert(`${file.name} is too large. Maximum file size is 10MB.`);
+                }
+            });
 
-			 input.click();
-		 }
+            updateFilesDisplay(serviceId);
+            updateSubmitButton(serviceId);
+        };
 
-		 function updateFilesDisplay() {
-			 const container = document.getElementById('filesContainer');
-			 const uploadSection = document.getElementById('uploadSection');
+        input.click();
+    }
 
-			 if (selectedFiles.length > 0) {
-				 container.style.display = 'block';
-				 uploadSection.classList.add('has-files');
+    function updateFilesDisplay(serviceId) {
+        const container = document.getElementById('filesContainer-' + serviceId);
+        const uploadSection = container?.closest('.upload-section');
 
-				 container.innerHTML = selectedFiles.map(fileObj => `
-					 <div class="file-item">
-						 <div class="file-info">
-							 <div class="file-icon">📄</div>
-							 <div class="file-details">
-								 <div class="file-name">${fileObj.uploaded ? '✅' : '📎'} ${fileObj.file.name}</div>
-								 <div class="file-size">${formatFileSize(fileObj.file.size)}</div>
-							 </div>
-						 </div>
-						 <button class="remove-file" onclick="removeFile('${fileObj.id}')">${fileObj.uploaded ? 'Remove' : '✕'}</button>
-					 </div>
-				 `).join('');
-			 } else {
-				 container.style.display = 'none';
-				 uploadSection.classList.remove('has-files');
-			 }
-		 }
+        if (!container) return;
 
-		 function removeFile(fileId) {
-			 selectedFiles = selectedFiles.filter(f => f.id != fileId);
-			 uploadedFiles = uploadedFiles.filter(f => f.id != fileId);
-			 updateFilesDisplay();
-			 updateSubmitButton();
-		 }
+        if (serviceFiles[serviceId] && serviceFiles[serviceId].length > 0) {
+            container.style.display = 'block';
+            if (uploadSection) uploadSection.classList.add('has-files');
 
-		 function formatFileSize(bytes) {
-			 if (bytes === 0) return '0 Bytes';
-			 const k = 1024;
-			 const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-			 const i = Math.floor(Math.log(bytes) / Math.log(k));
-			 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-		 }
+            container.innerHTML = serviceFiles[serviceId].map(fileObj => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon">📄</div>
+                        <div class="file-details">
+                            <div class="file-name">${fileObj.uploaded ? '✅' : '📎'} ${fileObj.file.name}</div>
+                            <div class="file-size">${formatFileSize(fileObj.file.size)}</div>
+                        </div>
+                    </div>
+                    <button class="remove-file" onclick="removeFile('${serviceId}', '${fileObj.id}')">${fileObj.uploaded ? 'Remove' : '✕'}</button>
+                </div>
+            `).join('');
+        } else {
+            container.style.display = 'none';
+            if (uploadSection) uploadSection.classList.remove('has-files');
+        }
+    }
 
-		 function updateSubmitButton() {
-			 const submitBtn = document.getElementById('submitBtn');
-			 const unuploadedFiles = selectedFiles.filter(f => !f.uploaded);
+    function removeFile(serviceId, fileId) {
+        if (serviceFiles[serviceId]) {
+            serviceFiles[serviceId] = serviceFiles[serviceId].filter(f => f.id != fileId);
+        }
+        if (uploadedServiceFiles[serviceId]) {
+            uploadedServiceFiles[serviceId] = uploadedServiceFiles[serviceId].filter(f => f.id != fileId);
+        }
+        updateFilesDisplay(serviceId);
+        updateSubmitButton(serviceId);
+    }
 
-			 if (unuploadedFiles.length > 0) {
-				 submitBtn.disabled = false;
-				 submitBtn.textContent = `Submit ${unuploadedFiles.length} File(s)`;
-			 } else {
-				 submitBtn.disabled = true;
-				 submitBtn.textContent = 'No files to submit';
-			 }
-		 }
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
 
-		 function submitFiles() {
-			 const unuploadedFiles = selectedFiles.filter(f => !f.uploaded);
-			 if (unuploadedFiles.length === 0) return;
+    function updateSubmitButton(serviceId) {
+        const submitBtn = document.getElementById('submitBtn-' + serviceId);
 
-			 const progressBar = document.getElementById('progressBar');
-			 const uploadProgress = document.getElementById('uploadProgress');
-			 const submitBtn = document.getElementById('submitBtn');
+        if (!submitBtn) return;
 
-			 // Show progress bar
-			 uploadProgress.style.display = 'block';
-			 submitBtn.disabled = true;
-			 submitBtn.textContent = 'Uploading...';
+        const unuploadedFiles = serviceFiles[serviceId]?.filter(f => !f.uploaded) || [];
 
-			 // Simulate file upload progress
-			 let progress = 0;
-			 const interval = setInterval(() => {
-				 progress += Math.random() * 15;
-				 if (progress >= 100) {
-					 progress = 100;
-					 clearInterval(interval);
+        if (unuploadedFiles.length > 0) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = `Submit ${unuploadedFiles.length} File(s)`;
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'No files to submit';
+        }
+    }
 
-					 // Mark files as uploaded
-					 unuploadedFiles.forEach(fileObj => {
-						 fileObj.uploaded = true;
-						 uploadedFiles.push(fileObj);
-					 });
+    function submitFiles(serviceId) {
+        const unuploadedFiles = serviceFiles[serviceId]?.filter(f => !f.uploaded) || [];
+        if (unuploadedFiles.length === 0) return;
 
-					 // Update display
-					 setTimeout(() => {
-						 uploadProgress.style.display = 'none';
-						 progressBar.style.width = '0%';
-						 updateFilesDisplay();
-						 updateSubmitButton();
+        const progressBar = document.getElementById('progressBar-' + serviceId);
+        const uploadProgress = document.getElementById('uploadProgress-' + serviceId);
+        const submitBtn = document.getElementById('submitBtn-' + serviceId);
 
-						 // Show success message
-						 alert(`Successfully uploaded ${unuploadedFiles.length} file(s)!`);
-					 }, 500);
-				 }
-				 progressBar.style.width = progress + '%';
-			 }, 200);
-		 }
+        if (!submitBtn || !uploadProgress || !progressBar) return;
 
-		 function downloadFile(fileId) {
-			 // Simulate file download
-			 const fileNames = {
-				 'turnitin-report': 'Turnitin_Report_Draft1.pdf',
-				 'revision-notes': 'Revision_Notes_Comments.docx',
-				 'similarity-report': 'Similarity_Index_Report.pdf'
-			 };
+        uploadProgress.style.display = 'block';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Uploading...';
 
-			 const fileName = fileNames[fileId] || 'document.pdf';
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
 
-			 // Create a temporary download simulation
-			 const link = document.createElement('a');
-			 link.href = '#';
-			 link.download = fileName;
+                unuploadedFiles.forEach(fileObj => {
+                    fileObj.uploaded = true;
+                    if (!uploadedServiceFiles[serviceId]) {
+                        uploadedServiceFiles[serviceId] = [];
+                    }
+                    uploadedServiceFiles[serviceId].push(fileObj);
+                });
 
-			 // Show download notification
-			 alert(`Downloading: ${fileName}`);
+                setTimeout(() => {
+                    uploadProgress.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    updateFilesDisplay(serviceId);
+                    updateSubmitButton(serviceId);
+                    alert(`Successfully uploaded ${unuploadedFiles.length} file(s) for ${serviceId}!`);
+                }, 500);
+            }
+            progressBar.style.width = progress + '%';
+        }, 200);
+    }
 
-			 // In a real application, this would trigger actual file download
-			 console.log(`Downloading file: ${fileName}`);
-		 }
+    function downloadFile(fileId, serviceId) {
+        const fileNames = {
+            'turnitin-report': 'Turnitin_Report_Draft1.pdf',
+            'revision-notes': 'Revision_Notes_Comments.docx',
+            'similarity-report': 'Similarity_Index_Report.pdf'
+        };
 
-		 function viewFile(fileId) {
-			 // Simulate file viewing
-			 const fileNames = {
-				 'turnitin-report': 'Turnitin_Report_Draft1.pdf',
-				 'revision-notes': 'Revision_Notes_Comments.docx',
-				 'similarity-report': 'Similarity_Index_Report.pdf'
-			 };
+        const fileName = fileNames[fileId] || 'document.pdf';
+        alert(`Downloading: ${fileName} from service: ${serviceId}`);
+        console.log(`Downloading file: ${fileName} from service: ${serviceId}`);
+    }
 
-			 const fileName = fileNames[fileId] || 'document.pdf';
+    document.addEventListener('DOMContentLoaded', function() {
+        const serviceItems = document.querySelectorAll('.service-item');
+        const serviceDetails = document.querySelectorAll('.service-detail');
+        const noServiceMsg = document.getElementById('no-service');
 
-			 // Show file preview notification
-			 alert(`Opening file viewer for: ${fileName}`);
+        const hasServices = serviceItems.length > 0;
 
-			 // In a real application, this would open a file preview modal or new tab
-			 console.log(`Viewing file: ${fileName}`);
-		 }
+        if (hasServices) {
+            if (noServiceMsg) noServiceMsg.style.display = 'none';
 
-		 // Initialize with first service
-		 document.addEventListener('DOMContentLoaded', function() {
-			 const firstService = document.querySelector('.service-detail.active');
-			 if (firstService) {
-				 firstService.style.display = 'block';
-			 }
-		 });
+            serviceItems.forEach(item => item.classList.remove('active'));
+            if (serviceItems) {
+                serviceItems.classList.add('active');
+                const firstServiceId = serviceItems.getAttribute('onclick').match(/'([^']+)'/);
+                initializeServiceArrays(firstServiceId);
+            }
 
-							 document.addEventListener('DOMContentLoaded', function () {
-						// Get all service items
-						const serviceItems = document.querySelectorAll('.service-item');
-						const serviceDetails = document.querySelectorAll('.service-detail');
-						const noServiceMsg = document.getElementById('no-service');
-
-						// Boolean: are there any services?
-						const hasServices = serviceItems.length > 0;
-
-						if (hasServices) {
-							// Hide "No Service" message
-							if (noServiceMsg) noServiceMsg.style.display = 'none';
-
-							// Show first service item as active
-							serviceItems.forEach(item => item.classList.remove('active'));
-							if (serviceItems[0]) serviceItems[0].classList.add('active');
-
-							// Show first service detail as active
-							serviceDetails.forEach(detail => detail.classList.remove('active'));
-							if (serviceDetails[0]) serviceDetails[0].classList.add('active');
-						} else {
-							// Show "No Service" message
-							if (noServiceMsg) noServiceMsg.style.display = 'block';
-
-							// Hide all service details
-							serviceDetails.forEach(detail => detail.classList.remove('active'));
-						}
-					});
-
-
-	let runCount = 1; // Initial run count
-
-	function incrementRunCount() {
-		runCount++;
-		document.getElementById('runCount').textContent = runCount;
-	}
-
-
-			function showRemarks(ticketId) {
-			// Remove active class from all tickets
-			document.querySelectorAll('.ticket').forEach(ticket => {
-				ticket.classList.remove('active');
-			});
-
-			// Add active class to clicked ticket
-			event.currentTarget.classList.add('active');
-
-			// Update remarks content
-			const ticket = ticketData[ticketId];
-			document.getElementById('remarks-content').innerHTML = ticket.remarks;
-			document.getElementById('remarks-subtitle').innerHTML =
-				`Comments for: ${ticket.title} (${ticketId})`;
-		}
-
+            serviceDetails.forEach(detail => detail.classList.remove('active'));
+            if (serviceDetails) {
+                serviceDetails.classList.add('active');
+            }
+        } else {
+            if (noServiceMsg) noServiceMsg.style.display = 'block';
+            serviceDetails.forEach(detail => detail.classList.remove('active'));
+        }
+    });
 </script>

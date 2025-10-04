@@ -1,0 +1,1035 @@
+﻿@{
+    ViewData["Title"] = "Certificates";
+}
+@{
+    ViewBag.Title = "Certificates";
+    Layout = "~/Views/Shared/_AdminNav.cshtml";
+}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Certificate Management - Admin</title>
+<link rel="stylesheet" href="~/css/admin/certificates.css" asp-append-version="true" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+
+<div class="admin-certificates-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-certificate"></i>
+            Student Certificate Management
+        </h1>
+        <p class="page-subtitle">Generate and assign certificates to students based on their research services</p>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions-bar">
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search students or certificates..." />
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        <div class="action-buttons">
+            <button class="btn-primary" onclick="openBulkGenerateModal()">
+                <i class="fas fa-magic"></i> Bulk Generate
+            </button>
+            <button class="btn-secondary" onclick="refreshData()">
+                <i class="fas fa-refresh"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number" id="totalStudents">6</div>
+                <div class="stat-label">Active Students</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number" id="totalCertificates">15</div>
+                <div class="stat-label">Certificates Generated</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number" id="pendingCertificates">3</div>
+                <div class="stat-label">Pending Generation</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-download"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number" id="downloadedCertificates">12</div>
+                <div class="stat-label">Downloaded</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Grid -->
+    <div class="students-grid" id="studentsGrid">
+        <!-- Student cards will be populated here -->
+    </div>
+
+    <!-- Generate Certificate Modal -->
+    <div id="generateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="generateModalTitle">Generate Certificate</h3>
+                <span class="close" onclick="closeGenerateModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="certificate-preview" id="certificatePreview">
+                    <!-- Certificate preview will be shown here -->
+                </div>
+                <form id="generateForm" class="generate-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Student:</label>
+                            <input type="text" class="form-input" id="studentName" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Certificate Type:</label>
+                            <select class="form-select" id="certificateType" onchange="updateCertificatePreview()" required>
+                                <option value="">Select Certificate</option>
+                                <option value="originality">Certificate of Originality</option>
+                                <option value="validation">Certificate of Instrument Validation</option>
+                                <option value="analysis">Certificate of Data Analysis</option>
+                                <option value="editing">Certificate of Language Editing</option>
+                                <option value="clearance">Student Research Clearance</option>
+                                <option value="ethics">Certificate of Ethical Review</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Research Title:</label>
+                            <input type="text" class="form-input" id="researchTitle" placeholder="Enter research title..." required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Similarity Index (%):</label>
+                            <input type="number" class="form-input" id="similarityIndex" min="0" max="100" placeholder="e.g., 7" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Completion Date:</label>
+                            <input type="date" class="form-input" id="completionDate" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Additional Notes:</label>
+                        <textarea class="form-textarea" id="additionalNotes" placeholder="Any additional information..."></textarea>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="form-group">
+                        <label class="form-label">Attach Original Certificate PDF:</label>
+                        <div class="file-upload-area" onclick="document.getElementById('certificateFile').click()">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">
+                                Click to upload PDF file or drag and drop<br>
+                                <small>PDF files only, max 10MB</small>
+                            </div>
+                            <input type="file" id="certificateFile" accept=".pdf" style="display: none;" onchange="handleCertificateFileSelect(this.files)" />
+                        </div>
+                        <div id="selectedCertificateFile" class="file-preview" style="display: none;">
+                            <div class="file-item">
+                                <div class="file-icon">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="certificateFileName"></div>
+                                    <div class="file-size" id="certificateFileSize"></div>
+                                </div>
+                                <div class="file-actions">
+                                    <button type="button" class="btn-small btn-danger" onclick="removeCertificateFile()">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeGenerateModal()">Cancel</button>
+                <button class="btn-primary" onclick="generateCertificate()">
+                    <i class="fas fa-certificate"></i> Generate Certificate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Certificates Modal -->
+    <div id="viewCertificatesModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="viewModalTitle">Student Certificates</h3>
+                <span class="close" onclick="closeViewCertificatesModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="certificates-list" id="studentCertificatesList">
+                    <!-- Student certificates will be listed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeViewCertificatesModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Generate Modal -->
+    <div id="bulkGenerateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Bulk Generate Certificates</h3>
+                <span class="close" onclick="closeBulkGenerateModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Select Certificate Type:</label>
+                    <select class="form-select" id="bulkCertificateType" required>
+                        <option value="">Select Certificate</option>
+                        <option value="originality">Certificate of Originality</option>
+                        <option value="validation">Certificate of Instrument Validation</option>
+                        <option value="analysis">Certificate of Data Analysis</option>
+                        <option value="editing">Certificate of Language Editing</option>
+                        <option value="clearance">Student Research Clearance</option>
+                        <option value="ethics">Certificate of Ethical Review</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select Students:</label>
+                    <div class="student-selection-grid" id="bulkStudentSelection">
+                        <!-- Students for bulk selection will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Bulk File Upload Section -->
+                <div class="form-group">
+                    <label class="form-label">Attach Template PDF (Optional):</label>
+                    <div class="file-upload-area" onclick="document.getElementById('bulkCertificateFile').click()">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">
+                            Upload a template PDF for all certificates<br>
+                            <small>PDF files only, max 10MB</small>
+                        </div>
+                        <input type="file" id="bulkCertificateFile" accept=".pdf" style="display: none;" onchange="handleBulkCertificateFileSelect(this.files)" />
+                    </div>
+                    <div id="selectedBulkCertificateFile" class="file-preview" style="display: none;">
+                        <div class="file-item">
+                            <div class="file-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="file-info">
+                                <div class="file-name" id="bulkCertificateFileName"></div>
+                                <div class="file-size" id="bulkCertificateFileSize"></div>
+                            </div>
+                            <div class="file-actions">
+                                <button type="button" class="btn-small btn-danger" onclick="removeBulkCertificateFile()">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeBulkGenerateModal()">Cancel</button>
+                <button class="btn-primary" onclick="bulkGenerateCertificates()">
+                    <i class="fas fa-magic"></i> Generate Selected
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Student data with certificate tracking
+    const studentsData = [
+        {
+            "id": "JO",
+            "name": "John Ocrisma",
+            "studentNumber": "CS2021-001",
+            "department": "College of Engineering and Information Technology",
+            "course": "Computer Science",
+            "service": "originality-check",
+            "serviceName": "Originality Check",
+            "certificates": [
+                {
+                    "id": "cert_JO_001",
+                    "type": "originality",
+                    "title": "Certificate of Originality (Proposal Manuscript)",
+                    "researchTitle": "INTEGRATED RESEARCH SERVICES MANAGEMENT SYSTEM (IRSMS) FOR RESEARCH AND PUBLICATION DEPARTMENT OF LETRAN-MANILA",
+                    "similarityIndex": 7,
+                    "completionDate": "2025-08-19",
+                    "generatedDate": "2025-08-20",
+                    "status": "completed",
+                    "downloaded": true,
+                    "attachedFile": {
+                        "name": "certificate_originality_john_ocrisma.pdf",
+                        "size": "245 KB",
+                        "url": "/certificates/cert_JO_001.pdf"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "MS",
+            "name": "Maria Santos",
+            "studentNumber": "EN2021-045",
+            "department": "College of Engineering and Information Technology",
+            "course": "Engineering",
+            "service": "instrument-validation",
+            "serviceName": "Instrument Validation",
+            "certificates": [
+                {
+                    "id": "cert_MS_001",
+                    "type": "validation",
+                    "title": "Certificate of Instrument Validation",
+                    "researchTitle": "Smart Traffic Management System using IoT",
+                    "completionDate": "2025-07-15",
+                    "generatedDate": "2025-07-16",
+                    "status": "completed",
+                    "downloaded": true,
+                    "attachedFile": {
+                        "name": "certificate_validation_maria_santos.pdf",
+                        "size": "198 KB",
+                        "url": "/certificates/cert_MS_001.pdf"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "RD",
+            "name": "Robert Dela Cruz",
+            "studentNumber": "BS2020-023",
+            "department": "College of Business Administration and Accountancy",
+            "course": "Business Administration",
+            "service": "language-editing",
+            "serviceName": "Language Editing",
+            "certificates": []
+        },
+        {
+            "id": "AM",
+            "name": "Anna Mae Lopez",
+            "studentNumber": "ED2021-087",
+            "department": "College of Education",
+            "course": "Elementary Education",
+            "service": "data-analysis",
+            "serviceName": "Data Analysis",
+            "certificates": [
+                {
+                    "id": "cert_AM_001",
+                    "type": "analysis",
+                    "title": "Certificate of Data Analysis",
+                    "researchTitle": "Impact of Digital Learning on Elementary Education",
+                    "completionDate": "2025-09-10",
+                    "generatedDate": "2025-09-11",
+                    "status": "pending",
+                    "downloaded": false,
+                    "attachedFile": null
+                }
+            ]
+        },
+        {
+            "id": "JR",
+            "name": "Jose Rizal Mendoza",
+            "studentNumber": "LA2020-156",
+            "department": "College of Liberal Arts and Sciences",
+            "course": "Psychology",
+            "service": "ethics-review",
+            "serviceName": "Ethics Review",
+            "certificates": [
+                {
+                    "id": "cert_JR_001",
+                    "type": "ethics",
+                    "title": "Certificate of Ethical Review",
+                    "researchTitle": "Psychological Effects of Social Media on Teenagers",
+                    "completionDate": "2025-06-25",
+                    "generatedDate": "2025-06-26",
+                    "status": "completed",
+                    "downloaded": false,
+                    "attachedFile": {
+                        "name": "certificate_ethics_jose_mendoza.pdf",
+                        "size": "267 KB",
+                        "url": "/certificates/cert_JR_001.pdf"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "MG",
+            "name": "Mark Gabriel Torres",
+            "studentNumber": "SH2023-045",
+            "department": "Senior High School Department",
+            "course": "STEM",
+            "service": "student-research-clearance",
+            "serviceName": "Research Clearance",
+            "certificates": [
+                {
+                    "id": "cert_MG_001",
+                    "type": "clearance",
+                    "title": "Student Research Clearance",
+                    "researchTitle": "Renewable Energy Solutions for Rural Communities",
+                    "completionDate": "2025-05-30",
+                    "generatedDate": "2025-05-31",
+                    "status": "completed",
+                    "downloaded": true,
+                    "attachedFile": {
+                        "name": "certificate_clearance_mark_torres.pdf",
+                        "size": "213 KB",
+                        "url": "/certificates/cert_MG_001.pdf"
+                    }
+                }
+            ]
+        }
+    ];
+
+    const certificateTemplates = {
+        originality: {
+            title: "Certificate of Originality",
+            subtitle: "(Proposal Manuscript)",
+            description: "I/We hereby declare that this submission entitled:",
+            includesSimilarity: true
+        },
+        validation: {
+            title: "Certificate of Instrument Validation",
+            subtitle: "",
+            description: "This certifies that the research instrument for:",
+            includesSimilarity: false
+        },
+        analysis: {
+            title: "Certificate of Data Analysis",
+            subtitle: "",
+            description: "This certifies that the data analysis for:",
+            includesSimilarity: false
+        },
+        editing: {
+            title: "Certificate of Language Editing",
+            subtitle: "",
+            description: "This certifies that the language editing for:",
+            includesSimilarity: false
+        },
+        clearance: {
+            title: "Student Research Clearance",
+            subtitle: "",
+            description: "This certifies that the research study entitled:",
+            includesSimilarity: false
+        },
+        ethics: {
+            title: "Certificate of Ethical Review",
+            subtitle: "",
+            description: "This certifies that the research study entitled:",
+            includesSimilarity: false
+        }
+    };
+
+    let currentStudentId = null;
+    let selectedCertificateFile = null;
+    let selectedBulkCertificateFile = null;
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        renderStudentsGrid();
+        updateStatistics();
+        setupEventListeners();
+    });
+
+    function setupEventListeners() {
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', handleSearch);
+
+        // Modal close on outside click
+        const modals = ['generateModal', 'viewCertificatesModal', 'bulkGenerateModal'];
+        modals.forEach(modalId => {
+            document.getElementById(modalId).addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const closeFunction = `close${modalId.charAt(0).toUpperCase() + modalId.slice(1)}`;
+                    if (window[closeFunction]) window[closeFunction]();
+                }
+            });
+        });
+
+        // Set default completion date to today
+        document.getElementById('completionDate').value = new Date().toISOString().split('T')[0];
+
+        // Drag and drop functionality
+        setupDragAndDrop();
+    }
+
+    function setupDragAndDrop() {
+        const uploadAreas = document.querySelectorAll('.file-upload-area');
+
+        uploadAreas.forEach(area => {
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const fileInput = area.querySelector('input[type="file"]');
+                    if (fileInput.id === 'certificateFile') {
+                        handleCertificateFileSelect(files);
+                    } else if (fileInput.id === 'bulkCertificateFile') {
+                        handleBulkCertificateFileSelect(files);
+                    }
+                }
+            });
+        });
+    }
+
+    function renderStudentsGrid() {
+        const container = document.getElementById('studentsGrid');
+
+        container.innerHTML = studentsData.map(student => {
+            const certificates = student.certificates || [];
+            const completedCerts = certificates.filter(cert => cert.status === 'completed').length;
+            const pendingCerts = certificates.filter(cert => cert.status === 'pending').length;
+            const attachedFiles = certificates.filter(cert => cert.attachedFile).length;
+            const initials = student.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+
+            return `
+                <div class="student-card" data-id="${student.id}">
+                    <div class="student-header">
+                        <div class="student-avatar">${initials}</div>
+                        <div class="student-info">
+                            <h3 class="student-name">${student.name}</h3>
+                            <p class="student-number">${student.studentNumber}</p>
+                            <p class="student-course">${student.course}</p>
+                        </div>
+                        <div class="student-service">
+                            <span class="service-badge">${student.serviceName}</span>
+                        </div>
+                    </div>
+
+                    <div class="certificates-summary">
+                        <div class="summary-item">
+                            <span class="summary-number">${certificates.length}</span>
+                            <span class="summary-label">Total</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-number completed">${completedCerts}</span>
+                            <span class="summary-label">Completed</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-number pending">${pendingCerts}</span>
+                            <span class="summary-label">Pending</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-number attached">${attachedFiles}</span>
+                            <span class="summary-label">Attached</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="btn-primary btn-small" onclick="openGenerateModal('${student.id}')">
+                            <i class="fas fa-plus"></i> Generate
+                        </button>
+                        <button class="btn-secondary btn-small" onclick="viewStudentCertificates('${student.id}')">
+                            <i class="fas fa-eye"></i> View (${certificates.length})
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function handleSearch() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const studentCards = document.querySelectorAll('.student-card');
+
+        studentCards.forEach(card => {
+            const studentName = card.querySelector('.student-name').textContent.toLowerCase();
+            const studentNumber = card.querySelector('.student-number').textContent.toLowerCase();
+            const isVisible = studentName.includes(searchTerm) || studentNumber.includes(searchTerm);
+            card.style.display = isVisible ? 'block' : 'none';
+        });
+    }
+
+    function updateStatistics() {
+        const totalStudents = studentsData.length;
+        const allCertificates = studentsData.flatMap(student => student.certificates || []);
+        const totalCertificates = allCertificates.length;
+        const pendingCertificates = allCertificates.filter(cert => cert.status === 'pending').length;
+        const downloadedCertificates = allCertificates.filter(cert => cert.downloaded).length;
+
+        document.getElementById('totalStudents').textContent = totalStudents;
+        document.getElementById('totalCertificates').textContent = totalCertificates;
+        document.getElementById('pendingCertificates').textContent = pendingCertificates;
+        document.getElementById('downloadedCertificates').textContent = downloadedCertificates;
+    }
+
+    // File handling functions
+    function handleCertificateFileSelect(files) {
+        if (files.length > 0) {
+            const file = files[0];
+
+            // Validate file type
+            if (file.type !== 'application/pdf') {
+                alert('Please select a PDF file only.');
+                return;
+            }
+
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB.');
+                return;
+            }
+
+            selectedCertificateFile = file;
+
+            document.getElementById('selectedCertificateFile').style.display = 'block';
+            document.getElementById('certificateFileName').textContent = file.name;
+            document.getElementById('certificateFileSize').textContent = formatFileSize(file.size);
+        }
+    }
+
+    function removeCertificateFile() {
+        selectedCertificateFile = null;
+        document.getElementById('selectedCertificateFile').style.display = 'none';
+        document.getElementById('certificateFile').value = '';
+    }
+
+    function handleBulkCertificateFileSelect(files) {
+        if (files.length > 0) {
+            const file = files[0];
+
+            // Validate file type
+            if (file.type !== 'application/pdf') {
+                alert('Please select a PDF file only.');
+                return;
+            }
+
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB.');
+                return;
+            }
+
+            selectedBulkCertificateFile = file;
+
+            document.getElementById('selectedBulkCertificateFile').style.display = 'block';
+            document.getElementById('bulkCertificateFileName').textContent = file.name;
+            document.getElementById('bulkCertificateFileSize').textContent = formatFileSize(file.size);
+        }
+    }
+
+    function removeBulkCertificateFile() {
+        selectedBulkCertificateFile = null;
+        document.getElementById('selectedBulkCertificateFile').style.display = 'none';
+        document.getElementById('bulkCertificateFile').value = '';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function openGenerateModal(studentId) {
+        currentStudentId = studentId;
+        const student = studentsData.find(s => s.id === studentId);
+
+        if (student) {
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('generateModal').style.display = 'block';
+            updateCertificatePreview();
+
+            // Reset file selection
+            selectedCertificateFile = null;
+            document.getElementById('selectedCertificateFile').style.display = 'none';
+            document.getElementById('certificateFile').value = '';
+        }
+    }
+
+    function closeGenerateModal() {
+        document.getElementById('generateModal').style.display = 'none';
+        document.getElementById('generateForm').reset();
+        currentStudentId = null;
+        selectedCertificateFile = null;
+    }
+
+    function updateCertificatePreview() {
+        const certificateType = document.getElementById('certificateType').value;
+        const researchTitle = document.getElementById('researchTitle').value || 'Sample Research Title';
+        const similarityIndex = document.getElementById('similarityIndex').value || '7';
+        const completionDate = document.getElementById('completionDate').value || '2025-10-04';
+        const studentName = document.getElementById('studentName').value;
+
+        if (!certificateType) {
+            document.getElementById('certificatePreview').innerHTML = `
+                <div class="preview-placeholder">
+                    <i class="fas fa-certificate"></i>
+                    <p>Select a certificate type to preview</p>
+                </div>
+            `;
+            return;
+        }
+
+        const template = certificateTemplates[certificateType];
+        const formattedDate = new Date(completionDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        document.getElementById('certificatePreview').innerHTML = `
+            <div class="certificate-template">
+                <div class="cert-header">
+                    <h2>${template.title}</h2>
+                    ${template.subtitle ? `<h3>${template.subtitle}</h3>` : ''}
+                </div>
+                <div class="cert-body">
+                    <p class="cert-declaration">${template.description}</p>
+                    <div class="research-title">${researchTitle.toUpperCase()}</div>
+                    <p class="cert-completion">has successfully completed by</p>
+                    <div class="student-names">${studentName}</div>
+                    ${template.includesSimilarity ? `<p class="similarity-index">with a similarity index of <strong>${similarityIndex}%</strong></p>` : ''}
+                    <p class="completion-date">Completed on: ${formattedDate}</p>
+                    <p class="download-instruction">CLICK TILE TO DOWNLOAD PDF</p>
+                </div>
+            </div>
+        `;
+
+        // Toggle similarity field visibility
+        const similarityField = document.getElementById('similarityIndex').parentElement;
+        similarityField.style.display = template.includesSimilarity ? 'block' : 'none';
+    }
+
+    function generateCertificate() {
+        const form = document.getElementById('generateForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        if (!currentStudentId) return;
+
+        const student = studentsData.find(s => s.id === currentStudentId);
+        const certificateType = document.getElementById('certificateType').value;
+        const researchTitle = document.getElementById('researchTitle').value;
+        const similarityIndex = document.getElementById('similarityIndex').value;
+        const completionDate = document.getElementById('completionDate').value;
+        const additionalNotes = document.getElementById('additionalNotes').value;
+
+        let attachedFileData = null;
+        if (selectedCertificateFile) {
+            attachedFileData = {
+                name: selectedCertificateFile.name,
+                size: formatFileSize(selectedCertificateFile.size),
+                url: `/certificates/cert_${currentStudentId}_${Date.now()}.pdf`
+            };
+        }
+
+        const newCertificate = {
+            id: `cert_${currentStudentId}_${Date.now()}`,
+            type: certificateType,
+            title: certificateTemplates[certificateType].title,
+            researchTitle: researchTitle,
+            similarityIndex: similarityIndex ? parseInt(similarityIndex) : null,
+            completionDate: completionDate,
+            generatedDate: new Date().toISOString().split('T')[0],
+            status: 'completed',
+            downloaded: false,
+            notes: additionalNotes,
+            attachedFile: attachedFileData
+        };
+
+        if (!student.certificates) {
+            student.certificates = [];
+        }
+        student.certificates.push(newCertificate);
+
+        alert('Certificate generated successfully with attached file!');
+        closeGenerateModal();
+        renderStudentsGrid();
+        updateStatistics();
+    }
+
+    function viewStudentCertificates(studentId) {
+        const student = studentsData.find(s => s.id === studentId);
+        if (!student) return;
+
+        document.getElementById('viewModalTitle').textContent = `${student.name} - Certificates`;
+        const container = document.getElementById('studentCertificatesList');
+
+        if (!student.certificates || student.certificates.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="empty-title">No Certificates Generated</div>
+                    <div class="empty-subtitle">Generate certificates for this student to get started</div>
+                </div>
+            `;
+        } else {
+            container.innerHTML = student.certificates.map(cert => `
+                <div class="certificate-item">
+                    <div class="cert-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="cert-details">
+                        <h4 class="cert-title">${cert.title}</h4>
+                        <p class="cert-research-title">${cert.researchTitle}</p>
+                        <div class="cert-meta">
+                            <span class="cert-date">Generated: ${formatDate(cert.generatedDate)}</span>
+                            <span class="cert-completion">Completed: ${formatDate(cert.completionDate)}</span>
+                            ${cert.similarityIndex ? `<span class="similarity">Similarity: ${cert.similarityIndex}%</span>` : ''}
+                            ${cert.attachedFile ? `<span class="attached-file">ðŸ“Ž ${cert.attachedFile.name}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="cert-actions">
+                        <button class="btn-primary btn-small" onclick="downloadCertificate('${cert.id}')" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        ${cert.attachedFile ? `
+                        <button class="btn-secondary btn-small" onclick="downloadAttachedFile('${cert.id}')" title="Download PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                        ` : ''}
+                        <button class="btn-secondary btn-small" onclick="previewCertificate('${cert.id}')" title="Preview">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-danger btn-small" onclick="deleteCertificate('${cert.id}', '${studentId}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('viewCertificatesModal').style.display = 'block';
+    }
+
+    function closeViewCertificatesModal() {
+        document.getElementById('viewCertificatesModal').style.display = 'none';
+    }
+
+    function openBulkGenerateModal() {
+        populateBulkStudentSelection();
+        document.getElementById('bulkGenerateModal').style.display = 'block';
+
+        // Reset file selection
+        selectedBulkCertificateFile = null;
+        document.getElementById('selectedBulkCertificateFile').style.display = 'none';
+        document.getElementById('bulkCertificateFile').value = '';
+    }
+
+    function closeBulkGenerateModal() {
+        document.getElementById('bulkGenerateModal').style.display = 'none';
+        document.getElementById('bulkCertificateType').value = '';
+        selectedBulkCertificateFile = null;
+    }
+
+    function populateBulkStudentSelection() {
+        const container = document.getElementById('bulkStudentSelection');
+
+        container.innerHTML = studentsData.map(student => {
+            const initials = student.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+
+            return `
+                <div class="bulk-student-item">
+                    <input type="checkbox" id="bulk_${student.id}" value="${student.id}">
+                    <label for="bulk_${student.id}" class="bulk-student-label">
+                        <div class="bulk-student-avatar">${initials}</div>
+                        <div class="bulk-student-info">
+                            <div class="bulk-student-name">${student.name}</div>
+                            <div class="bulk-student-number">${student.studentNumber}</div>
+                        </div>
+                    </label>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function bulkGenerateCertificates() {
+        const certificateType = document.getElementById('bulkCertificateType').value;
+        if (!certificateType) {
+            alert('Please select a certificate type.');
+            return;
+        }
+
+        const selectedStudents = Array.from(document.querySelectorAll('#bulkStudentSelection input:checked'))
+            .map(cb => cb.value);
+
+        if (selectedStudents.length === 0) {
+            alert('Please select at least one student.');
+            return;
+        }
+
+        let attachedFileTemplate = null;
+        if (selectedBulkCertificateFile) {
+            attachedFileTemplate = {
+                name: selectedBulkCertificateFile.name,
+                size: formatFileSize(selectedBulkCertificateFile.size)
+            };
+        }
+
+        // Simulate bulk generation
+        selectedStudents.forEach(studentId => {
+            const student = studentsData.find(s => s.id === studentId);
+            if (student) {
+                let attachedFileData = null;
+                if (attachedFileTemplate) {
+                    attachedFileData = {
+                        name: attachedFileTemplate.name.replace(/\.pdf$/, `_${student.name.replace(/\s+/g, '_').toLowerCase()}.pdf`),
+                        size: attachedFileTemplate.size,
+                        url: `/certificates/cert_${studentId}_${Date.now()}.pdf`
+                    };
+                }
+
+                const newCertificate = {
+                    id: `cert_${studentId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    type: certificateType,
+                    title: certificateTemplates[certificateType].title,
+                    researchTitle: `Research Study - ${student.name}`,
+                    completionDate: new Date().toISOString().split('T')[0],
+                    generatedDate: new Date().toISOString().split('T')[0],
+                    status: 'completed',
+                    downloaded: false,
+                    attachedFile: attachedFileData
+                };
+
+                if (!student.certificates) {
+                    student.certificates = [];
+                }
+                student.certificates.push(newCertificate);
+            }
+        });
+
+        const fileMessage = selectedBulkCertificateFile ? ' with attached files' : '';
+        alert(`Successfully generated ${selectedStudents.length} certificates${fileMessage}!`);
+        closeBulkGenerateModal();
+        renderStudentsGrid();
+        updateStatistics();
+    }
+
+    function downloadCertificate(certificateId) {
+        // Find and mark certificate as downloaded
+        studentsData.forEach(student => {
+            if (student.certificates) {
+                const cert = student.certificates.find(c => c.id === certificateId);
+                if (cert) {
+                    cert.downloaded = true;
+                }
+            }
+        });
+
+        alert('Certificate download started!');
+        updateStatistics();
+        renderStudentsGrid();
+    }
+
+    function downloadAttachedFile(certificateId) {
+        let certificate = null;
+        studentsData.forEach(student => {
+            if (student.certificates) {
+                const found = student.certificates.find(c => c.id === certificateId);
+                if (found) certificate = found;
+            }
+        });
+
+        if (certificate && certificate.attachedFile) {
+            // Simulate file download
+            const link = document.createElement('a');
+            link.href = certificate.attachedFile.url;
+            link.download = certificate.attachedFile.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert('Attached PDF download started!');
+        }
+    }
+
+    function previewCertificate(certificateId) {
+        let certificate = null;
+        studentsData.forEach(student => {
+            if (student.certificates) {
+                const found = student.certificates.find(c => c.id === certificateId);
+                if (found) certificate = found;
+            }
+        });
+
+        if (certificate) {
+            alert('Certificate preview would open in a new window.');
+        }
+    }
+
+    function deleteCertificate(certificateId, studentId) {
+        if (confirm('Are you sure you want to delete this certificate and its attached file? This action cannot be undone.')) {
+            const student = studentsData.find(s => s.id === studentId);
+            if (student && student.certificates) {
+                student.certificates = student.certificates.filter(cert => cert.id !== certificateId);
+                alert('Certificate and attached file deleted successfully.');
+                viewStudentCertificates(studentId);
+                renderStudentsGrid();
+                updateStatistics();
+            }
+        }
+    }
+
+    function refreshData() {
+        renderStudentsGrid();
+        updateStatistics();
+        alert('Data refreshed successfully.');
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    }
+
+    // Form field updates
+    document.addEventListener('DOMContentLoaded', function() {
+        const researchTitleField = document.getElementById('researchTitle');
+        const similarityField = document.getElementById('similarityIndex');
+
+        if (researchTitleField) {
+            researchTitleField.addEventListener('input', updateCertificatePreview);
+        }
+
+        if (similarityField) {
+            similarityField.addEventListener('input', updateCertificatePreview);
+        }
+    });
+</script>

@@ -49,6 +49,19 @@ public class AdminController : Controller
         return View();
     }
 
+    public new IActionResult Tracking()
+    {
+
+        return View();
+    }
+
+    public new IActionResult Certificates()
+    {
+
+        return View();
+    }
+
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
