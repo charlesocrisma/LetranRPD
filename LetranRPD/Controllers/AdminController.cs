@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using LetranRPD.Models;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace LetranRPD.Controllers;
@@ -9,10 +10,12 @@ namespace LetranRPD.Controllers;
 public class AdminController : Controller
 {
     private readonly ILogger<AdminController> _logger;
+    private readonly ApplicationDBContext context;
 
-    public AdminController(ILogger<AdminController> logger)
+    public AdminController(ILogger<AdminController> logger, ApplicationDBContext context)
     {
         _logger = logger;
+        this.context = context;
     }
 
     public IActionResult Dashboard()
@@ -51,8 +54,8 @@ public class AdminController : Controller
 
     public new IActionResult Tracking()
     {
-
-        return View();
+        var services = context.ServiceInformations.Include(o => o.ServiceProgress).OrderBy(i => i.ServiceId).ToList();
+        return View(services);
     }
 
     public new IActionResult Certificates()

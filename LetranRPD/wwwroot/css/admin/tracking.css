@@ -21,6 +21,7 @@
     --status-failed: #ef4444;
     --status-pending: #94a3b8;
     --status-current: #3b82f6;
+    --status-revision: #fd7e14;
     /* Shadow */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -605,9 +606,9 @@ body {
         color: white;
     }
 
-    .step-dot.failed {
-        background: var(--status-failed);
-        border-color: var(--status-failed);
+    .step-dot.revision {
+        background: var(--status-revision);
+        border-color: var(--status-revision);
         color: white;
     }
 

@@ -26,9 +26,13 @@ namespace LetranRPD.Models
         [ForeignKey("SI")]
         public int ServiceId { get; set; }
         public int Progress1 { get; set; } = 1;
+        public List<string>? Progress1files { get; set; }
         public int Progress2 { get; set; } = 0;
+        public List<string>? Progress2files { get; set; }
         public int Progress3 { get; set; } = 0;
+        public List<string>? Progress3files { get; set; }
         public int Progress4 { get; set; } = 0;
+        public List<string>? Progress4files { get; set; }
 
         public DateTime AppliedDate { get; set; }
 }
@@ -45,6 +49,8 @@ namespace LetranRPD.Models
         public string ContactNumber { get; set; } = "";
         public string ResearchAdviser { get; set; } = "";
         public string Subject { get; set; } = "";
+
+        public string? OC_ManuscriptType { get; set; }
         public string? LE_Index { get; set; }
         public int? LE_Pages { get; set; }
         public string? DA_Variable { get; set; }

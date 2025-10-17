@@ -1,6 +1,8 @@
 ﻿@{
     Layout = "~/Views/Shared/_AdminNav.cshtml";
 }
+@model List<ServiceInformation>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,7 +118,7 @@
                     "receivedFiles": 2,
                     "sendFiles": 1,
                     "remarks": "Similarity index too high, requires revision",
-                    "stepStatuses": ["complete", "complete", "failed", "pending"]
+                    "stepStatuses": ["complete", "complete", "revision", "pending"]
                 },
                 {
                     "id": "MS",
@@ -238,7 +240,7 @@
                 { "key": "pending", "name": "PENDING", "color": "#94a3b8" },
                 { "key": "current", "name": "CURRENT", "color": "#3b82f6" },
                 { "key": "complete", "name": "COMPLETE", "color": "#10b981" },
-                { "key": "failed", "name": "FAILED", "color": "#ef4444" }
+                { "key": "revision", "name": "REVISION", "color": "#fd7e14" }
             ],
             "serviceSteps": {
                 "originality-check": {

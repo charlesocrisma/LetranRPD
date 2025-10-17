@@ -53,6 +53,7 @@ namespace LetranRPD.Controllers
                 ContactNumber = viewModel.ContactNumber,
                 ResearchAdviser = viewModel.ResearchAdviser,
                 Subject = viewModel.Subject,
+                OC_ManuscriptType = viewModel.OC_ManuscriptType,
                 ServiceProgress = new ServiceProgress {
                     Progress1 = 1,
                     Progress2 = 0,

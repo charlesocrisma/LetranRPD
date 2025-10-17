@@ -88,7 +88,7 @@
 		<!--First Service-->
 		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
 			<div class="service-header">
-				<h2 class="service-title">Originality Checking Progress</h2>
+				<h2 class="service-title">Originality Checking (@service.OC_ManuscriptType) Progress</h2>
 				<span class="service-status status-failed">Failed</span>
 			</div>
 			<div class="progress-container">
@@ -193,7 +193,13 @@
 
 					<div>
 						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
-						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+						<button class="submit-btn"
+								id="submitBtn-@service.ServiceId"
+								onclick="submitFiles(@service.ServiceId, 1)"
+								disabled>
+							Submit Files
+						</button>
+
 					</div>
 
 					<div class="upload-instructions">
@@ -1557,46 +1563,36 @@
         }
     }
 
-    function submitFiles(serviceId) {
-        const unuploadedFiles = serviceFiles[serviceId]?.filter(f => !f.uploaded) || [];
-        if (unuploadedFiles.length === 0) return;
+	   function submitFiles(serviceId, progressStep) {
+		const unuploadedFiles = serviceFiles[serviceId]?.filter(f => !f.uploaded) || [];
+		if (unuploadedFiles.length === 0) return;
 
-        const progressBar = document.getElementById('progressBar-' + serviceId);
-        const uploadProgress = document.getElementById('uploadProgress-' + serviceId);
-        const submitBtn = document.getElementById('submitBtn-' + serviceId);
+		const formData = new FormData();
+		formData.append("serviceId", serviceId);
+		formData.append("progressStep", progressStep);
 
-        if (!submitBtn || !uploadProgress || !progressBar) return;
+		unuploadedFiles.forEach(fileObj => {
+			formData.append("files", fileObj.file);
+		});
 
-        uploadProgress.style.display = 'block';
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Uploading...';
+		fetch('/Tracking/UploadFiles', {
+			method: 'POST',
+			body: formData
+		})
+		.then(res => res.json())
+		.then(data => {
+			if (data.success) {
+				unuploadedFiles.forEach(f => f.uploaded = true);
+				updateFilesDisplay(serviceId);
+				updateSubmitButton(serviceId);
+				alert("Database updated successfully!");
+			} else {
+				alert("Upload failed: " + data.message);
+			}
+		})
+		.catch(err => console.error("Upload error:", err));
+	}
 
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-
-                unuploadedFiles.forEach(fileObj => {
-                    fileObj.uploaded = true;
-                    if (!uploadedServiceFiles[serviceId]) {
-                        uploadedServiceFiles[serviceId] = [];
-                    }
-                    uploadedServiceFiles[serviceId].push(fileObj);
-                });
-
-                setTimeout(() => {
-                    uploadProgress.style.display = 'none';
-                    progressBar.style.width = '0%';
-                    updateFilesDisplay(serviceId);
-                    updateSubmitButton(serviceId);
-                    alert(`Successfully uploaded ${unuploadedFiles.length} file(s) for ${serviceId}!`);
-                }, 500);
-            }
-            progressBar.style.width = progress + '%';
-        }, 200);
-    }
 
     function downloadFile(fileId, serviceId) {
         const fileNames = {
