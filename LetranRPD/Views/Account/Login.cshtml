@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
 }
 @model LetranRPD.Models.Account
@@ -10,6 +9,9 @@
         <img src="~/Gallery/Research logo.png" alt="Research & Publication Department Logo">
     </div>
     <h1>Welcome To Research & Public Department</h1>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <form asp-action="LoginButton" method="post">
         <input type="email" id="email" placeholder="Student Email" asp-for="Email" required>
         <input type="password" id="password" placeholder="Password" asp-for="password" required>
@@ -20,4 +22,3 @@
         <p>New here? <a asp-action="Register" class="register" style="color:dimgrey; font-style:italic;">Create Account</a>
     </div>
 </div>
-

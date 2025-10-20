@@ -2,6 +2,7 @@
 using Org.BouncyCastle.Bcpg;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 namespace LetranRPD.Models
 
 {
@@ -20,7 +21,7 @@ namespace LetranRPD.Models
     public class ServiceProgress
     {
         public int Id { get; set; }
-
+        [JsonIgnore]
         public ServiceInformation SI { get; set; } = null!;
 
         [ForeignKey("SI")]
@@ -56,6 +57,7 @@ namespace LetranRPD.Models
         public string? DA_Variable { get; set; }
         public string? DA_Tool { get; set; }
 
+        
         public ServiceProgress ServiceProgress { get; set; } = new ServiceProgress();
 
     }

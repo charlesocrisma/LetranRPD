@@ -1,20 +1,31 @@
 using LetranRPD.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+// 1. Add DbContext
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LetranRPDContext")));
 
-builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("LetranRPDContext")));
-
+// 2. Add Session support
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromDays(10); // Set session timeout
-    options.Cookie.HttpOnly = true; // Make the session cookie HTTP only
-    options.Cookie.IsEssential = true; // Make the session cookie essential
+    options.IdleTimeout = TimeSpan.FromDays(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
+
+// 3. Add Controllers, Views, and NewtonsoftJson support
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson();
+
+// 4. Password Hashing service removed as requested.
+
+
+builder.Services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
 
 var app = builder.Build();
 
@@ -22,7 +33,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -33,7 +43,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseSession();
+app.UseSession(); // <-- Make sure UseSession is called before MapControllerRoute
 
 app.MapControllerRoute(
     name: "default",

@@ -5,8 +5,11 @@
 <link rel="stylesheet" href="~/css/Register.css" asp-append-version="true" />
 <div class="register-container">
 	<h2>REGISTRATION</h2>
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
 	<form asp-action="RegisterButton" method="post">
 		<input type="email" required placeholder="Student Email (letran.edu.ph)" asp-for="Email">
+		<span asp-validation-for="Email" class="text-danger"></span>
 		<input type="text" id="studentNo" placeholder="Student Number" maxlength="7" pattern="[0-9]{7}" asp-for="StudentNumber">
 		<input required asp-for="FirstName" placeholder="First Name">
 		<input required asp-for="LastName" placeholder="Last Name">

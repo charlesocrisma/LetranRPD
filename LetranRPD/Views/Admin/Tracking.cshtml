@@ -98,139 +98,80 @@
     </div>
 
     <script>
-        // Application data with dual status system
+
+        const serviceInfoFromDb = @Json.Serialize(Model);
+        function getStepStatus(progressValue) {
+            switch (progressValue) {
+                case 1: return "current";
+                case 2: return "complete";
+                case 3: return "revision";
+                case 0:
+                default:
+                    return "pending";
+            }
+        }
+
+        function transformDbData(si) {
+
+            const prog = si.serviceProgress;
+            const stepStatuses = [
+                getStepStatus(prog.progress1),
+                getStepStatus(prog.progress2),
+                getStepStatus(prog.progress3),
+                getStepStatus(prog.progress4)
+            ];
+
+            let status = "processing";
+            if (stepStatuses.includes("revision")) {
+                status = "failed";
+            } else if (stepStatuses.every(s => s === "complete")) {
+                status = "complete";
+            }
+
+            let currentStep = stepStatuses.findIndex(s => s === "current") + 1;
+            if (currentStep === 0) {
+                currentStep = stepStatuses.findIndex(s => s === "pending") + 1;
+            }
+            if (currentStep === 0 && !stepStatuses.includes("revision")) {
+                currentStep = stepStatuses.length;
+            }
+
+            const serviceKey = si.serviceType.toLowerCase().replace(/ /g, '-');
+                const allReceivedFiles = [
+            ...(prog.progress1files || []),
+            ...(prog.progress2files || []),
+            ...(prog.progress3files || []),
+            ...(prog.progress4files || [])
+        ];
+            return {
+                "id": si.serviceId, 
+                "name": si.author, 
+                "studentNumber": si.studentNumber,
+                "department": si.subject, 
+                "course": "N/A",     
+                "service": serviceKey,
+                "serviceName": si.serviceType,
+                "status": status,
+                "currentStep": currentStep,
+                "totalSteps": 4, 
+                "runCount": 1,  
+                "dateSubmitted": prog.appliedDate,
+                "lastUpdated": prog.appliedDate, 
+                "receivedFiles": allReceivedFiles,
+                "sendFiles": 0, 
+                "remarks": "", 
+                "stepStatuses": stepStatuses
+            };
+        }
+
+        const studentsFromDb = serviceInfoFromDb.map(transformDbData);
+        const departmentsFromDb = [...new Set(studentsFromDb.map(s => s.department))];
+        const servicesFromDb = [...new Map(studentsFromDb.map(s => [s.service, { key: s.service, name: s.serviceName }])).values()];
+
         const applicationData = {
-            "students": [
-                {
-                    "id": "JO",
-                    "name": "John Ocrisma",
-                    "studentNumber": "CS2021-001",
-                    "department": "College of Engineering and Information Technology",
-                    "course": "Computer Science",
-                    "service": "originality-check",
-                    "serviceName": "Originality Check",
-                    "status": "failed",
-                    "currentStep": 3,
-                    "totalSteps": 4,
-                    "runCount": 4,
-                    "dateSubmitted": "2024-03-15",
-                    "lastUpdated": "2024-03-20",
-                    "receivedFiles": 2,
-                    "sendFiles": 1,
-                    "remarks": "Similarity index too high, requires revision",
-                    "stepStatuses": ["complete", "complete", "revision", "pending"]
-                },
-                {
-                    "id": "MS",
-                    "name": "Maria Santos",
-                    "studentNumber": "EN2021-045",
-                    "department": "College of Engineering and Information Technology",
-                    "course": "Engineering",
-                    "service": "instrument-validation",
-                    "serviceName": "Instrument Validation",
-                    "status": "complete",
-                    "currentStep": 4,
-                    "totalSteps": 4,
-                    "runCount": 2,
-                    "dateSubmitted": "2024-03-10",
-                    "lastUpdated": "2024-03-25",
-                    "receivedFiles": 3,
-                    "sendFiles": 1,
-                    "remarks": "Validation completed successfully",
-                    "stepStatuses": ["complete", "complete", "complete", "complete"]
-                },
-                {
-                    "id": "RD",
-                    "name": "Robert Dela Cruz",
-                    "studentNumber": "BS2020-023",
-                    "department": "College of Business Administration and Accountancy",
-                    "course": "Business Administration",
-                    "service": "language-editing",
-                    "serviceName": "Language Editing",
-                    "status": "processing",
-                    "currentStep": 1,
-                    "totalSteps": 4,
-                    "runCount": 1,
-                    "dateSubmitted": "2024-03-18",
-                    "lastUpdated": "2024-03-18",
-                    "receivedFiles": 0,
-                    "sendFiles": 0,
-                    "remarks": "Language editing in progress",
-                    "stepStatuses": ["current", "pending", "pending", "pending"]
-                },
-                {
-                    "id": "AM",
-                    "name": "Anna Mae Lopez",
-                    "studentNumber": "ED2021-087",
-                    "department": "College of Education",
-                    "course": "Elementary Education",
-                    "service": "data-analysis",
-                    "serviceName": "Data Analysis",
-                    "status": "processing",
-                    "currentStep": 2,
-                    "totalSteps": 4,
-                    "runCount": 1,
-                    "dateSubmitted": "2024-03-16",
-                    "lastUpdated": "2024-03-22",
-                    "receivedFiles": 1,
-                    "sendFiles": 0,
-                    "remarks": "Statistical analysis in progress",
-                    "stepStatuses": ["complete", "current", "pending", "pending"]
-                },
-                {
-                    "id": "JR",
-                    "name": "Jose Rizal Mendoza",
-                    "studentNumber": "LA2020-156",
-                    "department": "College of Liberal Arts and Sciences",
-                    "course": "Psychology",
-                    "service": "ethics-review",
-                    "serviceName": "Ethics Review",
-                    "status": "processing",
-                    "currentStep": 3,
-                    "totalSteps": 6,
-                    "runCount": 3,
-                    "dateSubmitted": "2024-03-12",
-                    "lastUpdated": "2024-03-24",
-                    "receivedFiles": 2,
-                    "sendFiles": 2,
-                    "remarks": "Ethics review in progress",
-                    "stepStatuses": ["complete", "complete", "current", "pending", "pending", "pending"]
-                },
-                {
-                    "id": "MG",
-                    "name": "Mark Gabriel Torres",
-                    "studentNumber": "SH2023-045",
-                    "department": "Senior High School Department",
-                    "course": "STEM",
-                    "service": "student-research-clearance",
-                    "serviceName": "Research Clearance",
-                    "status": "complete",
-                    "currentStep": 3,
-                    "totalSteps": 3,
-                    "runCount": 1,
-                    "dateSubmitted": "2024-03-14",
-                    "lastUpdated": "2024-03-21",
-                    "receivedFiles": 1,
-                    "sendFiles": 1,
-                    "remarks": "Clearance approved",
-                    "stepStatuses": ["complete", "complete", "complete"]
-                }
-            ],
-            "departments": [
-                "Senior High School Department",
-                "College of Business Administration and Accountancy",
-                "College of Engineering and Information Technology",
-                "College of Education",
-                "College of Liberal Arts and Sciences"
-            ],
-            "services": [
-                { "key": "originality-check", "name": "Originality Check" },
-                { "key": "instrument-validation", "name": "Instrument Validation" },
-                { "key": "language-editing", "name": "Language Editing" },
-                { "key": "data-analysis", "name": "Data Analysis" },
-                { "key": "student-research-clearance", "name": "Research Clearance" },
-                { "key": "ethics-review", "name": "Ethics Review" }
-            ],
+            "students": studentsFromDb,
+            "departments": departmentsFromDb,
+            "services": servicesFromDb,
             "generalStatusTypes": [
                 { "key": "processing", "name": "Processing", "color": "#3b82f6" },
                 { "key": "complete", "name": "Complete", "color": "#10b981" },
@@ -244,190 +185,31 @@
             ],
             "serviceSteps": {
                 "originality-check": {
-                    "title": "Originality Check Process",
-                    "steps": [
-                        {
-                            "number": 1,
-                            "title": "Submission of Requirements",
-                            "details": "Requirements:<br>• SR01 - Originality Checking Service Form<br>• SR02 - Certificate of originality for proposal Manuscript, If applicable<br>• SR12 - Approval Sheet signed by all the panelists<br>• Word file of the Research Manuscript (without the table of contents and references/appendices/bibliography page)",
-                            "processingTime": "30 minutes"
-                        },
-                        {
-                            "number": 2,
-                            "title": "Submission of Official Receipt",
-                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 600 (JHS, SHS and Collegiate)",
-                            "processingTime": "20 minutes - 1 hour"
-                        },
-                        {
-                            "number": 3,
-                            "title": "Wait for the Originality Check Service Result",
-                            "details": "Note: If the similarity index is 10% above in the first run, revise the manuscript according to the similarity index results for another round of originality checking.",
-                            "processingTime": "2-3 days"
-                        },
-                        {
-                            "number": 4,
-                            "title": "Receive the Originality Check results and SR02 - Certificate of Originality",
-                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
-                            "processingTime": "15 Minutes"
-                        }
-                    ],
-                    "note": "If similarity index is above 10%, the student shall edit the paper and repeat steps 3 - 4 twice."
+  
                 },
                 "instrument-validation": {
-                    "title": "Instrument Validation Process",
-                    "steps": [
-                        {
-                            "number": 1,
-                            "title": "Submission of Requirements",
-                            "details": "Requirements:<br>• SR03 - Instrument Validation Service Form<br>• SR02A - Certificate of Originality for Proposal Manuscript<br>• SR12A - Approval Sheet for Proposal Manuscript<br>• Research instrument/s<br>• Research manuscript",
-                            "processingTime": "30 minutes"
-                        },
-                        {
-                            "number": 2,
-                            "title": "Submission of Official Receipt",
-                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 600 (JHS, SHS, and Collegiate)",
-                            "processingTime": "20 minutes - 1 hour"
-                        },
-                        {
-                            "number": 3,
-                            "title": "Wait for the Instrument Validation Service Result",
-                            "details": "Note: Await the validation, review, revision needed and approval of the Instrument Validator. Once approved, the Instrument Validator or the student researcher/s must forward the approved and signed SR03 - Instrument Validation Service Form to the RPD.",
-                            "processingTime": "2-5 days"
-                        },
-                        {
-                            "number": 4,
-                            "title": "Receive the Instrument Validation results and SR04 - Certificate of Instrument Validation",
-                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
-                            "processingTime": "15 Minutes"
-                        }
-                    ]
+  
                 },
                 "language-editing": {
-                    "title": "Language Editing Process",
-                    "steps": [
-                        {
-                            "number": 1,
-                            "title": "Submission of Requirements",
-                            "details": "Requirements:<br>• SR07 - Language Editing Service Form<br>• SR02A & SR02B - Certificate of Originality (Proposal and Final Manuscript)<br>• SR12B - Approval Sheet of Final Manuscript<br>• SR04 - Certificate of Instrument Validation/Exemption, if applicable<br>• SR06 - Certificate of Data Analysis, if applicable<br>• MSWord file of the Research Manuscript in RPD Language Editing Format",
-                            "processingTime": "30 minutes"
-                        },
-                        {
-                            "number": 2,
-                            "title": "Submission of Official Receipt",
-                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 30 (JHS, SHS, and Collegiate) Per page",
-                            "processingTime": "20 minutes - 1 hour"
-                        },
-                        {
-                            "number": 3,
-                            "title": "Wait for the Language Editing Service Result",
-                            "details": "Note: Await the Language Editor's proofreading, editing, revision, and approval of the research manuscript. Once approved, the Editor or the student researcher/s must forward the approved and signed SR07 - Language Editing Service Form to the RPD",
-                            "processingTime": "2-5 days"
-                        },
-                        {
-                            "number": 4,
-                            "title": "Receive the SR08 - Certificate of Language Editing",
-                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
-                            "processingTime": "15 Minutes"
-                        }
-                    ]
+  
                 },
                 "data-analysis": {
-                    "title": "Data Analysis Process",
-                    "steps": [
-                        {
-                            "number": 1,
-                            "title": "Submission of Requirements",
-                            "details": "Requirements:<br>• SR05 - Data Analysis Service Form<br>• SR04 - Certificate of Instrument Validation/Exemption<br>• SR02A - Certificate of Originality for Proposal Manuscript<br>• Encoded Data Set (Number Coded Format)<br>• Statistical Tool/Treatment to be availed<br>• Research Manuscript",
-                            "processingTime": "30 minutes"
-                        },
-                        {
-                            "number": 2,
-                            "title": "Submission of Official Receipt",
-                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees:<br>• Basic statistical tools: Php 2,500<br>• Advanced statistical tools: Php 3,000",
-                            "processingTime": "20 minutes - 1 hour"
-                        },
-                        {
-                            "number": 3,
-                            "title": "Wait for the Data Analysis Service Result",
-                            "details": "Note: Await the Data Analyst's review, discussion, and analysis of the dataset. Once approved, the Analyst or the student researcher/s must forward the approved and signed SR05 - Data Analysis Service Form to the RPD.",
-                            "processingTime": "2-3 days"
-                        },
-                        {
-                            "number": 4,
-                            "title": "Receive the SR06 - Certificate of Data Analysis",
-                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
-                            "processingTime": "15 Minutes"
-                        }
-                    ]
+  
                 },
                 "student-research-clearance": {
-                    "title": "Student Research Clearance Process",
-                    "steps": [
-                        {
-                            "number": 1,
-                            "title": "Submission of Requirements",
-                            "details": "Requirements:<br>• SR02A & SR02B - Certificate of Originality (Proposal and Final Manuscript)<br>• SR04 - Certificate of Instrument Validation/Exemption, if applicable<br>• SR06 - Certificate of Data Analysis, if applicable<br>• SR08 - Certificate of Language Editing<br>• Final Manuscript, incorporating the language-edited version",
-                            "processingTime": "1-2 days"
-                        },
-                        {
-                            "number": 2,
-                            "title": "Receive the SR09 - Student Research Clearance",
-                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
-                            "processingTime": "15 Minutes"
-                        }
-                    ]
+  
                 },
                 "ethics-review": {
-                    "title": "Ethics Review Process",
-                    "steps": [
-                        {
-                            "number": 1,
-                            "title": "Submission of Requirements",
-                            "details": "Requirements:<br>• ERB01 - Ethics Review Application Form<br>• ERB02 - Ethics Review Application Submission Checklist Form<br>• ERB03 - Application for Ethics Review Exemption Form<br>• Research Protocol - Title, researchers and affiliations, research objectives, significance, brief literature review, and conceptual framework, methods (including sample, locate, recruitment of participants and/or respondents, inclusion criteria, instruments, and procedures), ethical considerations relevant to the study, research budget<br>• Participants and/or Respondents recruitment materials, letters, scripts and templates<br>• Informed Consent Forms and Assent Forms (if applicable)<br>• Ethical considerations relevant to the study<br>• Funding/Grant/Sponsor letter or contract and/or Memorandum of Agreement among collaborating institutions (if applicable)<br>• Additional materials relevant to justifying the exemption category<br>• Instruments, questionnaires, interview or FGD scripts and protocols",
-                            "processingTime": "30 minutes"
-                        },
-                        {
-                            "number": 2,
-                            "title": "Submission of Official Receipt",
-                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees: Php 700 (initial payment for exemption)",
-                            "processingTime": "30 minutes - 1 hour"
-                        },
-                        {
-                            "number": 3,
-                            "title": "Wait for the Ethics Review Result",
-                            "details": "Note: Await the result, revision needed and approval of the ethics review. <b>ONCE APPROVED</b>, the Reviewer or the student researcher/s must forward the approved and signed ERB02 and ERB03.<br>If <b>NOT APPROVED</b>, the student will receive an email regarding if the paper will undergo expedited or full review and will receive the additional payment advice.<br>*Please note that Form ERB04 must be filed before the payment advice can be issued.",
-                            "processingTime": "5-7 days"
-                        },
-                        {
-                            "number": 4,
-                            "title": "Submission of Official Receipt (Additional Payment)",
-                            "details": "Payment Instructions:<br>• If at Letran Cashier, send a picture of the official receipt.<br>• If bank deposit, send a picture of the transaction slip.<br>• If online payment, send a screenshot of the email/text confirmation of the online payment.<br><br>Fees:<br>• Php 1,750 (expedited)<br>• Php 3,500 (full review)",
-                            "processingTime": "30 minutes - 1 hour"
-                        },
-                        {
-                            "number": 5,
-                            "title": "Wait for the Ethics Review Result",
-                            "details": "Note: Await the result, revision needed and approval of the Ethics Reviewer. <b>ONCE APPROVED</b>, the Reviewer or the student researcher/s must forward the approved and signed ERB02 and ERB04.<br>If <b>NOT APPROVED</b>, the researcher/s will make the necessary revision until the RPD will issue ERB07 - Certificate of Ethics Review",
-                            "processingTime": "7-14 days (expedited), 14 days - 1 month (full review)"
-                        },
-                        {
-                            "number": 6,
-                            "title": "Receive the ERB07 - Certificate of Ethical Review",
-                            "details": "Note: To view/download your certificate, please hover your cursor at the icon on the right top corner and go to Account > Certificates",
-                            "processingTime": "15 Minutes"
-                        }
-                    ]
+  
                 }
             }
         };
 
-        // Global variables
         let currentDepartment = 'all';
         let currentService = 'all';
         let expandedRow = null;
         let filteredStudents = [...applicationData.students];
 
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', function () {
             initializeApp();
         });
@@ -437,7 +219,6 @@
             setupEventListeners();
             updateStatistics();
 
-            // Start with filter section collapsed
             const filterSection = document.getElementById('filterSection');
             if (filterSection) {
                 filterSection.classList.add('collapsed');
@@ -445,34 +226,28 @@
         }
 
         function setupEventListeners() {
-            // Search functionality
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', handleSearch);
             }
-
-            // Filter toggle
             const filterToggle = document.getElementById('filterToggle');
             if (filterToggle) {
                 filterToggle.addEventListener('click', toggleFilterSection);
             }
 
-            // Setup department and service filters
             setupFilterTabs();
         }
 
         function setupFilterTabs() {
-            // Department filter tabs
             const departmentContainer = document.getElementById('departmentTabs');
             if (departmentContainer) {
                 departmentContainer.innerHTML = '';
 
-                // All departments option
                 const allDeptTab = createFilterTab('All Departments', 'all', currentDepartment === 'all');
                 allDeptTab.onclick = () => filterByDepartment('all');
                 departmentContainer.appendChild(allDeptTab);
 
-                // Individual departments
+
                 applicationData.departments.forEach(dept => {
                     const tab = createFilterTab(dept, dept, currentDepartment === dept);
                     tab.onclick = () => filterByDepartment(dept);
@@ -480,17 +255,14 @@
                 });
             }
 
-            // Service filter tabs
             const serviceContainer = document.getElementById('serviceTabs');
             if (serviceContainer) {
                 serviceContainer.innerHTML = '';
 
-                // All services option
                 const allServiceTab = createFilterTab('All Services', 'all', currentService === 'all');
                 allServiceTab.onclick = () => filterByService('all');
                 serviceContainer.appendChild(allServiceTab);
 
-                // Individual services
                 applicationData.services.forEach(service => {
                     const tab = createFilterTab(service.name, service.key, currentService === service.key);
                     tab.onclick = () => filterByService(service.key);
@@ -536,7 +308,6 @@
         function filterByDepartment(department) {
             currentDepartment = department;
 
-            // Update tab states
             document.querySelectorAll('#departmentTabs .filter-tab').forEach(tab => {
                 tab.classList.remove('active');
                 if (tab.getAttribute('data-value') === department) {
@@ -550,7 +321,6 @@
         function filterByService(service) {
             currentService = service;
 
-            // Update tab states
             document.querySelectorAll('#serviceTabs .filter-tab').forEach(tab => {
                 tab.classList.remove('active');
                 if (tab.getAttribute('data-value') === service) {
@@ -564,12 +334,10 @@
         function applyFilters() {
             let filtered = [...filteredStudents];
 
-            // Apply department filter
             if (currentDepartment !== 'all') {
                 filtered = filtered.filter(student => student.department === currentDepartment);
             }
 
-            // Apply service filter
             if (currentService !== 'all') {
                 filtered = filtered.filter(student => student.service === currentService);
             }
@@ -733,7 +501,7 @@
 
                         <div class="file-tabs">
                             <button class="file-tab active" onclick="switchFileTab('${student.id}', 'received')">
-                                Received Files <span class="file-count">${student.receivedFiles}</span>
+                                Received Files <span class="file-count">${student.receivedFiles.length}</span>
                             </button>
                             <button class="file-tab" onclick="switchFileTab('${student.id}', 'send')">
                                 Send to Student <span class="file-count">${student.sendFiles}</span>
@@ -764,30 +532,50 @@
             `;
         }
 
-        function createReceivedFilesContent(student) {
+                function createReceivedFilesContent(student) {
+            // 'student.receivedFiles' is now an array like ["report.pdf", "data.xlsx"]
             return `
                 <div class="file-list">
-                    ${student.receivedFiles > 0 ?
-                    Array(student.receivedFiles).fill().map((_, index) => `
-                        <div class="file-item">
-                            <div class="file-icon">
-                                <i class="fas fa-file-pdf"></i>
+                    ${student.receivedFiles.length > 0 ?
+                        student.receivedFiles.map((fileName, index) => `
+                            <div class="file-item">
+                                <div class="file-icon">
+                                    <i class="fas ${getFileIcon(fileName)}"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name">${fileName}</div>
+                                    
+                                </div>
+                                <div class="file-actions">
+                                    <a href="/uploads/Service_${student.id}/${fileName}" class="file-action-btn btn-download" title="Download ${fileName}" download>
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="file-info">
-                                <div class="file-name">Document_${index + 1}.pdf</div>
-                                <div class="file-size">2.3 MB</div>
-                            </div>
-                            <div class="file-actions">
-                                <button class="file-action-btn btn-download" title="Download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('') :
-                    '<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>'
-                }
+                        `).join('') :
+                        '<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>'
+                    }
                 </div>
             `;
+        }
+
+        // BONUS: Add this helper function to your script to get file-specific icons
+        function getFileIcon(fileName) {
+            const ext = fileName.split('.').pop().toLowerCase();
+            switch (ext) {
+                case 'pdf': return 'fa-file-pdf';
+                case 'doc':
+                case 'docx': return 'fa-file-word';
+                case 'xls':
+                case 'xlsx': return 'fa-file-excel';
+                case 'png':
+                case 'jpg':
+                case 'jpeg':
+                case 'gif': return 'fa-file-image';
+                case 'zip':
+                case 'rar': return 'fa-file-archive';
+                default: return 'fa-file-alt'; // Default file icon
+            }
         }
 
         function createSendFilesContent(student) {
@@ -829,7 +617,7 @@
         }
 
         function setupTableEventListeners() {
-            // Event listeners are set up via onclick attributes in HTML
+
         }
 
         function toggleStudentDetails(studentId) {
@@ -839,7 +627,6 @@
             if (expandedRow && studentRow) {
                 const isExpanded = !expandedRow.classList.contains('hidden');
 
-                // Close any other expanded rows
                 document.querySelectorAll('.expanded-content').forEach(row => {
                     row.classList.add('hidden');
                 });

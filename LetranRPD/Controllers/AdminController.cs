@@ -54,8 +54,13 @@ public class AdminController : Controller
 
     public new IActionResult Tracking()
     {
-        var services = context.ServiceInformations.Include(o => o.ServiceProgress).OrderBy(i => i.ServiceId).ToList();
-        return View(services);
+
+        var serviceInfoList = context.ServiceInformations
+                                .Include(si => si.ServiceProgress)
+                                .OrderByDescending(si => si.ServiceProgress.AppliedDate) // Optional: sort by date
+                                .ToList();
+
+        return View(serviceInfoList);
     }
 
     public new IActionResult Certificates()
