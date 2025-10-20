@@ -4,6 +4,7 @@ using LetranRPD.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LetranRPD.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250928161912_add-date")]
+    partial class adddate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,17 +101,13 @@ namespace LetranRPD.Migrations
                     b.Property<int?>("LE_Pages")
                         .HasColumnType("int");
 
-                    b.Property<string>("OC_ManuscriptType")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ResearchAdviser")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ServiceType")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentNumber")
                         .IsRequired()
@@ -136,41 +135,26 @@ namespace LetranRPD.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AppliedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Progress1")
                         .HasColumnType("int");
 
-                    b.PrimitiveCollection<string>("Progress1files")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Progress2")
                         .HasColumnType("int");
-
-                    b.PrimitiveCollection<string>("Progress2files")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Progress3")
                         .HasColumnType("int");
 
-                    b.PrimitiveCollection<string>("Progress3files")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Progress4")
                         .HasColumnType("int");
 
-                    b.PrimitiveCollection<string>("Progress4files")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ServiceId")
+                    b.Property<int>("SIServiceId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ServiceId")
-                        .IsUnique();
+                    b.HasIndex("SIServiceId");
 
                     b.ToTable("ServiceProgresses");
                 });
@@ -178,8 +162,8 @@ namespace LetranRPD.Migrations
             modelBuilder.Entity("LetranRPD.Models.ServiceProgress", b =>
                 {
                     b.HasOne("LetranRPD.Models.ServiceInformation", "SI")
-                        .WithOne("ServiceProgress")
-                        .HasForeignKey("LetranRPD.Models.ServiceProgress", "ServiceId")
+                        .WithMany("ServiceProgress")
+                        .HasForeignKey("SIServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -188,8 +172,7 @@ namespace LetranRPD.Migrations
 
             modelBuilder.Entity("LetranRPD.Models.ServiceInformation", b =>
                 {
-                    b.Navigation("ServiceProgress")
-                        .IsRequired();
+                    b.Navigation("ServiceProgress");
                 });
 #pragma warning restore 612, 618
         }

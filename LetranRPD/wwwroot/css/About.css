@@ -1,86 +1,114 @@
 ﻿body {
-    font-family: sans-serif; 
-    line-height: 1.6;
+    background-image: url('../BG/Letran Bg Cont.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #f9f9f9;
-    color: #333;
-}
-
-.about-hero {
-    background: url('../BG/Letran Night.jpg') no-repeat center center/cover;
     color: white;
+    overflow-x: hidden;
+}
+.main-nav-container {
+    margin-bottom: 30px;
+}
+
+.container {
+    margin-top: 30px;
+
+}
+
+.main-content {
+    margin-top: 3rem;
+    padding: 1rem;
+    max-width: 1720px;
+    margin: 0 auto;
+    background: white;
+    height: 100%;
+}
+
+.page-title {
+    color: black;
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.service-card {
+    margin-top: 2rem;
+    background-color: #fff;
+    border: 3px solid dimgrey;
+    border-radius: 30px;
     text-align: center;
-    padding: 100px 20px 60px;
+    align-items:center;
+    width: 500px;
+    height: 300px;
+    padding: 40px;
+
 }
 
-    .about-hero h1 {
-        font-size: 48px;
-        margin: 0;
-    }
-
-    .about-hero p {
-        font-size: 18px;
-        margin-top: 10px;
-        opacity: 0.8;
-    }
-
-.about-content {
-    padding: 60px 20px;
-    max-width: 1200px;
-    margin: auto;
-}
-
-.text-image-section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 30px;
-    flex-wrap: wrap;
-    margin-bottom: 60px;
-}
-
-    .text-image-section .text {
-        flex: 1;
-        min-width: 300px;
-    }
-
-    .text-image-section .image img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-    }
-
-.signature {
-    margin-top: 20px;
-    font-family: 'Brush Script MT', cursive;
-    font-size: 20px;
-}
-
-.features-section {
-    text-align: center;
-}
-
-    .features-section .features {
+    .service-card h2 {
+        font-size: 3.2rem;
+        color: #1a1a1a;
         display: flex;
-        justify-content: center;
-        gap: 30px;
-        margin-top: 30px;
-        flex-wrap: wrap;
+        justify-content: space-between;
+        text-align:center;
     }
 
-.feature {
-    flex: 1 1 250px;
-    padding: 20px;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    background: #fafafa;
+    .service-card p {
+        font-size: 0.9rem;
+        color: #6b6b6b;
+        line-height: 1.5;
+    }
+
+.divider {
+    width: 80px;
+    height: 3px;
+    background-color: #8B0000;
+    margin: 0.6rem 0 1rem;
+}
+.service-card {
+    background-color: #fff;
+    border: 3px solid dimgrey;
+    border-radius: 30px;
+    text-align: center;
+    display: flex;
+    flex-direction: column; 
+    width: 500px;
+    height: 300px;
+    padding: 40px;
+}
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15rem;
+    margin-top: 2rem;
+    margin-bottom: 2.5rem;
+}
+    .service-card h2 {
+        font-size: 3.2rem;
+        color: #1a1a1a;
+        text-align: center;
+    }
+
+    .service-card p {
+        font-size: 0.9rem;
+        color: #6b6b6b;
+        line-height: 1.5;
+    }
+
+.divider {
+    width: 80px;
+    height: 3px;
+    background-color: #8B0000;
+    margin: 0.6rem auto 1rem; /* auto centers divider */
 }
 
-    .feature span {
-        font-size: 30px;
-        display: block;
-        margin-bottom: 10px;
+/* 📱 Responsive: stack on small screens */
+@media (max-width: 768px) {
+    .service-card {
+        width: 100%;
+        height: auto;
     }
-
+}

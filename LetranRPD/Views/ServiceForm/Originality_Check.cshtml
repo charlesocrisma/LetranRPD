@@ -1,4 +1,4 @@
-﻿@{
+﻿ @{
 	ViewBag.Title = "Originality";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 	var currentUser = Context.Session.GetObject<Account>("account") ?? null;
@@ -47,6 +47,15 @@
 			<div class="form-group full-width">
 				<label for="adviser">Research Adviser</label>
 				<input type="text" asp-for="ResearchAdviser" placeholder="Name">
+			</div>
+
+			<div class="form-group full-width">
+				<label>Manuscript Type</label>
+				<select required asp-for="OC_ManuscriptType">
+					<option disabled selected>Select your manuscript type</option>
+					<option>Proposal Manuscript</option>
+					<option>Final Manuscript</option>
+				</select>
 			</div>
 
 			<div class="form-group full-width">
