@@ -52,16 +52,18 @@ namespace LetranRPD.Controllers
                 ContactPerson = viewModel.ContactPerson,
                 ContactNumber = viewModel.ContactNumber,
                 ResearchAdviser = viewModel.ResearchAdviser,
-                Subject = viewModel.Subject
+                Subject = viewModel.Subject,
+                OC_ManuscriptType = viewModel.OC_ManuscriptType,
+                ServiceProgress = new ServiceProgress {
+                    Progress1 = 1,
+                    Progress2 = 0,
+                    Progress3 = 0,
+                    Progress4 = 0,
+                    AppliedDate = DateTime.Now
+                }
+                
 
             };
-            ServiceInformation.ServiceProgress.Add(new ServiceProgress
-            {
-                Progress1 = false,
-                Progress2 = false,
-                Progress3 = false,
-                Progress4 = false
-            });
 
             await dBContext.ServiceInformations.AddAsync(ServiceInformation);
 
@@ -83,16 +85,17 @@ namespace LetranRPD.Controllers
                 ContactPerson = viewModel.ContactPerson,
                 ContactNumber = viewModel.ContactNumber,
                 ResearchAdviser = viewModel.ResearchAdviser,
-                Subject = viewModel.Subject
+                Subject = viewModel.Subject,
+                ServiceProgress = new ServiceProgress
+                {
+                    Progress1 = 1,
+                    Progress2 = 0,
+                    Progress3 = 0,
+                    Progress4 = 0,
+                    AppliedDate = DateTime.Now
+                }
 
             };
-            ServiceInformation.ServiceProgress.Add(new ServiceProgress
-            {
-                Progress1 = false,
-                Progress2 = false,
-                Progress3 = false,
-                Progress4 = false
-            });
 
             await dBContext.ServiceInformations.AddAsync(ServiceInformation);
 
@@ -116,16 +119,16 @@ namespace LetranRPD.Controllers
                 ResearchAdviser = viewModel.ResearchAdviser,
                 Subject = viewModel.Subject,
                 LE_Index = viewModel.LE_Index,
-                LE_Pages = viewModel.LE_Pages
-
+                LE_Pages = viewModel.LE_Pages,
+                ServiceProgress = new ServiceProgress
+                {
+                    Progress1 = 1,
+                    Progress2 = 0,
+                    Progress3 = 0,
+                    Progress4 = 0,
+                    AppliedDate = DateTime.Now
+                }
             };
-            ServiceInformation.ServiceProgress.Add(new ServiceProgress
-            {
-                Progress1 = false,
-                Progress2 = false,
-                Progress3 = false,
-                Progress4 = false
-            });
 
             await dBContext.ServiceInformations.AddAsync(ServiceInformation);
 
@@ -149,16 +152,17 @@ namespace LetranRPD.Controllers
                 ResearchAdviser = viewModel.ResearchAdviser,
                 Subject = viewModel.Subject,
                 DA_Tool = viewModel.DA_Tool,
-                DA_Variable = viewModel.DA_Variable
+                DA_Variable = viewModel.DA_Variable,
+                ServiceProgress = new ServiceProgress
+                {
+                    Progress1 = 1,
+                    Progress2 = 0,
+                    Progress3 = 0,
+                    Progress4 = 0,
+                    AppliedDate = DateTime.Now
+                }
 
             };
-            ServiceInformation.ServiceProgress.Add(new ServiceProgress
-            {
-                Progress1 = false,
-                Progress2 = false,
-                Progress3 = false,
-                Progress4 = false
-            });
 
             await dBContext.ServiceInformations.AddAsync(ServiceInformation);
 

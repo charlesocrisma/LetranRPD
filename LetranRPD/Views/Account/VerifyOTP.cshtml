@@ -1,0 +1,19 @@
+﻿@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+<link rel="stylesheet" href="~/css/login.css">
+<div class="login-container">
+    <h2>Check Your Email</h2>
+    <p>We've sent a 6-digit OTP to your email address.</p>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <form asp-action="VerifyOtp" method="post">
+        <input type="text" id="otp" name="otp" placeholder="Enter your OTP" required maxlength="6">
+        <button type="submit" class="btn">Verify Account</button>
+    </form>
+
+    <div class="extra">
+        <a asp-action="Register" style="color:grey;font-style:italic;">Go back to Register</a>
+    </div>
+</div>

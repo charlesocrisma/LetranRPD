@@ -1,16 +1,19 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using LetranRPD.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace LetranRPD.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly ApplicationDBContext context;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, ApplicationDBContext context)
     {
         _logger = logger;
+        this.context = context;
     }
 
     public IActionResult Index()
@@ -50,7 +53,8 @@ public class HomeController : Controller
     }
     public IActionResult Tracker()
     {
-        return View();
+        var services = context.ServiceInformations.Include(o => o.ServiceProgress).OrderBy(i => i.ServiceId).ToList();
+        return View(services);
     }
     public IActionResult Privacy()
     {
