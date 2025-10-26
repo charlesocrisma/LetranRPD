@@ -1,21 +1,17 @@
 ﻿using LetranRPD.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-
-using Microsoft.AspNetCore.Authorization;
-using LetranRPD.Controllers;
 using Microsoft.EntityFrameworkCore;
-
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.IO;
+using System;
+using Microsoft.AspNetCore.Http; // Required for IFormFile
 
 namespace LetranRPD.Controllers
-
 {
     public class Tracking : Controller
     {
         private readonly ApplicationDBContext dBContext;
-
-        public List<ServiceInformation> ServiceInformationList = new();
 
         public Tracking(ApplicationDBContext dBContext)
         {
@@ -25,12 +21,11 @@ namespace LetranRPD.Controllers
         [HttpPost]
         public async Task<IActionResult> add(ServiceInformation viewModel)
         {
-
             var ServiceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
                 Email = viewModel.Email,
-                ServiceType = "Originality Check",
+                ServiceType = "Originality Check", // This was hardcoded in your original file
                 Title = viewModel.Title,
                 Author = viewModel.Author,
                 ContactPerson = viewModel.ContactPerson,
@@ -39,61 +34,103 @@ namespace LetranRPD.Controllers
                 Subject = viewModel.Subject,
                 ServiceProgress = new ServiceProgress
                 {
-                    Progress1 = 1,
-                    Progress2 = 0,
+                    Progress1 = 1, // 1 = Active
+                    Progress2 = 0, // 0 = Pending
                     Progress3 = 0,
                     Progress4 = 0,
                     AppliedDate = DateTime.Now
                 }
-
-
             };
 
             await dBContext.ServiceInformations.AddAsync(ServiceInformation);
-
             await dBContext.SaveChangesAsync();
 
             return RedirectToAction("Services", "Home");
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Update(ServiceInformation viewModel)
-        //{
-        //    // Find the existing record by ID (make sure viewModel.Id exists)
-        //    var existingService = await dBContext.ServiceInformations
-        //        .Include(s => s.ServiceProgress) // Include related progress data
-        //        .FirstOrDefaultAsync(s => s.ServiceId == viewModel.ServiceId);
+        // This is the View Model for the new UpdateProgress action
+        public class UpdateProgressViewModel
+        {
+            public int ServiceId { get; set; }
+            public int StepNumber{ get;  set; }
+            public int NewStatus { get; set; }
+            public string Remarks { get; set; }
+        }
 
-        //    if (existingService == null)
-        //    {
-        //        return NotFound(); // Return 404 if not found
-        //    }
+        // This is the new action the JavaScript will call
+        [HttpPost]
+        public async Task<IActionResult> UpdateProgress([FromBody] UpdateProgressViewModel model)
+        {
+            if (model == null)
+            {
+                return BadRequest("Invalid data.");
+            }
 
-        //    // Update the properties
+            var existingService = await dBContext.ServiceInformations
+                .Include(s => s.ServiceProgress)
+                .FirstOrDefaultAsync(s => s.ServiceId == model.ServiceId);
 
+            if (existingService == null)
+            {
+                return NotFound("Service not found.");
+            }
 
-        //     //Update progress(optional)
-        //    if (viewModel.ServiceProgress != null)
-        //    {
-        //        existingService.ServiceProgress.Progress1 = viewModel.ServiceProgress.Progress1;
-        //        existingService.ServiceProgress.Progress2 = viewModel.ServiceProgress.Progress2;
-        //        existingService.ServiceProgress.Progress3 = viewModel.ServiceProgress.Progress3;
-        //        existingService.ServiceProgress.Progress4 = viewModel.ServiceProgress.Progress4;
-        //        existingService.ServiceProgress.AppliedDate = viewModel.ServiceProgress.AppliedDate;
-        //    }
+            var progress = existingService.ServiceProgress;
+            progress.Remarks = model.Remarks; // Update remarks
 
-        //    // Save changes
-        //    await dBContext.SaveChangesAsync();
+            // Update the correct progress step
+            switch (model.StepNumber)
+            {
+                case 1:
+                    progress.Progress1 = model.NewStatus;
+                    break;
+                case 2:
+                    progress.Progress2 = model.NewStatus;
+                    break;
+                case 3:
+                    progress.Progress3 = model.NewStatus;
+                    break;
+                case 4:
+                    progress.Progress4 = model.NewStatus;
+                    break;
+                default:
+                    return BadRequest("Invalid progress step.");
+            }
 
-        //    // Redirect or return success
-        //    return RedirectToAction("Services", "Home");
-        //}
+            // --- Logic to automatically advance progress ---
+            if (model.NewStatus == 2) // 2 = Completed
+            {
+                switch (model.StepNumber)
+                {
+                    case 1:
+                        if (progress.Progress2 == 0) progress.Progress2 = 1; // 0 = Pending, 1 = Active
+                        break;
+                    case 2:
+                        if (progress.Progress3 == 0) progress.Progress3 = 1;
+                        break;
+                    case 3:
+                        if (progress.Progress4 == 0) progress.Progress4 = 1;
+                        break;
+                    case 4:
+                        // This is the last step, no further advancement
+                        break;
+                }
+            }
+
+            await dBContext.SaveChangesAsync();
+
+            // Return the updated progress state so the UI can sync
+            return Json(new { success = true, message = "Progress updated.", updatedProgress = progress });
+        }
 
         [HttpPost]
         public async Task<IActionResult> UploadFiles(int serviceId, int progressStep, List<IFormFile> files)
         {
+            // --- This is the only change ---
+            // If no files are sent, it's not an error. Just return OK.
             if (files == null || files.Count == 0)
-                return BadRequest("No files uploaded.");
+                return Ok(new { success = true, message = "No files to upload." });
+            // --- End of change ---
 
             var existingService = await dBContext.ServiceInformations
                 .Include(s => s.ServiceProgress)
@@ -101,7 +138,8 @@ namespace LetranRPD.Controllers
 
             if (existingService == null)
                 return NotFound("Service not found.");
-            var directory =  "wwwroot/uploads/Service_"+serviceId;
+
+            var directory = Path.Combine("wwwroot", "uploads", "Service_" + serviceId);
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), directory);
 
             if (!Directory.Exists(uploadsFolder))
@@ -111,18 +149,20 @@ namespace LetranRPD.Controllers
 
             foreach (var file in files)
             {
-                var uniqueFileName = $"{DateTime.Now.ToString("dd-MM-yyyy")}_{file.FileName}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                if (file.Length > 0)
                 {
-                    await file.CopyToAsync(stream);
-                }
+                    var safeFileName = Path.GetFileName(file.FileName);
+                    var uniqueFileName = $"{DateTime.Now.ToString("yyyyMMddHHmmss")}_{safeFileName}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                savedFileNames.Add(uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    savedFileNames.Add(uniqueFileName);
+                }
             }
 
-            // Update corresponding progress step list
             var progress = existingService.ServiceProgress;
 
             switch (progressStep)
@@ -149,9 +189,8 @@ namespace LetranRPD.Controllers
 
             await dBContext.SaveChangesAsync();
 
-            return Json(new { success = true, message = "Files uploaded and database updated successfully." });
+            return Json(new { success = true, message = "Files uploaded successfully.", fileNames = savedFileNames });
         }
-
-
     }
 }
+

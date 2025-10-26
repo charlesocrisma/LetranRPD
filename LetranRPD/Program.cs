@@ -20,7 +20,12 @@ builder.Services.AddSession(options =>
 
 // 3. Add Controllers, Views, and NewtonsoftJson support
 builder.Services.AddControllersWithViews()
-    .AddNewtonsoftJson();
+    .AddNewtonsoftJson(options => // <-- Add this
+    {
+        // This line tells the serializer to stop when it finds a loop
+        options.SerializerSettings.ReferenceLoopHandling =
+            Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
 
 // 4. Password Hashing service removed as requested.
 

@@ -1,7 +1,35 @@
 ﻿@{
     Layout = "~/Views/Shared/_AdminNav.cshtml";
 }
+@using LetranRPD.Models
 @model List<ServiceInformation>
+@Html.AntiForgeryToken()
+
+
+@{
+    Func<int, string> GetStatusClass = (status) =>
+    {
+        switch (status)
+        {
+            case 0: return "pending";   // Not yet started
+            case 1: return "active";    // In progress
+            case 2: return "completed"; // Finished
+            default: return "pending";
+        }
+    };
+
+    Func<int, string> GetStatusText = (status) =>
+    {
+        switch (status)
+        {
+            case 0: return "Pending";
+            case 1: return "Processing";
+            case 2: return "Completed";
+            default: return "Pending";
+        }
+    };
+}
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +55,7 @@
         <!-- Statistics Row -->
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-number" id="totalStudents">6</div>
+                <div class="stat-number" id="totalSubmissions">6</div>
                 <div class="stat-label">Total Submissions</div>
             </div>
             <div class="stat-card">
@@ -78,7 +106,7 @@
         </div>
 
         <!-- Students Table Container -->
-        <div class="table-wrapper" id="studentsTableContainer">
+        <div class="table-wrapper" id="submissionsTableContainer">
             <!-- Table will be populated by JavaScript -->
         </div>
 
@@ -99,698 +127,883 @@
 
     <script>
 
-        const serviceInfoFromDb = @Json.Serialize(Model);
-        function getStepStatus(progressValue) {
-            switch (progressValue) {
-                case 1: return "current";
-                case 2: return "complete";
-                case 3: return "revision";
-                case 0:
-                default:
-                    return "pending";
-            }
+    const serviceInfoFromDb = @Json.Serialize(Model);
+
+            let currentServiceId = null;
+        // Stores the serviceId for the remarks modal
+        let currentRemarksServiceId = null;
+
+    // --- HELPER FUNCTIONS ---
+
+    function getStepStatus(progressValue) {
+        switch (progressValue) {
+            case 1: return "current";
+            case 2: return "complete";
+            case 3: return "revision";
+            case 0:
+            default:
+                return "pending";
+        }
+    }
+
+    function convertJsStatusToDbInt(statusString) {
+        switch (statusString) {
+            case "current": return 1;
+            case "complete": return 2;
+            case "revision": return 3;
+            case "pending":
+            default:
+                return 0;
+        }
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    function getFileIcon(fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+        switch (ext) {
+            case 'pdf': return 'fa-file-pdf';
+            case 'doc':
+            case 'docx': return 'fa-file-word';
+            case 'xls':
+            case 'xlsx': return 'fa-file-excel';
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+            case 'gif': return 'fa-file-image';
+            case 'zip':
+            case 'rar': return 'fa-file-archive';
+            default: return 'fa-file-alt'; // Default file icon
+        }
+    }
+
+    // --- DATA TRANSFORMATION ---
+
+    function transformDbData(si) {
+        const prog = si.serviceProgress;
+        const stepStatuses = [
+            getStepStatus(prog.progress1),
+            getStepStatus(prog.progress2),
+            getStepStatus(prog.progress3),
+            getStepStatus(prog.progress4)
+        ];
+
+        let status = "processing";
+        if (stepStatuses.includes("revision")) {
+            status = "failed";
+        } else if (stepStatuses.every(s => s === "complete")) {
+            status = "complete";
         }
 
-        function transformDbData(si) {
+        let currentStep = stepStatuses.findIndex(s => s === "current") + 1;
+        if (currentStep === 0 && status !== 'complete' && status !== 'failed') {
+            currentStep = stepStatuses.findIndex(s => s === "pending") + 1;
+        }
+        if (currentStep === 0 && status === 'complete') {
+            currentStep = stepStatuses.length;
+        }
 
-            const prog = si.serviceProgress;
-            const stepStatuses = [
-                getStepStatus(prog.progress1),
-                getStepStatus(prog.progress2),
-                getStepStatus(prog.progress3),
-                getStepStatus(prog.progress4)
-            ];
-
-            let status = "processing";
-            if (stepStatuses.includes("revision")) {
-                status = "failed";
-            } else if (stepStatuses.every(s => s === "complete")) {
-                status = "complete";
-            }
-
-            let currentStep = stepStatuses.findIndex(s => s === "current") + 1;
-            if (currentStep === 0) {
-                currentStep = stepStatuses.findIndex(s => s === "pending") + 1;
-            }
-            if (currentStep === 0 && !stepStatuses.includes("revision")) {
-                currentStep = stepStatuses.length;
-            }
-
-            const serviceKey = si.serviceType.toLowerCase().replace(/ /g, '-');
-                const allReceivedFiles = [
+        const serviceKey = si.serviceType.toLowerCase().replace(/ /g, '-');
+        const allReceivedFiles = [
             ...(prog.progress1files || []),
             ...(prog.progress2files || []),
             ...(prog.progress3files || []),
             ...(prog.progress4files || [])
         ];
-            return {
-                "id": si.serviceId, 
-                "name": si.author, 
-                "studentNumber": si.studentNumber,
-                "department": si.subject, 
-                "course": "N/A",     
-                "service": serviceKey,
-                "serviceName": si.serviceType,
-                "status": status,
-                "currentStep": currentStep,
-                "totalSteps": 4, 
-                "runCount": 1,  
-                "dateSubmitted": prog.appliedDate,
-                "lastUpdated": prog.appliedDate, 
-                "receivedFiles": allReceivedFiles,
-                "sendFiles": 0, 
-                "remarks": "", 
-                "stepStatuses": stepStatuses
-            };
-        }
-
-        const studentsFromDb = serviceInfoFromDb.map(transformDbData);
-        const departmentsFromDb = [...new Set(studentsFromDb.map(s => s.department))];
-        const servicesFromDb = [...new Map(studentsFromDb.map(s => [s.service, { key: s.service, name: s.serviceName }])).values()];
-
-        const applicationData = {
-            "students": studentsFromDb,
-            "departments": departmentsFromDb,
-            "services": servicesFromDb,
-            "generalStatusTypes": [
-                { "key": "processing", "name": "Processing", "color": "#3b82f6" },
-                { "key": "complete", "name": "Complete", "color": "#10b981" },
-                { "key": "failed", "name": "Failed", "color": "#ef4444" }
-            ],
-            "stepStatusTypes": [
-                { "key": "pending", "name": "PENDING", "color": "#94a3b8" },
-                { "key": "current", "name": "CURRENT", "color": "#3b82f6" },
-                { "key": "complete", "name": "COMPLETE", "color": "#10b981" },
-                { "key": "revision", "name": "REVISION", "color": "#fd7e14" }
-            ],
-            "serviceSteps": {
-                "originality-check": {
-  
-                },
-                "instrument-validation": {
-  
-                },
-                "language-editing": {
-  
-                },
-                "data-analysis": {
-  
-                },
-                "student-research-clearance": {
-  
-                },
-                "ethics-review": {
-  
-                }
-            }
+        return {
+            "id": si.serviceId, // This is the ServiceId
+            "name": si.author,
+            "studentNumber": si.studentNumber,
+            "department": si.subject,
+            "course": "N/A",
+            "service": serviceKey,
+            "serviceName": si.serviceType,
+            "status": status,
+            "currentStep": currentStep,
+            "totalSteps": 4,
+            "runCount": prog.runCount || 1, // <-- FIXED: Load from DB
+            "dateSubmitted": prog.appliedDate,
+            "lastUpdated": prog.appliedDate, // You might want a different 'lastUpdated' field
+            "receivedFiles": allReceivedFiles,
+            "sendFiles": 0,
+            "remarks": prog.remarks || "", // <-- FIXED: Load from DB
+            "stepStatuses": stepStatuses
         };
+    }
 
-        let currentDepartment = 'all';
-        let currentService = 'all';
-        let expandedRow = null;
-        let filteredStudents = [...applicationData.students];
+    // --- APPLICATION STATE (RENAMED) ---
 
-        document.addEventListener('DOMContentLoaded', function () {
-            initializeApp();
+    const submissionsFromDb = serviceInfoFromDb.map(transformDbData);
+    const departmentsFromDb = [...new Set(submissionsFromDb.map(s => s.department))];
+    const servicesFromDb = [...new Map(submissionsFromDb.map(s => [s.service, { key: s.service, name: s.serviceName }])).values()];
+
+    const applicationData = {
+        "submissions": submissionsFromDb, // RENAMED
+        "departments": departmentsFromDb,
+        "services": servicesFromDb,
+        "generalStatusTypes": [
+            { "key": "processing", "name": "Processing", "color": "#3b82f6" },
+            { "key": "complete", "name": "Complete", "color": "#10b981" },
+            { "key": "failed", "name": "Failed", "color": "#ef4444" }
+        ],
+        "stepStatusTypes": [
+            { "key": "pending", "name": "PENDING", "color": "#94a3b8" },
+            { "key": "current", "name": "CURRENT", "color": "#3b82f6" },
+            { "key": "complete", "name": "COMPLETE", "color": "#10b981" },
+            { "key": "revision", "name": "REVISION", "color": "#fd7e14" }
+        ],
+        // FIXED: Populated serviceSteps to match your 'showServiceSteps' function
+        "serviceSteps": {
+            "originality-check": {
+                "title": "Originality Check Guide",
+                "steps": [
+                    { "number": 1, "title": "Submission", "details": "Student submits document (e.g., proposal, final paper).", "processingTime": "N/A" },
+                    { "number": 2, "title": "Admin Scan", "details": "Admin runs the document through Turnitin.", "processingTime": "1-2 hours" },
+                    { "number": 3, "title": "Review", "details": "Admin reviews the similarity report for issues.", "processingTime": "1 working day" },
+                    { "number": 4, "title": "Feedback", "details": "Admin sends the report back to the student with remarks (Pass/Revision).", "processingTime": "1 working day" }
+                ],
+                "note": "Note: A similarity index of 20% or lower is generally required."
+            },
+            "instrument-validation": {
+                "title": "Instrument Validation Guide",
+                "steps": [
+                    { "number": 1, "title": "Submission", "details": "Student submits validation-ready instrument and list of potential validators.", "processingTime": "N/A" },
+                    { "number": 2, "title": "Admin Assigns", "details": "Admin contacts and assigns 3-5 validators.", "processingTime": "2-3 working days" },
+                    { "number": 3, "title": "Validation", "details": "Validators provide feedback and scores on the instrument.", "processingTime": "5-7 working days" },
+                    { "number": 4, "title": "Analysis", "details": "Admin computes CVI/Cronbach's Alpha and sends results to student.", "processingTime": "1-2 working days" }
+                ],
+                "note": "Note: This service may take longer depending on validator availability."
+            },
+            // (Add similar data for your other services...)
+            "language-editing": {
+                "title": "Language Editing Guide",
+                 "steps": [
+                    { "number": 1, "title": "Submission", "details": "Student submits full manuscript for editing.", "processingTime": "N/A" },
+                    { "number": 2, "title": "Assign Editor", "details": "Admin assigns a language editor.", "processingTime": "1 working day" },
+                    { "number": 3, "title": "Editing", "details": "Editor provides track-changed document.", "processingTime": "3-5 working days" },
+                    { "number": 4, "title": "Final Review", "details": "Admin reviews and sends final edited document to student.", "processingTime": "1 working day" }
+                ],
+                "note": ""
+            },
+            "data-analysis": {
+                "title": "Data Analysis Guide",
+                 "steps": [
+                    { "number": 1, "title": "Submission", "details": "Student submits raw data (e.g., Excel) and research questions.", "processingTime": "N/A" },
+                    { "number": 2, "title": "Assign Statistician", "details": "Admin assigns a statistician.", "processingTime": "1 working day" },
+                    { "number": 3, "title": "Analysis", "details": "Statistician performs analysis and prepares results tables.", "processingTime": "3-5 working days" },
+                    { "number": 4, "title": "Send Results", "details": "Admin sends completed analysis and interpretation guide.", "processingTime": "1 working day" }
+                ],
+                "note": ""
+            },
+            "student-research-clearance": {
+                "title": "Research Clearance Guide",
+                 "steps": [
+                    { "number": 1, "title": "Submission", "details": "Student submits completed manuscript and all required forms.", "processingTime": "N/A" },
+                    { "number": 2, "title": "Completion Check", "details": "Admin checks for completion of all prior steps (e.g., ethics, editing).", "processingTime": "1-2 working days" },
+                    { "number": 3, "title": "Signatures", "details": "Admin forwards for final signatures from department heads.", "processingTime": "2-3 working days" },
+                    { "number": 4, "title": "Issue Clearance", "details": "Admin issues the final, signed research clearance document.", "processingTime": "1 working day" }
+                ],
+                "note": ""
+            },
+            "ethics-review": {
+                "title": "Ethics Review Guide",
+                 "steps": [
+                    { "number": 1, "title": "Submission", "details": "Student submits ethics packet (proposal, consent forms, etc.).", "processingTime": "N/A" },
+                    { "number": 2, "title": "Initial Screening", "details": "Admin performs initial screening for completeness.", "processingTime": "1-2 working days" },
+                    { "number": 3, "title": "ERB Review", "details": "Ethics Review Board (ERB) reviews the submission.", "processingTime": "5-10 working days" },
+                    { "number": 4, "title": "Issue Decision", "details": "ERB issues decision (Approved, Minor Revisions, Full Review).", "processingTime": "1 working day" }
+                ],
+                "note": "Ethics review timelines can vary significantly based on the complexity."
+            }
+        }
+    };
+
+    let currentDepartment = 'all';
+    let currentService = 'all';
+    let expandedRow = null;
+    let filteredSubmissions = [...applicationData.submissions]; // RENAMED
+
+    // --- INITIALIZATION ---
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeApp();
+    });
+
+    function initializeApp() {
+        setupFilterTabs(); // Setup filters first
+        applyFilters(); // This will call renderTable and updateStatistics
+        setupEventListeners();
+
+        const filterSection = document.getElementById('filterSection');
+        if (filterSection) {
+            filterSection.classList.add('collapsed');
+        }
+    }
+
+    // --- EVENT LISTENERS ---
+
+    function setupEventListeners() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearch);
+        }
+        const filterToggle = document.getElementById('filterToggle');
+        if (filterToggle) {
+            filterToggle.addEventListener('click', toggleFilterSection);
+        }
+    }
+
+    function setupFilterTabs() {
+        // ... (This function looks fine)
+        const departmentContainer = document.getElementById('departmentTabs');
+        if (departmentContainer) {
+            departmentContainer.innerHTML = '';
+            const allDeptTab = createFilterTab('All Departments', 'all', currentDepartment === 'all');
+            allDeptTab.onclick = () => filterByDepartment('all');
+            departmentContainer.appendChild(allDeptTab);
+            applicationData.departments.forEach(dept => {
+                const tab = createFilterTab(dept, dept, currentDepartment === dept);
+                tab.onclick = () => filterByDepartment(dept);
+                departmentContainer.appendChild(tab);
+            });
+        }
+        const serviceContainer = document.getElementById('serviceTabs');
+        if (serviceContainer) {
+            serviceContainer.innerHTML = '';
+            const allServiceTab = createFilterTab('All Services', 'all', currentService === 'all');
+            allServiceTab.onclick = () => filterByService('all');
+            serviceContainer.appendChild(allServiceTab);
+            applicationData.services.forEach(service => {
+                const tab = createFilterTab(service.name, service.key, currentService === service.key);
+                tab.onclick = () => filterByService(service.key);
+                serviceContainer.appendChild(tab);
+            });
+        }
+    }
+
+    function createFilterTab(text, value, isActive) {
+        const tab = document.createElement('button');
+        tab.className = `filter-tab ${isActive ? 'active' : ''}`;
+        tab.textContent = text;
+        tab.setAttribute('data-value', value);
+        return tab;
+    }
+
+    function toggleFilterSection() {
+        const filterSection = document.getElementById('filterSection');
+        if (filterSection) {
+            filterSection.classList.toggle('collapsed');
+        }
+    }
+
+    // --- FILTERING & SEARCH (RENAMED) ---
+
+    function handleSearch(event) {
+        const searchTerm = event.target.value.toLowerCase().trim();
+        let baseList = [...applicationData.submissions];
+
+        if (searchTerm !== '') {
+            baseList = applicationData.submissions.filter(submission => { // RENAMED
+                return submission.name.toLowerCase().includes(searchTerm) ||
+                    submission.studentNumber.toLowerCase().includes(searchTerm) ||
+                    submission.serviceName.toLowerCase().includes(searchTerm) ||
+                    submission.department.toLowerCase().includes(searchTerm);
+            });
+        }
+        // Store the search-filtered list globally before applying tab filters
+        filteredSubmissions = baseList;
+        applyFilters();
+    }
+
+    function filterByDepartment(department) {
+        currentDepartment = department;
+        document.querySelectorAll('#departmentTabs .filter-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.getAttribute('data-value') === department);
         });
+        applyFilters();
+    }
 
-        function initializeApp() {
-            renderTable();
-            setupEventListeners();
-            updateStatistics();
+    function filterByService(service) {
+        currentService = service;
+        document.querySelectorAll('#serviceTabs .filter-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.getAttribute('data-value') === service);
+        });
+        applyFilters();
+    }
 
-            const filterSection = document.getElementById('filterSection');
-            if (filterSection) {
-                filterSection.classList.add('collapsed');
-            }
+    function applyFilters() {
+        // Start from the latest search-filtered list
+        let filtered = [...filteredSubmissions];
+
+        if (currentDepartment !== 'all') {
+            filtered = filtered.filter(submission => submission.department === currentDepartment);
         }
 
-        function setupEventListeners() {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', handleSearch);
-            }
-            const filterToggle = document.getElementById('filterToggle');
-            if (filterToggle) {
-                filterToggle.addEventListener('click', toggleFilterSection);
-            }
-
-            setupFilterTabs();
+        if (currentService !== 'all') {
+            filtered = filtered.filter(submission => submission.service === currentService);
         }
 
-        function setupFilterTabs() {
-            const departmentContainer = document.getElementById('departmentTabs');
-            if (departmentContainer) {
-                departmentContainer.innerHTML = '';
+        renderTable(filtered);
+        // Update global stats based on the *original* full dataset
+        updateStatistics(applicationData.submissions); 
+    }
 
-                const allDeptTab = createFilterTab('All Departments', 'all', currentDepartment === 'all');
-                allDeptTab.onclick = () => filterByDepartment('all');
-                departmentContainer.appendChild(allDeptTab);
+    // --- TABLE RENDERING (RENAMED) ---
 
+    function renderTable(submissions = applicationData.submissions) { // RENAMED
+        // RENAMED ID
+        const tableContainer = document.getElementById('submissionsTableContainer'); 
+        if (!tableContainer) return;
 
-                applicationData.departments.forEach(dept => {
-                    const tab = createFilterTab(dept, dept, currentDepartment === dept);
-                    tab.onclick = () => filterByDepartment(dept);
-                    departmentContainer.appendChild(tab);
-                });
-            }
-
-            const serviceContainer = document.getElementById('serviceTabs');
-            if (serviceContainer) {
-                serviceContainer.innerHTML = '';
-
-                const allServiceTab = createFilterTab('All Services', 'all', currentService === 'all');
-                allServiceTab.onclick = () => filterByService('all');
-                serviceContainer.appendChild(allServiceTab);
-
-                applicationData.services.forEach(service => {
-                    const tab = createFilterTab(service.name, service.key, currentService === service.key);
-                    tab.onclick = () => filterByService(service.key);
-                    serviceContainer.appendChild(tab);
-                });
-            }
-        }
-
-        function createFilterTab(text, value, isActive) {
-            const tab = document.createElement('button');
-            tab.className = `filter-tab ${isActive ? 'active' : ''}`;
-            tab.textContent = text;
-            tab.setAttribute('data-value', value);
-            return tab;
-        }
-
-        function toggleFilterSection() {
-            const filterSection = document.getElementById('filterSection');
-            const toggleIcon = document.querySelector('.filter-toggle-icon');
-
-            if (filterSection && toggleIcon) {
-                filterSection.classList.toggle('collapsed');
-            }
-        }
-
-        function handleSearch(event) {
-            const searchTerm = event.target.value.toLowerCase().trim();
-
-            if (searchTerm === '') {
-                filteredStudents = [...applicationData.students];
-            } else {
-                filteredStudents = applicationData.students.filter(student => {
-                    return student.name.toLowerCase().includes(searchTerm) ||
-                        student.studentNumber.toLowerCase().includes(searchTerm) ||
-                        student.serviceName.toLowerCase().includes(searchTerm) ||
-                        student.department.toLowerCase().includes(searchTerm);
-                });
-            }
-
-            applyFilters();
-        }
-
-        function filterByDepartment(department) {
-            currentDepartment = department;
-
-            document.querySelectorAll('#departmentTabs .filter-tab').forEach(tab => {
-                tab.classList.remove('active');
-                if (tab.getAttribute('data-value') === department) {
-                    tab.classList.add('active');
-                }
-            });
-
-            applyFilters();
-        }
-
-        function filterByService(service) {
-            currentService = service;
-
-            document.querySelectorAll('#serviceTabs .filter-tab').forEach(tab => {
-                tab.classList.remove('active');
-                if (tab.getAttribute('data-value') === service) {
-                    tab.classList.add('active');
-                }
-            });
-
-            applyFilters();
-        }
-
-        function applyFilters() {
-            let filtered = [...filteredStudents];
-
-            if (currentDepartment !== 'all') {
-                filtered = filtered.filter(student => student.department === currentDepartment);
-            }
-
-            if (currentService !== 'all') {
-                filtered = filtered.filter(student => student.service === currentService);
-            }
-
-            renderTable(filtered);
-            updateStatistics(filtered);
-        }
-
-        function renderTable(students = applicationData.students) {
-            const tableContainer = document.getElementById('studentsTableContainer');
-            if (!tableContainer) return;
-
-            const table = `
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3 class="table-title">
-                            <i class="fas fa-users"></i>
-                            Research Submissions (${students.length})
-                        </h3>
-                    </div>
-                    <table class="students-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Department</th>
-                                <th>Service</th>
-                                <th>Status</th>
-                                <th>Progress</th>
-                                <th>Last Updated</th>
-                                <th>Guide</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${students.map(student => createStudentRow(student)).join('')}
-                        </tbody>
-                    </table>
+        const table = `
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="fas fa-users"></i>
+                        Research Submissions (${submissions.length})
+                    </h3>
                 </div>
-            `;
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Research Title</th>
+                            <th>Department</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Last Updated</th>
+                            <th>Guide</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${submissions.length > 0 ?
+                            submissions.map(submission => createSubmissionRow(submission)).join('') : // RENAMED
+                            '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: #6b7280;">No submissions found.</td></tr>'
+                        }
+                    </tbody>
+                </table>
+            </div>
+        `;
 
-            tableContainer.innerHTML = table;
-            setupTableEventListeners();
-        }
+        tableContainer.innerHTML = table;
+    }
 
-        function createStudentRow(student) {
-            const progressPercentage = Math.round((student.currentStep / student.totalSteps) * 100);
-            const statusClass = `status-${student.status}`;
-            const initials = student.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+    function createSubmissionRow(submission) { // RENAMED
+        const isComplete = submission.status === 'complete';
+        const currentStepForProgress = isComplete ? submission.totalSteps : submission.currentStep;
+        const progressPercentage = Math.round((currentStepForProgress / submission.totalSteps) * 100);
+        const statusClass = `status-${submission.status}`;
+        const initials = submission.name.split(' ').map(n => n[0]).join('').substring(0, 2);
 
-            return `
-                <tr class="student-row" onclick="toggleStudentDetails('${student.id}')" data-student-id="${student.id}">
-                    <td>
-                        <div class="student-info">
-                            <div class="student-avatar">${initials}</div>
-                            <div class="student-details">
-                                <h4>${student.name}</h4>
-                                <p>${student.studentNumber} • ${student.course}</p>
+        return `
+            <tr class="student-row" onclick="toggleSubmissionDetails('${submission.id}')" data-service-id="${submission.id}">
+                <td>
+                    <div class="student-info">
+                        <div class="student-avatar">${initials}</div>
+                        <div class="student-details">
+                            <h4>${submission.name}</h4>
+                            <p>${submission.studentNumber} • ${submission.course}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="department-text">${submission.department}</span>
+                </td>
+                 <td>
+                    <span class="department-text">${submission.title}</span>
+                </td>
+                 <td>
+                        <span class="department-text">${submission.departments}</span>
+                    </td>
+                <td>
+                    <span class="service-badge">${submission.serviceName}</span>
+                </td>
+                <td>
+                    <span class="status-badge ${statusClass}">${submission.status}</span>
+                </td>
+                <td>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${progressPercentage}%"></div>
+                        </div>
+                        <div class="progress-text">${currentStepForProgress}/${submission.totalSteps} steps</div>
+                    </div>
+                </td>
+                <td>${formatDate(submission.lastUpdated)}</td>
+                <td>
+                    <button class="action-btn info-btn" onclick="event.stopPropagation(); showServiceSteps('${submission.service}')" title="View Service Steps">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr class="expanded-content hidden" id="expanded-${submission.id}">
+                <td colspan="7">
+                    ${createExpandedContent(submission)}
+                </td>
+            </tr>
+        `;
+    }
+
+    function createExpandedContent(submission) { // RENAMED
+        return `
+            <div class="expanded-inner">
+                <div class="control-section">
+                    <div class="section-header">
+                        <i class="fas fa-cogs"></i>
+                        Progress Control
+                    </div>
+
+                    <div class="progress-controls">
+                        <div class="control-group">
+                            <label class="control-label">General Status:</label>
+                            <select class="status-select" onchange="updateGeneralStatus('${submission.id}', this.value)">
+                                ${applicationData.generalStatusTypes.map(status =>
+                                    `<option value="${status.key}" ${submission.status === status.key ? 'selected' : ''}>
+                                        ${status.name}
+                                    </option>`
+                                ).join('')}
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Run Count:</label>
+                            <div class="run-count-controls">
+                                <button class="run-count-btn" onclick="updateRunCount('${submission.id}', -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="run-count-display" id="runCount-${submission.id}">${submission.runCount}</span>
+                                <button class="run-count-btn" onclick="updateRunCount('${submission.id}', 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
                             </div>
                         </div>
-                    </td>
-                    <td>
-                        <span class="department-text">${student.department}</span>
-                    </td>
-                    <td>
-                        <span class="service-badge">${student.serviceName}</span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${statusClass}">${student.status}</span>
-                    </td>
-                    <td>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill ${statusClass}" style="width: ${progressPercentage}%"></div>
-                            </div>
-                            <div class="progress-text">${student.currentStep}/${student.totalSteps} steps</div>
+                    </div>
+
+                    <div class="step-management">
+                        <div class="section-header">
+                            <i class="fas fa-list-ol"></i>
+                            Step Management
                         </div>
-                    </td>
-                    <td>${formatDate(student.lastUpdated)}</td>
-                    <td>
-                        <button class="action-btn info-btn" onclick="event.stopPropagation(); showServiceSteps('${student.service}')" title="View Service Steps">
-                            <i class="fas fa-info-circle"></i>
+
+                        <div class="step-indicator">
+                            ${submission.stepStatuses.map((status, index) =>
+                                `<div class="step-dot ${status}" title="Step ${index + 1}: ${status.toUpperCase()}">${index + 1}</div>`
+                            ).join('')}
+                        </div>
+
+                        <div class="step-status-controls">
+                            ${submission.stepStatuses.map((status, index) => `
+                                <div class="step-status-item">
+                                    <span class="step-label">Step ${index + 1}:</span>
+                                    <select class="step-status-select" onchange="updateStepStatus('${submission.id}', ${index}, this.value)">
+                                        ${applicationData.stepStatusTypes.map(stepStatus =>
+                                            `<option value="${stepStatus.key}" ${status === stepStatus.key ? 'selected' : ''}>
+                                                ${stepStatus.name}
+                                            </option>`
+                                        ).join('')}
+                                    </select>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <div class="section-header">
+                        <i class="fas fa-folder-open"></i>
+                        File Management
+                    </div>
+
+                    <div class="file-tabs">
+                        <button class="file-tab active" onclick="switchFileTab(event, '${submission.id}', 'received')">
+                            Received Files <span class="file-count">${submission.receivedFiles.length}</span>
                         </button>
-                    </td>
-                </tr>
-                <tr class="expanded-content hidden" id="expanded-${student.id}">
-                    <td colspan="7">
-                        ${createExpandedContent(student)}
-                    </td>
-                </tr>
-            `;
-        }
-
-        function createExpandedContent(student) {
-            return `
-                <div class="expanded-inner">
-                    <div class="control-section">
-                        <div class="section-header">
-                            <i class="fas fa-cogs"></i>
-                            Progress Control
-                        </div>
-
-                        <div class="progress-controls">
-                            <div class="control-group">
-                                <label class="control-label">General Status:</label>
-                                <select class="status-select" onchange="updateGeneralStatus('${student.id}', this.value)">
-                                    ${applicationData.generalStatusTypes.map(status =>
-                `<option value="${status.key}" ${student.status === status.key ? 'selected' : ''}>
-                                            ${status.name}
-                                        </option>`
-            ).join('')}
-                                </select>
-                            </div>
-
-                            <div class="control-group">
-                                <label class="control-label">Run Count:</label>
-                                <div class="run-count-controls">
-                                    <button class="run-count-btn" onclick="updateRunCount('${student.id}', -1)">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <span class="run-count-display" id="runCount-${student.id}">${student.runCount}</span>
-                                    <button class="run-count-btn" onclick="updateRunCount('${student.id}', 1)">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="step-management">
-                            <div class="section-header">
-                                <i class="fas fa-list-ol"></i>
-                                Step Management
-                            </div>
-
-                            <div class="step-indicator">
-                                ${student.stepStatuses.map((status, index) =>
-                `<div class="step-dot ${status}" title="Step ${index + 1}: ${status.toUpperCase()}">${index + 1}</div>`
-            ).join('')}
-                            </div>
-
-                            <div class="step-status-controls">
-                                ${student.stepStatuses.map((status, index) => `
-                                    <div class="step-status-item">
-                                        <span class="step-label">Step ${index + 1}:</span>
-                                        <select class="step-status-select" onchange="updateStepStatus('${student.id}', ${index}, this.value)">
-                                            ${applicationData.stepStatusTypes.map(stepStatus =>
-                    `<option value="${stepStatus.key}" ${status === stepStatus.key ? 'selected' : ''}>
-                                                    ${stepStatus.name}
-                                                </option>`
-                ).join('')}
-                                        </select>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
+                        <button class="file-tab" onclick="switchFileTab(event, '${submission.id}', 'send')">
+                            Send to Student <span class="file-count" id="send-file-count-${submission.id}">${submission.sendFiles}</span>
+                        </button>
                     </div>
 
-                    <div class="control-section">
-                        <div class="section-header">
-                            <i class="fas fa-folder-open"></i>
-                            File Management
-                        </div>
+                    <div class="file-content" id="fileContent-${submission.id}">
+                        ${createReceivedFilesContent(submission)}
+                    </div>
 
-                        <div class="file-tabs">
-                            <button class="file-tab active" onclick="switchFileTab('${student.id}', 'received')">
-                                Received Files <span class="file-count">${student.receivedFiles.length}</span>
-                            </button>
-                            <button class="file-tab" onclick="switchFileTab('${student.id}', 'send')">
-                                Send to Student <span class="file-count">${student.sendFiles}</span>
-                            </button>
-                        </div>
+                    <div class="section-header" style="margin-top: 1.5rem;">
+                        <i class="fas fa-comment-alt"></i>
+                        Remarks
+                    </div>
 
-                        <div class="file-content" id="fileContent-${student.id}">
-                            ${createReceivedFilesContent(student)}
-                        </div>
+                    <textarea class="remarks-textarea" placeholder="Add remarks..." onchange="updateRemarks('${submission.id}', this.value)">${submission.remarks}</textarea>
 
-                        <div class="section-header" style="margin-top: 1.5rem;">
-                            <i class="fas fa-comment-alt"></i>
-                            Remarks
-                        </div>
-
-                        <textarea class="remarks-textarea" placeholder="Add remarks..." onchange="updateRemarks('${student.id}', this.value)">${student.remarks}</textarea>
-
-                        <div class="action-buttons">
-                            <button class="action-btn btn-primary" onclick="saveChanges('${student.id}')">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <button class="action-btn btn-secondary" onclick="toggleStudentDetails('${student.id}')">
-                                <i class="fas fa-times"></i> Close
-                            </button>
-                        </div>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary" onclick="saveChanges(${submission.id})">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <button class="action-btn btn-secondary" onclick="toggleSubmissionDetails('${submission.id}')">
+                            <i class="fas fa-times"></i> Close
+                        </button>
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
 
-                function createReceivedFilesContent(student) {
-            // 'student.receivedFiles' is now an array like ["report.pdf", "data.xlsx"]
-            return `
-                <div class="file-list">
-                    ${student.receivedFiles.length > 0 ?
-                        student.receivedFiles.map((fileName, index) => `
-                            <div class="file-item">
-                                <div class="file-icon">
-                                    <i class="fas ${getFileIcon(fileName)}"></i>
-                                </div>
-                                <div class="file-info">
-                                    <div class="file-name">${fileName}</div>
-                                    
-                                </div>
-                                <div class="file-actions">
-                                    <a href="/uploads/Service_${student.id}/${fileName}" class="file-action-btn btn-download" title="Download ${fileName}" download>
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        `).join('') :
-                        '<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>'
-                    }
-                </div>
-            `;
-        }
-
-        // BONUS: Add this helper function to your script to get file-specific icons
-        function getFileIcon(fileName) {
-            const ext = fileName.split('.').pop().toLowerCase();
-            switch (ext) {
-                case 'pdf': return 'fa-file-pdf';
-                case 'doc':
-                case 'docx': return 'fa-file-word';
-                case 'xls':
-                case 'xlsx': return 'fa-file-excel';
-                case 'png':
-                case 'jpg':
-                case 'jpeg':
-                case 'gif': return 'fa-file-image';
-                case 'zip':
-                case 'rar': return 'fa-file-archive';
-                default: return 'fa-file-alt'; // Default file icon
-            }
-        }
-
-        function createSendFilesContent(student) {
-            return `
-                <div class="drag-drop-area" onclick="document.getElementById('fileInput-${student.id}').click()">
-                    <div class="drag-drop-text">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 1rem; color: #3b82f6;"></i><br>
-                        Click to upload files or drag and drop<br>
-                        <small>PDF, DOC, DOCX files up to 10MB</small>
-                    </div>
-                    <input type="file" id="fileInput-${student.id}" multiple accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileUpload('${student.id}', this.files)">
-                </div>
-
-                <div class="file-list">
-                    ${student.sendFiles > 0 ?
-                    Array(student.sendFiles).fill().map((_, index) => `
+    function createReceivedFilesContent(submission) { // RENAMED
+        return `
+            <div class="file-list">
+                ${submission.receivedFiles.length > 0 ?
+                    submission.receivedFiles.map((fileName, index) => `
                         <div class="file-item">
                             <div class="file-icon">
-                                <i class="fas fa-file-pdf"></i>
+                                <i class="fas ${getFileIcon(fileName)}"></i>
                             </div>
                             <div class="file-info">
-                                <div class="file-name">Response_${index + 1}.pdf</div>
-                                <div class="file-size">1.8 MB</div>
+                                <div class="file-name">${fileName}</div>
                             </div>
                             <div class="file-actions">
-                                <button class="file-action-btn btn-send" title="Send to Student">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                                <button class="file-action-btn btn-delete" title="Delete">
+                                <a href="/uploads/Service_${submission.id}/${fileName}" class="file-action-btn btn-download" title="Download ${fileName}" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `).join('') :
+                    '<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>'
+                }
+            </div>
+        `;
+    }
+
+    function createSendFilesContent(submission) { // RENAMED
+        return `
+            <div class="drag-drop-area" onclick="document.getElementById('fileInput-${submission.id}').click()">
+                <div class="drag-drop-text">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 1rem; color: #3b82f6;"></i><br>
+                    Click to upload files or drag and drop<br>
+                    <small>PDF, DOC, DOCX files up to 10MB</small>
+                </div>
+                <input type="file" id="fileInput-${submission.id}" multiple accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileUpload('${submission.id}', this.files)">
+            </div>
+            <div class="file-list" id="send-file-list-${submission.id}">
+                <p style="text-align: center; color: #6b7280; padding: 1rem;">No files staged for sending</p>
+            </div>
+        `;
+    }
+
+    function setupTableEventListeners() {
+        // This was empty in your file, so I've left it
+    }
+
+    // --- UI INTERACTIONS (RENAMED) ---
+
+   function toggleSubmissionDetails(serviceId) {
+    const expandedRowElement = document.getElementById(`expanded-${serviceId}`);
+    const submissionRow = document.querySelector(`[data-service-id="${serviceId}"]`);
+
+    if (expandedRowElement && submissionRow) {
+        const isExpanded = !expandedRowElement.classList.contains('hidden');
+
+        // Close all others
+        document.querySelectorAll('.expanded-content').forEach(row => {
+            row.classList.add('hidden');
+        });
+        document.querySelectorAll('.student-row').forEach(row => {
+            row.classList.remove('expanded');
+        });
+
+        // Toggle this one
+        if (!isExpanded) {
+            expandedRowElement.classList.remove('hidden');
+            submissionRow.classList.add('expanded');
+            expandedRow = serviceId; // Store just the ID
+        } else {
+            expandedRow = null;
+        }
+    }
+}
+
+    function switchFileTab(event, serviceId, tabType) { // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        if (!submission) return;
+
+        // Update tab states
+        const tabContainer = event.currentTarget.parentElement;
+        tabContainer.querySelectorAll('.file-tab').forEach(tab => tab.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        // Update content
+        const contentContainer = document.getElementById(`fileContent-${serviceId}`);
+        if (contentContainer) {
+            if (tabType === 'received') {
+                contentContainer.innerHTML = createReceivedFilesContent(submission);
+            } else {
+                contentContainer.innerHTML = createSendFilesContent(submission);
+            }
+        }
+    }
+
+    // --- LOCAL DATA UPDATES (RENAMED) ---
+
+    function updateGeneralStatus(serviceId, newStatus) { // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        if (submission) {
+            submission.status = newStatus;
+            submission.lastUpdated = new Date().toISOString(); // More precise
+            
+            // Auto-update steps based on general status
+            if (newStatus === 'complete') {
+                submission.stepStatuses = submission.stepStatuses.map(() => 'complete');
+            } else if (newStatus === 'failed') {
+                const revisionIndex = submission.stepStatuses.findIndex(s => s !== 'complete');
+                if (revisionIndex !== -1) {
+                    submission.stepStatuses[revisionIndex] = 'revision';
+                }
+            } else if (newStatus === 'processing') {
+                 // If moving from failed/complete back to processing, set first non-complete to 'current'
+                 const currentIndex = submission.stepStatuses.findIndex(s => s === 'current');
+                 if (currentIndex === -1) {
+                    const firstPending = submission.stepStatuses.findIndex(s => s === 'pending' || s === 'revision');
+                    if (firstPending !== -1) {
+                        submission.stepStatuses[firstPending] = 'current';
+                    }
+                 }
+            }
+
+            // Re-render the table to reflect changes (applyFilters re-applies search/tabs)
+            const currentSearch = document.getElementById('searchInput').value;
+            handleSearch({ target: { value: currentSearch } }); // This re-runs search and applyFilters
+
+
+        }
+    }
+
+    function updateRunCount(serviceId, delta) { // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        if (submission) {
+            const newCount = Math.max(1, (submission.runCount || 1) + delta); // Default to 1, min 1
+            submission.runCount = newCount;
+
+            const display = document.getElementById(`runCount-${serviceId}`);
+            if (display) {
+                display.textContent = newCount;
+            }
+        }
+    }
+
+    function updateStepStatus(serviceId, stepIndex, newStatus) { // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        if (submission && stepIndex >= 0 && stepIndex < submission.stepStatuses.length) {
+            submission.stepStatuses[stepIndex] = newStatus;
+
+            // Auto-update general status
+            if (submission.stepStatuses.includes("revision")) {
+                submission.status = "failed";
+            } else if (submission.stepStatuses.every(s => s === "complete")) {
+                submission.status = "complete";
+            } else {
+                submission.status = "processing";
+            }
+            
+            // Update the general status dropdown in the expanded view
+            const statusSelect = document.querySelector(`#expanded-${serviceId} .status-select`);
+            if (statusSelect) {
+                statusSelect.value = submission.status;
+            }
+
+            // Update the visual indicator
+            const stepDot = document.querySelector(`#expanded-${serviceId} .step-dot:nth-child(${stepIndex + 1})`);
+            if (stepDot) {
+                stepDot.className = `step-dot ${newStatus}`;
+                stepDot.title = `Step ${stepIndex + 1}: ${newStatus.toUpperCase()}`;
+            }
+
+            // Find and update the main row in the table without a full re-render
+            const mainRow = document.querySelector(`[data-service-id="${serviceId}"]`);
+            if (mainRow) {
+                 // Update status badge
+                const statusBadge = mainRow.querySelector('.status-badge');
+                if (statusBadge) {
+                    statusBadge.className = `status-badge status-${submission.status}`;
+                    statusBadge.textContent = submission.status;
+                }
+                // Update progress bar
+                const isComplete = submission.status === 'complete';
+                const currentStepForProgress = isComplete ? submission.totalSteps : submission.currentStep;
+                const progressPercentage = Math.round((currentStepForProgress / submission.totalSteps) * 100);
+                
+                const progressFill = mainRow.querySelector('.progress-fill');
+                if (progressFill) {
+                    progressFill.className = `progress-fill status-${submission.status}`;
+                    progressFill.style.width = `${progressPercentage}%`;
+                }
+                const progressText = mainRow.querySelector('.progress-text');
+                if (progressText) {
+                    progressText.textContent = `${currentStepForProgress}/${submission.totalSteps} steps`;
+                }
+            }
+            // Update global stats
+            updateStatistics(applicationData.submissions);
+        }
+    }
+
+    function updateRemarks(serviceId, remarks) { // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        if (submission) {
+            submission.remarks = remarks;
+        }
+    }
+
+    function handleFileUpload(serviceId, files) { // RENAMED
+        console.log(`Uploading ${files.length} files for service ${serviceId}`);
+
+        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        if (submission) {
+            // This is just a visual simulation. Real uploads need a server.
+            submission.sendFiles += files.length;
+            document.getElementById(`send-file-count-${serviceId}`).textContent = submission.sendFiles;
+
+            const fileList = document.getElementById(`send-file-list-${serviceId}`);
+            if (fileList) {
+                // Clear "no files" message
+                if (fileList.querySelector('p')) {
+                    fileList.innerHTML = '';
+                }
+                // Add new files
+                for (let file of files) {
+                     fileList.innerHTML += `
+                        <div class="file-item staged-file">
+                            <div class="file-icon"><i class="fas ${getFileIcon(file.name)}"></i></div>
+                            <div class="file-info">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="file-action-btn btn-delete" title="Remove" onclick="this.parentElement.parentElement.remove()">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </div>
-                    `).join('') :
-                    '<p style="text-align: center; color: #6b7280; padding: 1rem;">No files to send</p>'
-                }
-                </div>
-            `;
-        }
-
-        function setupTableEventListeners() {
-
-        }
-
-        function toggleStudentDetails(studentId) {
-            const expandedRow = document.getElementById(`expanded-${studentId}`);
-            const studentRow = document.querySelector(`[data-student-id="${studentId}"]`);
-
-            if (expandedRow && studentRow) {
-                const isExpanded = !expandedRow.classList.contains('hidden');
-
-                document.querySelectorAll('.expanded-content').forEach(row => {
-                    row.classList.add('hidden');
-                });
-
-                document.querySelectorAll('.student-row').forEach(row => {
-                    row.classList.remove('expanded');
-                });
-
-                if (!isExpanded) {
-                    expandedRow.classList.remove('hidden');
-                    studentRow.classList.add('expanded');
-                    expandedRow = studentId;
-                } else {
-                    expandedRow = null;
+                    `;
                 }
             }
         }
+    }
 
-        function switchFileTab(studentId, tabType) {
-            const student = applicationData.students.find(s => s.id === studentId);
-            if (!student) return;
+    // --- SERVER COMMUNICATION (RENAMED) ---
 
-            // Update tab states
-            const tabContainer = document.querySelector(`#expanded-${studentId} .file-tabs`);
-            if (tabContainer) {
-                tabContainer.querySelectorAll('.file-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-
-                const activeTab = tabType === 'received' ? tabContainer.firstElementChild : tabContainer.lastElementChild;
-                if (activeTab) {
-                    activeTab.classList.add('active');
-                }
-            }
-
-            // Update content
-            const contentContainer = document.getElementById(`fileContent-${studentId}`);
-            if (contentContainer) {
-                if (tabType === 'received') {
-                    contentContainer.innerHTML = createReceivedFilesContent(student);
-                } else {
-                    contentContainer.innerHTML = createSendFilesContent(student);
-                }
-            }
+    async function saveChanges(serviceId) { // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        if (!submission) {
+            alert('Error: Could not find submission data.');
+            return;
         }
 
-        function updateGeneralStatus(studentId, newStatus) {
-            const student = applicationData.students.find(s => s.id === studentId);
-            if (student) {
-                student.status = newStatus;
-                student.lastUpdated = new Date().toISOString().split('T')[0];
-
-                // Re-render the table to reflect changes
-                applyFilters();
-
-                // Re-expand the row if it was expanded
-                setTimeout(() => {
-                    if (expandedRow === studentId) {
-                        toggleStudentDetails(studentId);
-                    }
-                }, 100);
-            }
+        const saveButton = document.querySelector(`#expanded-${serviceId} .btn-primary`);
+        if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
         }
 
-        function updateRunCount(studentId, delta) {
-            const student = applicationData.students.find(s => s.id === studentId);
-            if (student) {
-                const newCount = Math.max(0, student.runCount + delta);
-                student.runCount = newCount;
+        const payload = {
+            serviceId: submission.id, // This is the ServiceId
+            progress1: convertJsStatusToDbInt(submission.stepStatuses[0]),
+            progress2: convertJsStatusToDbInt(submission.stepStatuses[1]),
+            progress3: convertJsStatusToDbInt(submission.stepStatuses[2]),
+            progress4: convertJsStatusToDbInt(submission.stepStatuses[3]),
+            runCount: submission.runCount,
+            remarks: submission.remarks
+        };
+            console.log(payload);
 
-                // Update the display
-                const display = document.getElementById(`runCount-${studentId}`);
-                if (display) {
-                    display.textContent = newCount;
-                }
-            }
-        }
-
-        function updateStepStatus(studentId, stepIndex, newStatus) {
-            const student = applicationData.students.find(s => s.id === studentId);
-            if (student && stepIndex >= 0 && stepIndex < student.stepStatuses.length) {
-                student.stepStatuses[stepIndex] = newStatus;
-
-                // Update the visual indicator
-                const stepDot = document.querySelector(`#expanded-${studentId} .step-dot:nth-child(${stepIndex + 1})`);
-                if (stepDot) {
-                    stepDot.className = `step-dot ${newStatus}`;
-                    stepDot.title = `Step ${stepIndex + 1}: ${newStatus.toUpperCase()}`;
-                }
-            }
-        }
-
-        function updateRemarks(studentId, remarks) {
-            const student = applicationData.students.find(s => s.id === studentId);
-            if (student) {
-                student.remarks = remarks;
-            }
-        }
-
-        function handleFileUpload(studentId, files) {
-            // Simulate file upload
-            console.log(`Uploading ${files.length} files for student ${studentId}`);
-
-            const student = applicationData.students.find(s => s.id === studentId);
-            if (student) {
-                student.sendFiles += files.length;
-
-                // Refresh the file content
-                switchFileTab(studentId, 'send');
-            }
-        }
-
-        function saveChanges(studentId) {
-            // Simulate saving changes
-            console.log(`Saving changes for student ${studentId}`);
-
-            // Show success message (you can implement a toast notification here)
-            alert('Changes saved successfully!');
-        }
-
-        function updateStatistics(students = applicationData.students) {
-            const stats = {
-                total: students.length,
-                processing: students.filter(s => s.status === 'processing').length,
-                complete: students.filter(s => s.status === 'complete').length,
-                failed: students.filter(s => s.status === 'failed').length
-            };
-
-            // Update the display
-            const elements = {
-                totalStudents: document.getElementById('totalStudents'),
-                processingCount: document.getElementById('processingCount'),
-                completedCount: document.getElementById('completedCount'),
-                failedCount: document.getElementById('failedCount')
-            };
-
-            if (elements.totalStudents) elements.totalStudents.textContent = stats.total;
-            if (elements.processingCount) elements.processingCount.textContent = stats.processing;
-            if (elements.completedCount) elements.completedCount.textContent = stats.complete;
-            if (elements.failedCount) elements.failedCount.textContent = stats.failed;
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
+        try {
+            const response = await fetch('/Admin/UpdateProgress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // TODO: Add Anti-Forgery Token header if needed
+                },
+                body: JSON.stringify(payload)
             });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Save successful', result);
+                alert('Changes saved successfully!');
+
+                submission.lastUpdated = new Date().toISOString();
+                
+                // Update the 'Last Updated' cell in the main row
+                const mainRow = document.querySelector(`[data-service-id="${serviceId}"]`);
+                if(mainRow) {
+                    const dateCell = mainRow.cells[5]; // 6th cell (index 5)
+                    if(dateCell) {
+                        dateCell.textContent = formatDate(submission.lastUpdated);
+                    }
+                }
+
+            } else {
+                const errorText = await response.text();
+                console.error('Save failed:', errorText);
+                alert(`Error: Could not save changes. Server said: ${errorText}`);
+            }
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            alert('Error: A network error occurred while saving.');
+        } finally {
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            }
         }
+    }
 
-        // Service Steps Modal Functions
-        function showServiceSteps(serviceKey) {
-            const modal = document.getElementById('serviceStepsModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
+    // --- STATS & MODAL (RENAMED) ---
 
-            const serviceData = applicationData.serviceSteps[serviceKey];
-            if (!serviceData) return;
+    function updateStatistics(submissions = applicationData.submissions) { // RENAMED
+        const stats = {
+            total: submissions.length,
+            processing: submissions.filter(s => s.status === 'processing').length,
+            complete: submissions.filter(s => s.status === 'complete').length,
+            failed: submissions.filter(s => s.status === 'failed').length
+        };
 
+        // RENAMED ID
+        const elements = {
+            totalSubmissions: document.getElementById('totalSubmissions'),
+            processingCount: document.getElementById('processingCount'),
+            completedCount: document.getElementById('completedCount'),
+            failedCount: document.getElementById('failedCount')
+        };
+
+        if (elements.totalSubmissions) elements.totalSubmissions.textContent = stats.total;
+        if (elements.processingCount) elements.processingCount.textContent = stats.processing;
+        if (elements.completedCount) elements.completedCount.textContent = stats.complete;
+        if (elements.failedCount) elements.failedCount.textContent = stats.failed;
+    }
+
+
+    function showServiceSteps(serviceKey) {
+        const modal = document.getElementById('serviceStepsModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        const serviceData = applicationData.serviceSteps[serviceKey];
+        if (!serviceData || !serviceData.steps) {
+            console.warn(`No service step data found for key: ${serviceKey}`);
+            modalTitle.textContent = "Guide Not Available";
+            modalBody.innerHTML = "<p>The guide for this service has not been set up yet.</p>";
+        } else {
             modalTitle.textContent = serviceData.title;
 
             let stepsHTML = '<div class="service-steps-container">';
-
             serviceData.steps.forEach(step => {
                 stepsHTML += `
                     <div class="service-step-item">
@@ -803,31 +1016,34 @@
                     </div>
                 `;
             });
-
             stepsHTML += '</div>';
 
             if (serviceData.note) {
-                stepsHTML += `<div class="service-note">${serviceData.note}</div>`;
+                stepsHTML += `<div class="service-note"><strong>Note:</strong> ${serviceData.note}</div>`;
             }
 
             stepsHTML += '<div class="service-end-transaction">END OF TRANSACTION</div>';
-
             modalBody.innerHTML = stepsHTML;
-            modal.style.display = 'block';
-
-            // Close modal when clicking outside
-            modal.onclick = function (event) {
-                if (event.target === modal) {
-                    closeServiceStepsModal();
-                }
-            };
         }
+            
+        modal.style.display = 'block';
 
-        function closeServiceStepsModal() {
-            const modal = document.getElementById('serviceStepsModal');
+        // Close modal when clicking outside
+        modal.onclick = function (event) {
+            if (event.target === modal) {
+                closeServiceStepsModal();
+            }
+        };
+    }
+
+    // FIXED: Completed this function
+    function closeServiceStepsModal() {
+        const modal = document.getElementById('serviceStepsModal');
+        if (modal) {
             modal.style.display = 'none';
         }
+    }
 
-    </script>
+</script>
 </body>
 </html>

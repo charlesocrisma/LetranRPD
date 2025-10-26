@@ -10,7 +10,9 @@ namespace LetranRPD.Models
 
         public DbSet<Account> Accounts { get; set; } = null!;
         public DbSet<ServiceInformation> ServiceInformations { get; set; } = null!;
-        public DbSet<ServiceProgress> ServiceProgresses { get; set; } = null!;
+         public DbSet<ServiceProgress> ServiceProgresses { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

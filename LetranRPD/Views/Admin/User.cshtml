@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<Account>
+@{
     Layout = "~/Views/Shared/_AdminNav.cshtml";
 }
 
@@ -25,18 +26,20 @@
             </div>
         </header>
 
-        <!-- Stats Cards -->
+        <!-- Stats Cards - FIXED -->
         <div class="stats-grid">
             <div class="stat-card stat-card--primary">
-                <div class="stat-number" id="totalUsers">12</div>
+                <div class="stat-number" id="totalUsers">@Model.Count()</div>
                 <div class="stat-label">Total Users</div>
             </div>
             <div class="stat-card stat-card--success">
-                <div class="stat-number" id="activeStudents">8</div>
+                <!-- FIXED: Counting Students based on isAdmin == false -->
+                <div class="stat-number" id="activeStudents">@Model.Count(a => a.isAdmin == false)</div>
                 <div class="stat-label">Students</div>
             </div>
             <div class="stat-card stat-card--warning">
-                <div class="stat-number" id="activeAdmins">4</div>
+                <!-- FIXED: Counting Admins based on isAdmin == true -->
+                <div class="stat-number" id="activeAdmins">@Model.Count(a => a.isAdmin == true)</div>
                 <div class="stat-label">Admins</div>
             </div>
         </div>
@@ -76,15 +79,16 @@
                         </div>
                     </div>
 
+                    <!-- FIXED: Filter buttons now use the full names from your database -->
                     <div class="filter-group">
                         <label class="filter-label">Department:</label>
                         <div class="filter-buttons">
                             <button class="filter-btn active" data-filter="department" data-value="all">All Departments</button>
-                            <button class="filter-btn" data-filter="department" data-value="CEIT">Engineering & IT</button>
-                            <button class="filter-btn" data-filter="department" data-value="CBAA">Business Administration</button>
-                            <button class="filter-btn" data-filter="department" data-value="CELAS">Education & Liberal Arts</button>
-                            <button class="filter-btn" data-filter="department" data-value="RPD">Research & Publication</button>
-                            <button class="filter-btn" data-filter="department" data-value="SHS">Senior High School</button>
+                            <button class="filter-btn" data-filter="department" data-value="College of Engineering and Information Technology">Engineering & IT</button>
+                            <button class="filter-btn" data-filter="department" data-value="College of Business Administration and Accountancy">Business Administration</button>
+                            <button class="filter-btn" data-filter="department" data-value="College of Education, Liberal Arts, and Sciences">Education & Liberal Arts</button>
+                            <button class="filter-btn" data-filter="department" data-value="Research and Publication Department">Research & Publication</button>
+                            <button class="filter-btn" data-filter="department" data-value="Senior High School Department">Senior High School</button>
                         </div>
                     </div>
                 </div>
@@ -105,7 +109,7 @@
             <div class="table-header">
                 <h3 class="table-title">
                     <i class="fas fa-users"></i>
-                    User Directory (<span id="userCount">12</span>)
+                    User Directory (<span id="userCount">@Model.Count()</span>)
                 </h3>
                 <div class="table-actions">
                     <button class="btn btn-secondary btn-small" id="refreshData">
@@ -193,15 +197,16 @@
                         <input type="text" id="useridno" name="idno" class="form-control" required>
                     </div>
                     <div class="form-row">
+                        <!-- FIXED: Modal dropdown now uses full names, matching your database -->
                         <div class="form-group">
                             <label for="userDepartment" class="form-label">Department *</label>
                             <select id="userDepartment" name="department" class="form-control" required>
                                 <option value="">Select Department</option>
-                                <option value="CEIT">College of Engineering and Information Technology</option>
-                                <option value="CBAA">College of Business Administration and Accountancy</option>
-                                <option value="CELAS">College of Education, Liberal Arts, and Sciences</option>
-                                <option value="RPD">Research and Publication Department</option>
-                                <option value="SHS">Senior High School Department</option>
+                                <option value="College of Engineering and Information Technology">College of Engineering and Information Technology</option>
+                                <option value="College of Business Administration and Accountancy">College of Business Administration and Accountancy</option>
+                                <option value="College of Education, Liberal Arts, and Sciences">College of Education, Liberal Arts, and Sciences</option>
+                                <option value="Research and Publication Department">Research and Publication Department</option>
+                                <option value="Senior High School Department">Senior High School Department</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -253,141 +258,34 @@
 
     <script>
         class UserManagement {
-            constructor() {
-                this.users = [
-                    {
-                        id: 1,
-                        name: "John Martinez",
-                        email: "john.martinez@letran.edu.ph",
-                        idno: "CS2021-001",
-                        department: "CEIT",
-                        departmentFull: "College of Engineering and Information Technology",
-                        role: "Student",
-                        lastLogin: "2025-10-03T08:30:00Z",
-                        initials: "JM"
-                    },
-                    {
-                        id: 2,
-                        name: "Sarah Johnson",
-                        email: "sarah.johnson@letran.edu.ph",
-                        idno: "BS2020-045",
-                        department: "CBAA",
-                        departmentFull: "College of Business Administration and Accountancy",
-                        role: "Student",
-                        lastLogin: "2025-10-02T16:45:00Z",
-                        initials: "SJ"
-                    },
-                    {
-                        id: 3,
-                        name: "Dr. Michael Chen",
-                        email: "m.chen@letran.edu.ph",
-                        idno: "ADM001",
-                        department: "RPD",
-                        departmentFull: "Research and Publication Department",
-                        role: "Admin",
-                        lastLogin: "2025-10-03T07:15:00Z",
-                        initials: "MC"
-                    },
-                    {
-                        id: 4,
-                        name: "Emily Rodriguez",
-                        email: "emily.rodriguez@letran.edu.ph",
-                        idno: "ED2021-087",
-                        department: "CELAS",
-                        departmentFull: "College of Education, Liberal Arts, and Sciences",
-                        role: "Student",
-                        lastLogin: "2025-10-01T14:20:00Z",
-                        initials: "ER"
-                    },
-                    {
-                        id: 5,
-                        name: "Prof. David Wilson",
-                        email: "d.wilson@letran.edu.ph",
-                        idno: "ADM012",
-                        department: "RPD",
-                        departmentFull: "Research and Publication Department",
-                        role: "Admin",
-                        lastLogin: "2025-10-02T12:30:00Z",
-                        initials: "DW"
-                    },
-                    {
-                        id: 6,
-                        name: "Lisa Thompson",
-                        email: "lisa.thompson@letran.edu.ph",
-                        idno: "SH2021-156",
-                        department: "SHS",
-                        departmentFull: "Senior High School Department",
-                        role: "Student",
-                        lastLogin: "2025-09-28T14:22:00Z",
-                        initials: "LT"
-                    },
-                    {
-                        id: 7,
-                        name: "Robert Kim",
-                        email: "robert.kim@letran.edu.ph",
-                        idno: "BA2020-234",
-                        department: "CBAA",
-                        departmentFull: "College of Business Administration and Accountancy",
-                        role: "Student",
-                        lastLogin: "2025-09-25T11:45:00Z",
-                        initials: "RK"
-                    },
-                    {
-                        id: 8,
-                        name: "Amanda Foster",
-                        email: "amanda.foster@letran.edu.ph",
-                        idno: "ED2023-067",
-                        department: "CELAS",
-                        departmentFull: "College of Education, Liberal Arts, and Sciences",
-                        role: "Student",
-                        lastLogin: "2025-10-03T09:20:00Z",
-                        initials: "AF"
-                    },
-                    {
-                        id: 9,
-                        name: "Dr. Maria Santos",
-                        email: "m.santos@letran.edu.ph",
-                        idno: "ADM003",
-                        department: "RPD",
-                        departmentFull: "Research and Publication Department",
-                        role: "Admin",
-                        lastLogin: "2025-10-03T06:45:00Z",
-                        initials: "MS"
-                    },
-                    {
-                        id: 10,
-                        name: "James Wilson",
-                        email: "james.wilson@letran.edu.ph",
-                        idno: "IT2021-234",
-                        department: "CEIT",
-                        departmentFull: "College of Engineering and Information Technology",
-                        role: "Student",
-                        lastLogin: "2025-10-02T11:30:00Z",
-                        initials: "JW"
-                    },
-                    {
-                        id: 11,
-                        name: "Dr. Jennifer Lee",
-                        email: "j.lee@letran.edu.ph",
-                        idno: "ADM004",
-                        department: "RPD",
-                        departmentFull: "Research and Publication Department",
-                        role: "Admin",
-                        lastLogin: "2025-10-02T15:30:00Z",
-                        initials: "JL"
-                    },
-                    {
-                        id: 12,
-                        name: "Kevin Brown",
-                        email: "kevin.brown@letran.edu.ph",
-                        idno: "SH2022-156",
-                        department: "SHS",
-                        departmentFull: "Senior High School Department",
-                        role: "Student",
-                        lastLogin: "2025-10-03T10:15:00Z",
-                        initials: "KB"
-                    }
-                ];
+            constructor(initialUsers = []) {
+                console.log("UserManagement constructor loaded.");
+                console.log("Received initialUsers:", initialUsers);
+
+                // FIXED: Removed all map logic. We will use the full names directly.
+                this.users = initialUsers.map(user => {
+                    const fName = user.firstName || "";
+                    const lName = user.lastName || "";
+
+                    // Correctly map Role and Department
+                    const role = user.isAdmin === true ? "Admin" : "Student";
+                    // FIXED: .trim() removes hidden whitespace from the database value
+                    const dbDepartmentName = (user.level || "N/A").trim();
+
+                    return {
+                        id: user.id,
+                        name: `${fName} ${lName}`.trim(),
+                        email: user.email || "N/A",
+                        idno: user.studentNumber || "N/A",
+                        role: role,
+                        department: dbDepartmentName, // Used for filtering (Full Name)
+                        departmentFull: dbDepartmentName, // Used for modal (Full Name)
+                        lastLogin: new Date().toISOString(),
+                        initials: `${fName.charAt(0)}${lName.charAt(0)}`.toUpperCase()
+                    };
+                });
+
+                console.log("Mapped users:", this.users);
 
                 this.filteredUsers = [...this.users];
                 this.selectedUsers = new Set();
@@ -399,31 +297,36 @@
                     department: 'all',
                     search: ''
                 };
-
                 this.currentEditingUser = null;
                 this.init();
             }
 
             init() {
+                console.log("Initializing UserManagement...");
                 this.setupEventListeners();
                 this.updateStats();
                 this.renderTable();
                 this.updateUserCount();
                 this.renderPagination();
+                console.log("Initialization complete.");
             }
 
             setupEventListeners() {
+                console.log("Setting up event listeners...");
                 // Filter toggle
-                document.getElementById('filterToggle').addEventListener('click', this.toggleFilters);
+                const filterToggle = document.getElementById('filterToggle');
+                if (filterToggle) filterToggle.addEventListener('click', this.toggleFilters);
 
                 // Search
-                document.getElementById('searchInput').addEventListener('input', this.debounce((e) => {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.addEventListener('input', this.debounce((e) => {
                     this.filters.search = e.target.value.toLowerCase();
                     this.applyFilters();
                     this.toggleSearchClear();
                 }, 300));
 
-                document.getElementById('searchClear').addEventListener('click', () => {
+                const searchClear = document.getElementById('searchClear');
+                if (searchClear) searchClear.addEventListener('click', () => {
                     document.getElementById('searchInput').value = '';
                     this.filters.search = '';
                     this.applyFilters();
@@ -438,63 +341,59 @@
                 });
 
                 // Clear filters
-                document.getElementById('clearFilters').addEventListener('click', () => {
-                    this.clearAllFilters();
-                });
+                const clearFilters = document.getElementById('clearFilters');
+                if (clearFilters) clearFilters.addEventListener('click', () => this.clearAllFilters());
 
                 // Export data
-                document.getElementById('exportData').addEventListener('click', () => {
-                    this.exportData();
-                });
+                const exportData = document.getElementById('exportData');
+                if (exportData) exportData.addEventListener('click', () => this.exportData());
 
                 // Refresh data
-                document.getElementById('refreshData').addEventListener('click', () => {
-                    this.refreshData();
-                });
+                const refreshData = document.getElementById('refreshData');
+                if (refreshData) refreshData.addEventListener('click', () => location.reload());
 
                 // Add user
-                document.getElementById('addUserBtn').addEventListener('click', () => {
-                    this.openUserModal();
-                });
+                const addUserBtn = document.getElementById('addUserBtn');
+                if (addUserBtn) addUserBtn.addEventListener('click', () => this.openUserModal());
 
-                document.getElementById('addFirstUser').addEventListener('click', () => {
-                    this.openUserModal();
-                });
+                const addFirstUser = document.getElementById('addFirstUser');
+                if (addFirstUser) addFirstUser.addEventListener('click', () => this.openUserModal());
 
                 // Table interactions
-                document.getElementById('usersTableBody').addEventListener('click', (e) => {
-                    this.handleTableClick(e);
-                });
+                const usersTableBody = document.getElementById('usersTableBody');
+                if (usersTableBody) usersTableBody.addEventListener('click', (e) => this.handleTableClick(e));
 
                 // Select all
-                document.getElementById('selectAll').addEventListener('change', (e) => {
-                    this.toggleSelectAll(e.target.checked);
-                });
+                const selectAll = document.getElementById('selectAll');
+                if (selectAll) selectAll.addEventListener('change', (e) => this.toggleSelectAll(e.target.checked));
 
                 // Modal controls
-                document.getElementById('closeUserModal').addEventListener('click', () => {
-                    this.closeUserModal();
-                });
+                const closeUserModal = document.getElementById('closeUserModal');
+                if (closeUserModal) closeUserModal.addEventListener('click', () => this.closeUserModal());
 
-                document.getElementById('cancelUserModal').addEventListener('click', () => {
-                    this.closeUserModal();
-                });
+                const cancelUserModal = document.getElementById('cancelUserModal');
+                if (cancelUserModal) cancelUserModal.addEventListener('click', () => this.closeUserModal());
 
-                document.getElementById('userForm').addEventListener('submit', (e) => {
-                    this.handleUserSubmit(e);
-                });
+                const userForm = document.getElementById('userForm');
+                if (userForm) {
+                    userForm.addEventListener('submit', (e) => {
+                        console.log("Submit event fired!");
+                        this.handleUserSubmit(e);
+                    });
+                } else {
+                    console.error("CRITICAL: userForm not found!");
+                }
 
                 // Confirmation modal
-                document.getElementById('closeConfirmModal').addEventListener('click', () => {
-                    this.closeConfirmModal();
-                });
+                const closeConfirmModal = document.getElementById('closeConfirmModal');
+                if(closeConfirmModal) closeConfirmModal.addEventListener('click', () => this.closeConfirmModal());
 
-                document.getElementById('cancelConfirm').addEventListener('click', () => {
-                    this.closeConfirmModal();
-                });
+                const cancelConfirm = document.getElementById('cancelConfirm');
+                if(cancelConfirm) cancelConfirm.addEventListener('click', () => this.closeConfirmModal());
 
                 // Page size change
-                document.getElementById('pageSize').addEventListener('change', (e) => {
+                const pageSize = document.getElementById('pageSize');
+                if (pageSize) pageSize.addEventListener('change', (e) => {
                     this.pageSize = parseInt(e.target.value);
                     this.currentPage = 1;
                     this.renderTable();
@@ -502,24 +401,23 @@
                 });
 
                 // Modal backdrop close
-                document.getElementById('userModal').addEventListener('click', (e) => {
-                    if (e.target.classList.contains('modal')) {
-                        this.closeUserModal();
-                    }
+                const userModal = document.getElementById('userModal');
+                if (userModal) userModal.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) this.closeUserModal();
                 });
 
-                document.getElementById('confirmModal').addEventListener('click', (e) => {
-                    if (e.target.classList.contains('modal')) {
-                        this.closeConfirmModal();
-                    }
+                const confirmModal = document.getElementById('confirmModal');
+                if (confirmModal) confirmModal.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) this.closeConfirmModal();
                 });
+
+                console.log("Event listeners setup complete.");
             }
 
             toggleFilters = () => {
                 const content = document.getElementById('filterContent');
                 const toggle = document.getElementById('filterToggle');
                 const isVisible = content.style.display !== 'none';
-
                 if (isVisible) {
                     content.style.display = 'none';
                     toggle.querySelector('i').className = 'fas fa-chevron-down';
@@ -532,13 +430,9 @@
             handleFilterClick(button) {
                 const filterType = button.dataset.filter;
                 const filterValue = button.dataset.value;
-
-                // Update active state
                 const group = button.closest('.filter-group');
                 group.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
-
-                // Update filter
                 this.filters[filterType] = filterValue;
                 this.applyFilters();
             }
@@ -546,7 +440,6 @@
             applyFilters() {
                 this.filteredUsers = this.users.filter(user => {
                     let matches = true;
-
                     // Search filter
                     if (this.filters.search) {
                         const searchTerm = this.filters.search.toLowerCase();
@@ -556,35 +449,27 @@
                             user.idno.toLowerCase().includes(searchTerm)
                         );
                     }
-
                     // Role filter
                     if (this.filters.role !== 'all') {
-                        matches = matches && user.role === this.filters.role;
+                        matches = matches && (user.role || "").toLowerCase() === this.filters.role.toLowerCase();
                     }
-
                     // Department filter
                     if (this.filters.department !== 'all') {
-                        matches = matches && user.department === this.filters.department;
+                        // FIXED: .trim() on both sides makes the match forgiving
+                        matches = matches && (user.department || "").trim() === (this.filters.department || "").trim();
                     }
-
                     return matches;
                 });
-
                 this.currentPage = 1;
                 this.selectedUsers.clear();
                 this.renderTable();
                 this.updateUserCount();
                 this.renderPagination();
+                this.updateSelectAllState();
             }
 
             clearAllFilters() {
-                this.filters = {
-                    role: 'all',
-                    department: 'all',
-                    search: ''
-                };
-
-                // Reset UI
+                this.filters = { role: 'all', department: 'all', search: '' };
                 document.getElementById('searchInput').value = '';
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.classList.remove('active');
@@ -592,7 +477,6 @@
                         btn.classList.add('active');
                     }
                 });
-
                 this.applyFilters();
                 this.toggleSearchClear();
             }
@@ -600,14 +484,13 @@
             toggleSearchClear() {
                 const searchClear = document.getElementById('searchClear');
                 const searchInput = document.getElementById('searchInput');
-                searchClear.style.display = searchInput.value.length > 0 ? 'block' : 'none';
+                if (searchClear && searchInput) searchClear.style.display = searchInput.value.length > 0 ? 'block' : 'none';
             }
 
             updateStats() {
                 const total = this.users.length;
-                const students = this.users.filter(u => u.role === 'Student').length;
-                const admins = this.users.filter(u => u.role === 'Admin').length;
-
+                const students = this.users.filter(u => (u.role || "").toLowerCase() === 'student').length;
+                const admins = this.users.filter(u => (u.role || "").toLowerCase() === 'admin').length;
                 document.getElementById('totalUsers').textContent = total;
                 document.getElementById('activeStudents').textContent = students;
                 document.getElementById('activeAdmins').textContent = admins;
@@ -620,110 +503,53 @@
             renderTable() {
                 const tbody = document.getElementById('usersTableBody');
                 const emptyState = document.getElementById('emptyState');
-
+                if (!tbody || !emptyState) return;
                 if (this.filteredUsers.length === 0) {
                     tbody.innerHTML = '';
                     emptyState.style.display = 'block';
                     return;
                 }
-
                 emptyState.style.display = 'none';
-
-                // Calculate pagination
                 const startIndex = (this.currentPage - 1) * this.pageSize;
                 const endIndex = startIndex + this.pageSize;
                 const pageUsers = this.filteredUsers.slice(startIndex, endIndex);
-
                 tbody.innerHTML = pageUsers.map(user => `
                     <tr data-user-id="${user.id}" ${this.selectedUsers.has(user.id) ? 'class="selected"' : ''}>
-                        <td>
-                            <label class="checkbox-wrapper">
-                                <input type="checkbox" ${this.selectedUsers.has(user.id) ? 'checked' : ''}>
-                                <span class="checkbox-custom"></span>
-                            </label>
-                        </td>
-                        <td>
-                            <div class="user-info">
-                                <div class="user-avatar" style="background: ${this.getAvatarColor(user.name)}">
-                                    ${user.initials}
-                                </div>
-                                <div class="user-details">
-                                    <div class="user-name">${user.name}</div>
-                                    <div class="user-meta">${user.idno} • ${user.email}</div>
-                                </div>
-                            </div>
-                        </td>
+                        <td><label class="checkbox-wrapper"><input type="checkbox" ${this.selectedUsers.has(user.id) ? 'checked' : ''}><span class="checkbox-custom"></span></label></td>
+                        <td><div class="user-info"><div class="user-avatar" style="background: ${this.getAvatarColor(user.name)}">${user.initials}</div><div class="user-details"><div class="user-name">${user.name}</div><div class="user-meta">${user.idno} • ${user.email}</div></div></div></td>
                         <td class="department-cell">${user.departmentFull}</td>
-                        <td>
-                            <span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span>
-                        </td>
+                        <td><span class="role-badge role-${(user.role || "N/A").toLowerCase()}">${user.role}</span></td>
                         <td class="date-cell">${this.formatLastLogin(user.lastLogin)}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn action-btn--edit" title="Edit User" data-action="edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="action-btn action-btn--delete" title="Delete User" data-action="delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
+                        <td><div class="action-buttons"><button class="action-btn action-btn--edit" title="Edit User" data-action="edit"><i class="fas fa-edit"></i></button><button class="action-btn action-btn--delete" title="Delete User" data-action="delete"><i class="fas fa-trash"></i></button></div></td>
                     </tr>
                 `).join('');
+                this.updateSelectAllState();
             }
 
             renderPagination() {
                 const totalPages = Math.ceil(this.filteredUsers.length / this.pageSize);
                 const pagination = document.getElementById('pagination');
-
+                if (!pagination) return;
                 if (totalPages <= 1) {
                     pagination.innerHTML = '';
                     return;
                 }
-
                 let paginationHTML = '';
-
-                // Previous button
-                paginationHTML += `
-                    <button class="pagination-btn" ${this.currentPage === 1 ? 'disabled' : ''}
-                            onclick="userManagement.goToPage(${this.currentPage - 1})">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                `;
-
-                // Page numbers
+                paginationHTML += `<button class="pagination-btn" ${this.currentPage === 1 ? 'disabled' : ''} onclick="userManagement.goToPage(${this.currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
                 const startPage = Math.max(1, this.currentPage - 2);
                 const endPage = Math.min(totalPages, this.currentPage + 2);
-
                 if (startPage > 1) {
                     paginationHTML += `<button class="pagination-btn" onclick="userManagement.goToPage(1)">1</button>`;
-                    if (startPage > 2) {
-                        paginationHTML += `<span class="pagination-ellipsis">...</span>`;
-                    }
+                    if (startPage > 2) paginationHTML += `<span class="pagination-ellipsis">...</span>`;
                 }
-
                 for (let i = startPage; i <= endPage; i++) {
-                    paginationHTML += `
-                        <button class="pagination-btn ${i === this.currentPage ? 'active' : ''}"
-                                onclick="userManagement.goToPage(${i})">${i}</button>
-                    `;
+                    paginationHTML += `<button class="pagination-btn ${i === this.currentPage ? 'active' : ''}" onclick="userManagement.goToPage(${i})">${i}</button>`;
                 }
-
                 if (endPage < totalPages) {
-                    if (endPage < totalPages - 1) {
-                        paginationHTML += `<span class="pagination-ellipsis">...</span>`;
-                    }
+                    if (endPage < totalPages - 1) paginationHTML += `<span class="pagination-ellipsis">...</span>`;
                     paginationHTML += `<button class="pagination-btn" onclick="userManagement.goToPage(${totalPages})">${totalPages}</button>`;
                 }
-
-                // Next button
-                paginationHTML += `
-                    <button class="pagination-btn" ${this.currentPage === totalPages ? 'disabled' : ''}
-                            onclick="userManagement.goToPage(${this.currentPage + 1})">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                `;
-
+                paginationHTML += `<button class="pagination-btn" ${this.currentPage === totalPages ? 'disabled' : ''} onclick="userManagement.goToPage(${this.currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
                 pagination.innerHTML = paginationHTML;
             }
 
@@ -739,16 +565,11 @@
             handleTableClick(e) {
                 const tr = e.target.closest('tr');
                 if (!tr || !tr.dataset.userId) return;
-
                 const userId = parseInt(tr.dataset.userId);
-
-                // Handle checkbox
                 if (e.target.type === 'checkbox') {
                     this.toggleUserSelection(userId, e.target.checked);
                     return;
                 }
-
-                // Handle action buttons
                 const action = e.target.closest('[data-action]')?.dataset.action;
                 if (action) {
                     const user = this.users.find(u => u.id === userId);
@@ -756,26 +577,16 @@
                         this.openUserModal(user);
                     } else if (action === 'delete') {
                         this.confirmAction('delete', `Delete user "${user.name}"?`,
-                            'This action cannot be undone.', () => this.deleteUser(userId));
+                            'This action cannot be undone.', async () => await this.deleteUser(userId));
                     }
                 }
             }
 
             toggleUserSelection(userId, selected) {
-                if (selected) {
-                    this.selectedUsers.add(userId);
-                } else {
-                    this.selectedUsers.delete(userId);
-                }
-
-                // Update row appearance
+                if (selected) this.selectedUsers.add(userId);
+                else this.selectedUsers.delete(userId);
                 const row = document.querySelector(`[data-user-id="${userId}"]`);
-                if (selected) {
-                    row.classList.add('selected');
-                } else {
-                    row.classList.remove('selected');
-                }
-
+                if(row) row.classList.toggle('selected', selected);
                 this.updateSelectAllState();
             }
 
@@ -783,14 +594,11 @@
                 const startIndex = (this.currentPage - 1) * this.pageSize;
                 const endIndex = startIndex + this.pageSize;
                 const pageUsers = this.filteredUsers.slice(startIndex, endIndex);
-
                 pageUsers.forEach(user => {
                     const checkbox = document.querySelector(`[data-user-id="${user.id}"] input[type="checkbox"]`);
                     const row = document.querySelector(`[data-user-id="${user.id}"]`);
-
                     if (checkbox && row) {
                         checkbox.checked = selectAll;
-
                         if (selectAll) {
                             this.selectedUsers.add(user.id);
                             row.classList.add('selected');
@@ -804,13 +612,17 @@
 
             updateSelectAllState() {
                 const selectAllCheckbox = document.getElementById('selectAll');
+                if (!selectAllCheckbox) return;
                 const startIndex = (this.currentPage - 1) * this.pageSize;
                 const endIndex = startIndex + this.pageSize;
                 const pageUsers = this.filteredUsers.slice(startIndex, endIndex);
-
+                if(pageUsers.length === 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                    return;
+                }
                 const pageUserIds = pageUsers.map(u => u.id);
                 const selectedPageUsers = pageUserIds.filter(id => this.selectedUsers.has(id));
-
                 if (selectedPageUsers.length === 0) {
                     selectAllCheckbox.checked = false;
                     selectAllCheckbox.indeterminate = false;
@@ -828,31 +640,37 @@
                 const modal = document.getElementById('userModal');
                 const title = document.getElementById('userModalTitle');
                 const form = document.getElementById('userForm');
-
+                if (!modal || !title || !form) return;
                 title.textContent = user ? 'Edit User' : 'Add New User';
-
                 if (user) {
                     document.getElementById('userName').value = user.name;
                     document.getElementById('userEmail').value = user.email;
                     document.getElementById('useridno').value = user.idno;
-                    document.getElementById('userDepartment').value = user.department;
+                    // FIXED: Use departmentFull to set the dropdown
+                    document.getElementById('userDepartment').value = user.departmentFull;
                     document.getElementById('userRole').value = user.role;
                 } else {
                     form.reset();
                 }
-
                 modal.classList.remove('hidden');
                 document.getElementById('userName').focus();
             }
 
             closeUserModal() {
                 const modal = document.getElementById('userModal');
-                modal.classList.add('hidden');
+                if (modal) modal.classList.add('hidden');
                 this.currentEditingUser = null;
             }
 
-            handleUserSubmit(e) {
+            async handleUserSubmit(e) {
+                console.log("handleUserSubmit called.");
                 e.preventDefault();
+                const saveUserBtn = document.getElementById('saveUserBtn');
+                if (!saveUserBtn) {
+                    console.error("Save button not found!");
+                    return;
+                }
+                const originalBtnText = saveUserBtn.innerHTML;
 
                 const formData = new FormData(e.target);
                 const userData = {
@@ -862,64 +680,112 @@
                     department: formData.get('department'),
                     role: formData.get('role')
                 };
+                console.log("Form data:", userData);
 
                 // Validation
-                if (!userData.name || !userData.email || !userData.idno ||
-                    !userData.department || !userData.role) {
+                if (!userData.name || !userData.email || !userData.idno || !userData.department || !userData.role) {
+                    console.log("Validation failed: All fields are required.");
                     this.showToast('error', 'Error', 'All fields are required');
                     return;
                 }
 
-                // Check for duplicate email or ID (excluding current user if editing)
-                const existingUser = this.users.find(u =>
-                    (u.email === userData.email || u.idno === userData.idno) &&
-                    (!this.currentEditingUser || u.id !== this.currentEditingUser.id)
-                );
+                // More detailed duplicate check for logging
+                const duplicate = this.users.find(u => {
+                    const isDuplicate = (u.email === userData.email || u.idno === userData.idno) &&
+                                        (!this.currentEditingUser || u.id !== this.currentEditingUser.id);
+                    if (isDuplicate) {
+                        console.log("Duplicate user found:", u);
+                    }
+                    return isDuplicate;
+                });
 
-                if (existingUser) {
+                if (duplicate) {
+                    console.log("Validation failed: Email or ID already exists.");
                     this.showToast('error', 'Error', 'Email or Student/Employee ID already exists');
                     return;
                 }
 
-                // Add department full name
-                const deptMap = {
-                    'CEIT': 'College of Engineering and Information Technology',
-                    'CBAA': 'College of Business Administration and Accountancy',
-                    'CELAS': 'College of Education, Liberal Arts, and Sciences',
-                    'RPD': 'Research and Publication Department',
-                    'SHS': 'Senior High School Department'
-                };
-                userData.departmentFull = deptMap[userData.department];
-                userData.initials = userData.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+                let url = '';
+                let successMessage = '';
 
                 if (this.currentEditingUser) {
-                    // Update existing user
-                    Object.assign(this.currentEditingUser, userData);
-                    this.showToast('success', 'Success', `Updated user "${userData.name}"`);
+                    userData.id = this.currentEditingUser.id;
+                    url = '/Admin/UpdateUser';
+                    successMessage = `Updated user "${userData.name}"`;
+                    console.log("Submitting UPDATE to", url, "with data:", userData);
                 } else {
-                    // Add new user
-                    const newUser = {
-                        id: Math.max(...this.users.map(u => u.id)) + 1,
-                        ...userData,
-                        lastLogin: new Date().toISOString()
-                    };
-                    this.users.push(newUser);
-                    this.showToast('success', 'Success', `Added new user "${userData.name}"`);
+                    url = '/Admin/CreateUser';
+                    successMessage = `Added new user "${userData.name}"`;
+                    console.log("Submitting CREATE to", url, "with data:", userData);
                 }
 
-                this.updateStats();
-                this.applyFilters();
-                this.closeUserModal();
+                // Show loading state
+                saveUserBtn.disabled = true;
+                saveUserBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    console.log("Server response status:", response.status);
+                    const result = await response.json();
+                    console.log("Server response body:", result);
+
+                    if (response.ok) {
+                        if (result.success) {
+                            this.showToast('success', 'Success', successMessage);
+                            this.closeUserModal();
+                            location.reload();
+                        } else {
+                            this.showToast('error', 'Error', result.message || 'An error occurred.');
+                        }
+                    } else {
+                        this.showToast('error', 'Error', result.message || `Server error: ${response.status}`);
+                    }
+
+                } catch (error) {
+                    console.error('Error submitting user:', error);
+                    this.showToast('error', 'Error', 'Could not connect to the server. Check console for details.');
+                } finally {
+                    // Restore button
+                    saveUserBtn.disabled = false;
+                    saveUserBtn.innerHTML = originalBtnText;
+                }
             }
 
-            deleteUser(userId) {
+            async deleteUser(userId) {
+                console.log(`Attempting to delete user ${userId}`);
                 const user = this.users.find(u => u.id === userId);
-                if (user) {
-                    this.users = this.users.filter(u => u.id !== userId);
-                    this.selectedUsers.delete(userId);
-                    this.updateStats();
-                    this.applyFilters();
-                    this.showToast('success', 'Success', `Deleted user "${user.name}"`);
+                if (!user) {
+                    console.error(`User ${userId} not found in local data.`);
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/Admin/DeleteUser', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: userId })
+                    });
+
+                    console.log("Delete response status:", response.status);
+                    const result = await response.json();
+                    console.log("Delete response body:", result);
+
+                    if (response.ok && result.success) {
+                        this.showToast('success', 'Success', `Deleted user "${user.name}"`);
+                        location.reload();
+                    } else {
+                        this.showToast('error', 'Error', result.message || 'Could not delete user.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    this.showToast('error', 'Error', 'Could not connect to the server. Check console for details.');
                 }
             }
 
@@ -930,10 +796,14 @@
                 const iconEl = document.getElementById('confirmIcon');
                 const confirmBtn = document.getElementById('confirmAction');
 
+                if (!modal || !titleEl || !messageEl || !iconEl || !confirmBtn) {
+                    console.error("Confirmation modal elements not found!");
+                    return;
+                }
+
                 titleEl.textContent = title;
                 messageEl.textContent = message;
 
-                // Set appropriate icon and button style
                 if (type === 'delete') {
                     iconEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
                     iconEl.className = 'confirm-icon danger';
@@ -946,9 +816,27 @@
                     confirmBtn.innerHTML = '<i class="fas fa-check"></i> Confirm';
                 }
 
-                // Set up callback
-                confirmBtn.onclick = () => {
-                    callback();
+                confirmBtn.onclick = async () => {
+                    // Show loading state
+                    confirmBtn.disabled = true;
+                    if(type === 'delete') {
+                        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                    } else {
+                        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
+                    }
+
+                    try {
+                        await callback(); // This calls the async deleteUser
+                    } catch (e) {
+                        console.error("Error during confirm callback:", e);
+                        // Hide loading state on error
+                        confirmBtn.disabled = false;
+                        if(type === 'delete') {
+                           confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+                        } else {
+                           confirmBtn.innerHTML = '<i class="fas fa-check"></i> Confirm';
+                        }
+                    }
                     this.closeConfirmModal();
                 };
 
@@ -957,7 +845,7 @@
 
             closeConfirmModal() {
                 const modal = document.getElementById('confirmModal');
-                modal.classList.add('hidden');
+                if (modal) modal.classList.add('hidden');
             }
 
             exportData() {
@@ -969,97 +857,70 @@
                     Role: user.role,
                     'Last Login': this.formatLastLogin(user.lastLogin)
                 }));
-
                 const csv = this.convertToCSV(dataToExport);
                 const blob = new Blob([csv], { type: 'text/csv' });
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
-
                 link.href = url;
                 link.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(url);
-
                 this.showToast('success', 'Export Complete', `Exported ${dataToExport.length} user records`);
             }
 
-            refreshData() {
-                this.applyFilters();
-                this.updateStats();
-                this.showToast('success', 'Success', 'Data refreshed successfully');
-            }
+            refreshData() { location.reload(); }
 
-            // Utility functions
             getAvatarColor(name) {
-                const colors = [
-                    '#4f46e5', '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
-                    '#8b5cf6', '#f97316', '#ec4899', '#06b6d4', '#84cc16'
-                ];
+                const colors = ['#4f46e5', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#f97316', '#ec4899', '#06b6d4', '#84cc16'];
+                if (!name) return colors[0];
                 const index = name.charCodeAt(0) % colors.length;
                 return colors[index];
             }
 
             formatLastLogin(dateString) {
                 if (!dateString) return 'Never';
-
                 const date = new Date(dateString);
                 const now = new Date();
                 const diffMs = now - date;
                 const diffMins = Math.floor(diffMs / 60000);
                 const diffHours = Math.floor(diffMs / 3600000);
                 const diffDays = Math.floor(diffMs / 86400000);
-
-                if (diffMins < 60) {
-                    return `${diffMins} min ago`;
-                } else if (diffHours < 24) {
-                    return `${diffHours} hr ago`;
-                } else if (diffDays < 7) {
-                    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-                } else {
-                    return date.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
-                }
+                if (diffMins < 60) return `${diffMins} min ago`;
+                else if (diffHours < 24) return `${diffHours} hr ago`;
+                else if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+                else return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             }
 
             convertToCSV(data) {
                 if (data.length === 0) return '';
-
                 const headers = Object.keys(data[0]);
                 const csvContent = [
                     headers.join(','),
-                    ...data.map(row =>
-                        headers.map(header => {
-                            const value = row[header] || '';
-                            return `"${value.toString().replace(/"/g, '""')}"`;
-                        }).join(',')
-                    )
+                    ...data.map(row => headers.map(header => `"${(row[header] || '').toString().replace(/"/g, '""')}"`).join(','))
                 ].join('\n');
-
                 return csvContent;
             }
 
             debounce(func, wait) {
                 let timeout;
                 return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
+                    const later = () => { clearTimeout(timeout); func(...args); };
                     clearTimeout(timeout);
                     timeout = setTimeout(later, wait);
                 };
             }
 
             showToast(type, title, message) {
+                console.log(`TOAST (${type}): ${title} - ${message}`);
                 const container = document.getElementById('toastContainer');
+                if (!container) {
+                    console.error("CRITICAL: toastContainer not found!");
+                    return;
+                }
                 const toast = document.createElement('div');
-                toast.className = `toast toast-${type}`;
-
+                toast.className = `toast toast--${type}`;
                 toast.innerHTML = `
                     <div class="toast-icon">
                         <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}"></i>
@@ -1072,34 +933,36 @@
                         <i class="fas fa-times"></i>
                     </button>
                 `;
-
                 toast.querySelector('.toast-close').addEventListener('click', () => {
                     this.removeToast(toast);
                 });
-
                 container.appendChild(toast);
-
-                // Trigger animation
                 setTimeout(() => toast.classList.add('show'), 100);
-
-                // Auto remove after 5 seconds
                 setTimeout(() => this.removeToast(toast), 5000);
             }
 
             removeToast(toast) {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 300);
+                if (toast) {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }
             }
         }
 
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
-            window.userManagement = new UserManagement();
+            console.log("DOM content loaded.");
+            try {
+                const initialUsers = @Html.Raw(Json.Serialize(Model));
+                window.userManagement = new UserManagement(initialUsers);
+            } catch (e) {
+                console.error("CRITICAL ERROR on initialization:", e);
+            }
         });
     </script>
 </body>
 </html>
+

@@ -36,7 +36,9 @@ namespace LetranRPD.Models
         public List<string>? Progress4files { get; set; }
 
         public DateTime AppliedDate { get; set; }
-}
+        public int RunCount { get; set; } = 1;
+        public string? Remarks { get; set; }
+    }
     public class ServiceInformation
     {
         [Key]
@@ -57,8 +59,8 @@ namespace LetranRPD.Models
         public string? DA_Variable { get; set; }
         public string? DA_Tool { get; set; }
 
-        
-        public ServiceProgress ServiceProgress { get; set; } = new ServiceProgress();
+
+        public ServiceProgress ServiceProgress { get; set; }
 
     }
 
