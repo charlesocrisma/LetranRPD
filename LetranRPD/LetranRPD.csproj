@@ -26,7 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\data\" />
     <Folder Include="wwwroot\journals\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\js\articles.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

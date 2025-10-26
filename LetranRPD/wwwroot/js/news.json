@@ -1,0 +1,58 @@
+[
+  {
+    "Id": "1",
+    "Title": "Project TORCH: Research Ethics Training: Beyond Compliance - Embracing Ethics for Responsible Research",
+    "Content": "The Research and Publication Department recently conducted the Project TORCH: Research Ethics Training: Beyond Compliance - Embracing Ethics for Responsible Research under the guidance of Dr. Elizabeth Bautista, RN, Ph.D. former chair of Research Ethics Committee (REC) of Saint Louis University, Baguio, on Friday, February 28, 2025, in the RICH Room (Research, Innovation, and Creatives Hub) and via Zoom",
+    "ImagePath": "/News/News1.png",
+    "Category": "LETRAN MANILA",
+    "Date": "2025-03-05"
+  },
+  {
+    "Id": "2",
+    "Title": "Project TORCH: Research Ethics Training: Beyond Compliance - Embracing Ethics for Responsible Research",
+    "Content": "Testing content body",
+    "ImagePath": "/News/News2.png",
+    "Category": "LETRAN MANILA",
+    "Date": "2025-03-05"
+  },
+  {
+    "Id": "3",
+    "Title": "PLM and Letran Explore Potential Collaboration",
+    "Content": "Testing content body",
+    "ImagePath": "/News/News3.png",
+    "Category": "LETRAN MANILA",
+    "Date": "2025-03-05"
+  },
+  {
+    "Id": "4",
+    "Title": "Research and Publication Department Conducts Benchmarking Activity in Baguio City",
+    "Content": "Testing content body",
+    "ImagePath": "/News/News4.png",
+    "Category": "LETRAN MANILA",
+    "Date": "2025-03-05"
+  },
+  {
+    "Id": "5",
+    "Title": "Grade 12 Students Underwent Final Research Defense",
+    "Content": "Testing content body",
+    "ImagePath": "/News/News5.png",
+    "Category": "LETRAN MANILA",
+    "Date": "2025-03-05"
+  },
+  {
+    "Id": "c1d9c263-60ce-440d-9207-4e8e094563ea",
+    "Title": "Updated Test Title 2",
+    "Content": "test content 2",
+    "ImagePath": "/uploads/news/be949c20-f909-497a-b243-6a09d029221d.png",
+    "Category": "test categ 2",
+    "Date": "2025-10-23"
+  },
+  {
+    "Id": "152ca963-2372-4fd9-95b0-a97358690031",
+    "Title": "test 3",
+    "Content": "test 3",
+    "ImagePath": "/uploads/news/f0810b60-0543-4d7b-9666-ca9d6e07e490.png",
+    "Category": "test 3",
+    "Date": "2025-10-24"
+  }
+]

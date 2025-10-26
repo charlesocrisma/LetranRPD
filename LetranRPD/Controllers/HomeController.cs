@@ -20,6 +20,8 @@ public class HomeController : Controller
     public IActionResult Home()
     {
         return View();
+    
+       
     }
 
     public IActionResult About()
@@ -34,7 +36,8 @@ public class HomeController : Controller
 
     public IActionResult Journals()
     {
-        return View();
+        return View(Journals);
+      
     }
 
     public IActionResult Services()

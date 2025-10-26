@@ -1,0 +1,32 @@
+[
+  {
+    "Title": "asd",
+    "Authors": "asdasd",
+    "Abstract": "asd",
+    "JournalName": "Brillar",
+    "Volume": "3",
+    "SubVolume": "1",
+    "Category": "catttteeeee",
+    "Date": "October 21, 2025"
+  },
+  {
+    "Title": "test title 2",
+    "Authors": "authhor",
+    "Abstract": "abssctact",
+    "JournalName": "Brillar",
+    "Volume": "3",
+    "SubVolume": "1",
+    "Category": "categgg",
+    "Date": "October 23, 2025"
+  },
+  {
+    "Title": "titleeee",
+    "Authors": "updated author",
+    "Abstract": "updated abstract",
+    "JournalName": "The Horizon",
+    "Volume": "5",
+    "SubVolume": "7",
+    "Category": "updated category",
+    "Date": "October 23, 2025"
+  }
+]
