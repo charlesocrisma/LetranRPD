@@ -13,7 +13,7 @@ namespace LetranRPD.Models
         public string LastName { get; set; } = "";
         public string Email { get; set; } = "";
         public string StudentNumber { get; set; } = "";
-        public string Level { get; set; }
+        public string Level { get; set; } = "";
         public string password { get; set; } = "";
         public bool? isAdmin { get; set; } = false;
     }
