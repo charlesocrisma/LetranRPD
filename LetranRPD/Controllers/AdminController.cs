@@ -152,7 +152,16 @@ namespace LetranRPD.Controllers
             return Ok(new { success = true });
         }
 
+
+
+
         // ===== Progress Update (Using simpler logic from AdminController1) =====
+        [File: AdminController.cs]
+
+        [File: AdminController.cs]
+
+        [File: AdminController.cs]
+
         [HttpPost]
         public async Task<IActionResult> UpdateProgress([FromBody] ProgressUpdateModel model)
         {
@@ -200,39 +209,6 @@ namespace LetranRPD.Controllers
                 _logger.LogError(ex, "Error during update for ServiceId: {ServiceId}", model.ServiceId);
                 return StatusCode(500, "An error occurred while saving.");
             }
-        }
-
-        // ===== Journals Management (From AdminController1) =====
-        [HttpPost]
-        public IActionResult SaveJournal(string JournalName, string Volume, string SubVolume)
-        {
-            string jsonPath = Path.Combine(_env.WebRootPath, "js", "journal-data.json");
-            List<JournalModel> journals = new();
-
-            if (System.IO.File.Exists(jsonPath))
-            {
-                var existingJson = System.IO.File.ReadAllText(jsonPath);
-                journals = JsonSerializer.Deserialize<List<JournalModel>>(existingJson) ?? new();
-            }
-
-            bool isDuplicate = journals.Any(j =>
-                j.JournalName.Equals(JournalName, StringComparison.OrdinalIgnoreCase) &&
-                j.Volume.Equals(Volume, StringComparison.OrdinalIgnoreCase) &&
-                j.SubVolume.Equals(SubVolume, StringComparison.OrdinalIgnoreCase));
-
-            if (isDuplicate)
-                return Json(new { success = false, message = "Duplicate SubVolume detected." });
-
-            journals.Add(new JournalModel
-            {
-                JournalName = JournalName,
-                Volume = Volume,
-                SubVolume = SubVolume
-            });
-
-            var newJson = JsonSerializer.Serialize(journals, new JsonSerializerOptions { WriteIndented = true });
-            System.IO.File.WriteAllText(jsonPath, newJson);
-            return Json(new { success = true });
         }
 
         // ===== Article Management (From AdminController1) =====
