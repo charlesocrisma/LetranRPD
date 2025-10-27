@@ -59,7 +59,7 @@ namespace LetranRPD.Controllers
 
         // This is the new action the JavaScript will call
         [HttpPost]
-        public async Task<IActionResult> UpdateProgress([FromBody] UpdateProgressViewModel model)
+        public async Task<IActionResult> UpdateProgress([FromBody] UpdateProgressViewModel model, bool v)
         {
             if (model == null)
             {
@@ -68,7 +68,7 @@ namespace LetranRPD.Controllers
 
             var existingService = await dBContext.ServiceInformations
                 .Include(s => s.ServiceProgress)
-                .FirstOrDefaultAsync(s => s.ServiceId == model.ServiceId);
+                .FirstOrDefaultAsync(s => v);
 
             if (existingService == null)
             {
@@ -125,6 +125,7 @@ namespace LetranRPD.Controllers
 
         [HttpPost]
         public async Task<IActionResult> UploadFiles(int serviceId, int progressStep, List<IFormFile> files)
+
         {
             // --- This is the only change ---
             // If no files are sent, it's not an error. Just return OK.
@@ -134,7 +135,8 @@ namespace LetranRPD.Controllers
 
             var existingService = await dBContext.ServiceInformations
                 .Include(s => s.ServiceProgress)
-                .FirstOrDefaultAsync(s => s.ServiceId == serviceId);
+               .FirstOrDefaultAsync(s => (int)s.ServiceId == serviceId);
+
 
             if (existingService == null)
                 return NotFound("Service not found.");

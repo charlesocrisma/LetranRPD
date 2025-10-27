@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System; // Required for DateTime.Now
+using System.Collections.Generic; // Required for List<ServiceInformation>
 
 using Microsoft.AspNetCore.Authorization;
-using LetranRPD.Controllers;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -42,7 +43,7 @@ namespace LetranRPD.Controllers
         public async Task<IActionResult> OriginalityButton(ServiceInformation viewModel)
         {
 
-            var ServiceInformation = new ServiceInformation
+            var serviceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
                 Email = viewModel.Email,
@@ -54,18 +55,19 @@ namespace LetranRPD.Controllers
                 ResearchAdviser = viewModel.ResearchAdviser,
                 Subject = viewModel.Subject,
                 OC_ManuscriptType = viewModel.OC_ManuscriptType,
-                ServiceProgress = new ServiceProgress {
+                ServiceProgress = new ServiceProgress
+                {
                     Progress1 = 1,
                     Progress2 = 0,
                     Progress3 = 0,
                     Progress4 = 0,
                     AppliedDate = DateTime.Now
                 }
-                
+
 
             };
 
-            await dBContext.ServiceInformations.AddAsync(ServiceInformation);
+            await dBContext.ServiceInformations.AddAsync(serviceInformation);
 
             await dBContext.SaveChangesAsync();
 
@@ -75,7 +77,7 @@ namespace LetranRPD.Controllers
         public async Task<IActionResult> InstrumentButton(ServiceInformation viewModel)
         {
 
-            var ServiceInformation = new ServiceInformation
+            var serviceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
                 Email = viewModel.Email,
@@ -97,7 +99,7 @@ namespace LetranRPD.Controllers
 
             };
 
-            await dBContext.ServiceInformations.AddAsync(ServiceInformation);
+            await dBContext.ServiceInformations.AddAsync(serviceInformation);
 
             await dBContext.SaveChangesAsync();
 
@@ -107,7 +109,7 @@ namespace LetranRPD.Controllers
         public async Task<IActionResult> LanguageButton(ServiceInformation viewModel)
         {
 
-            var ServiceInformation = new ServiceInformation
+            var serviceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
                 Email = viewModel.Email,
@@ -130,7 +132,7 @@ namespace LetranRPD.Controllers
                 }
             };
 
-            await dBContext.ServiceInformations.AddAsync(ServiceInformation);
+            await dBContext.ServiceInformations.AddAsync(serviceInformation);
 
             await dBContext.SaveChangesAsync();
 
@@ -140,7 +142,7 @@ namespace LetranRPD.Controllers
         public async Task<IActionResult> DataButton(ServiceInformation viewModel)
         {
 
-            var ServiceInformation = new ServiceInformation
+            var serviceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
                 Email = viewModel.Email,
@@ -164,7 +166,7 @@ namespace LetranRPD.Controllers
 
             };
 
-            await dBContext.ServiceInformations.AddAsync(ServiceInformation);
+            await dBContext.ServiceInformations.AddAsync(serviceInformation);
 
             await dBContext.SaveChangesAsync();
 
