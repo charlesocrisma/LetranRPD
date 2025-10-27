@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using LetranRPD.Models;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using LetranRPD.Controllers;
 using Microsoft.EntityFrameworkCore;
-using System; // Added for Random and Exception
-using System.Collections.Generic; // Added for List<Account>
 
 using System.Net.Mail;
 using System.Net;
@@ -12,12 +12,10 @@ using Newtonsoft.Json;
 
 namespace ResearchManagement.Controllers
 {
-    // The ambiguity is resolved because Account and ApplicationDBContext now
-    // clearly refer to the types inside LetranRPD.Models
     public class AccountController : Controller
     {
         private readonly ApplicationDBContext dBContext;
-
+         
         public List<Account> accountList = new();
 
         public AccountController(ApplicationDBContext dBContext)
@@ -41,7 +39,7 @@ namespace ResearchManagement.Controllers
         private async Task _SendOtpEmailAsync(string toEmail, string otp)
         {
             string fromEmail = "charlesdominick.ocrisma@letran.edu.ph";
-            string fromPassword = "lecjtwpxqigntdni";
+            string fromPassword = "lecjtwpxqigntdni"; 
 
             var message = new MailMessage();
             message.From = new MailAddress(fromEmail);
@@ -84,7 +82,6 @@ namespace ResearchManagement.Controllers
 
             try
             {
-                // Random is now explicitly available due to 'using System;'
                 string otp = new Random().Next(100000, 999999).ToString();
 
                 await _SendOtpEmailAsync(viewModel.Email, otp);
@@ -107,6 +104,7 @@ namespace ResearchManagement.Controllers
             }
         }
 
+        // [GET] Action to show the OTP page
         // [GET] Action to show the OTP page
         public IActionResult VerifyOtp()
         {
@@ -156,7 +154,7 @@ namespace ResearchManagement.Controllers
                 // 5. Show error and *re-set* the TempData so they can try again
                 ModelState.AddModelError(string.Empty, "Invalid OTP. Please try again.");
                 TempData["PendingUser"] = pendingUserJson; // Must re-add it
-                TempData["VerificationOtp"] = correctOtp;    // Must re-add it
+                TempData["VerificationOtp"] = correctOtp;   // Must re-add it
                 return View();
             }
         }
