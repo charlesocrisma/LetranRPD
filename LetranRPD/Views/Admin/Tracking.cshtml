@@ -222,9 +222,8 @@
             "id": si.serviceId, // This is the ServiceId
             "name": si.author,
             "studentNumber": si.studentNumber,
-            "subject": si.subject,
-            "title": si.title,
-            "dept": si.Level,
+            "department": si.subject,
+            "course": "N/A",
             "service": serviceKey,
             "serviceName": si.serviceType,
             "status": status,
@@ -241,8 +240,6 @@
     }
 
     // --- APPLICATION STATE (RENAMED) ---
-
-
 
     const submissionsFromDb = serviceInfoFromDb.map(transformDbData);
     const departmentsFromDb = [...new Set(submissionsFromDb.map(s => s.department))];
@@ -480,6 +477,7 @@
                             <th>Student</th>
                             <th>Subject</th>
                             <th>Research Title</th>
+                            <th>Department</th>
                             <th>Service</th>
                             <th>Status</th>
                             <th>Progress</th>
@@ -514,16 +512,19 @@
                         <div class="student-avatar">${initials}</div>
                         <div class="student-details">
                             <h4>${submission.name}</h4>
-                            <p>${submission.studentNumber} • ${submission.dept}</p>
+                            <p>${submission.studentNumber} • ${submission.course}</p>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <span class="department-text">${submission.subject}</span>
+                    <span class="department-text">${submission.department}</span>
                 </td>
                  <td>
                     <span class="department-text">${submission.title}</span>
                 </td>
+                 <td>
+                        <span class="department-text">${submission.departments}</span>
+                    </td>
                 <td>
                     <span class="service-badge">${submission.serviceName}</span>
                 </td>
