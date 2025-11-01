@@ -53,7 +53,19 @@ public class HomeController : Controller
     }
     public IActionResult Tracker()
     {
-        var services = context.ServiceInformations.Include(o => o.ServiceProgress).OrderBy(i => i.ServiceId).ToList();
+
+        var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+        if (currentUser == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        var services = context.ServiceInformations
+                              .Include(o => o.ServiceProgress)
+                              .OrderBy(i => i.ServiceId)
+                              .ToList();
+
         return View(services);
     }
     public IActionResult Privacy()

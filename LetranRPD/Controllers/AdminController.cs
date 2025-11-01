@@ -55,24 +55,108 @@ namespace LetranRPD.Controllers
         }
 
         // ====== Admin Views (Combined from both files) ======
-        public IActionResult Dashboard() => View();
-        public IActionResult Research() => View();
-        public IActionResult Create() => View();
-        public IActionResult Submission() => View();
-        public IActionResult Content() => View(); // From AdminController1
-        public IActionResult Certificates() => View();
-        public IActionResult Privacy() => View();
+        public IActionResult Dashboard() 
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin ==false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        } 
+        public IActionResult Research()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
+        public IActionResult Create()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
+        public IActionResult Submission()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
+        public IActionResult Content()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }  // From AdminController1
+        public IActionResult Certificates()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
+        public IActionResult Privacy()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
 
         public IActionResult User()
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             List<Account> allAccounts = _context.Accounts.ToList(); // Using _context
             return View(allAccounts);
         }
 
-        public IActionResult Delete(string Name) => RedirectToAction("User");
+        public IActionResult Delete(string Name) 
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return RedirectToAction("User"); 
+        }
 
         public IActionResult Tracking()
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             var serviceInfoList = _context.ServiceInformations // Using _context
                 .Include(si => si.ServiceProgress)
                 .OrderByDescending(si => si.ServiceProgress.AppliedDate)

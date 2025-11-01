@@ -1,5 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_AdminNav.cshtml";
+    var currentUser = Context.Session.GetObject<Account>("account");
 }
 @using LetranRPD.Models
 @model List<ServiceInformation>
@@ -222,7 +223,7 @@
                     "name": si.author,
                     "studentNumber": si.studentNumber,
                     "department": si.subject,
-                    "course": "N/A",
+                    "course": si.email,
                     "service": serviceKey,
                     "serviceName": si.serviceType,
                     "title": si.title, // <-- **FIX 1: ADDED THIS LINE**
@@ -914,7 +915,7 @@
             saveButton.disabled = true;
             saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
         }
-
+        var remarks = "@currentUser.FirstName" + " " + "@currentUser.LastName" + "\u001F" + submission.remarks;
         const payload = {
             serviceId: submission.id, // This is the ServiceId
             progress1: convertJsStatusToDbInt(submission.stepStatuses[0]),
@@ -922,7 +923,7 @@
             progress3: convertJsStatusToDbInt(submission.stepStatuses[2]),
             progress4: convertJsStatusToDbInt(submission.stepStatuses[3]),
             runCount: submission.runCount,
-            remarks: submission.remarks
+            remarks: remarks
         };
             console.log(payload);
 

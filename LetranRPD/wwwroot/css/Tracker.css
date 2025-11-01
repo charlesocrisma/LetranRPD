@@ -137,6 +137,7 @@
 
 .service-title {
     color: #2c3e50;
+    width: 40rem;
 }
 
 .service-status {
@@ -156,6 +157,10 @@
     background: #d4edda;
     color: #155724;
 }
+.status-On-going {
+    background: #d4edda;
+    color: #155724;
+}
 
 .status-completed {
     background: #d1ecf1;
@@ -163,6 +168,10 @@
 }
 
 .status-failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+.status-Failed {
     background: #f8d7da;
     color: #721c24;
 }
