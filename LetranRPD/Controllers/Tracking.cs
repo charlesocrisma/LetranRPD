@@ -152,7 +152,7 @@ namespace LetranRPD.Controllers
                 if (file.Length > 0)
                 {
                     var safeFileName = Path.GetFileName(file.FileName);
-                    var uniqueFileName = $"{DateTime.Now.ToString("yyyyMMddHHmmss")}_{safeFileName}";
+                    var uniqueFileName = $"step{progressStep}_{DateTime.Now.ToString("yyyyMMddHHmm")}_{safeFileName}";
                     var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))

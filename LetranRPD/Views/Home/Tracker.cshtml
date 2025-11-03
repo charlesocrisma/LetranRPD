@@ -1,12 +1,7 @@
 ﻿@model List<ServiceInformation>
 @{
 	ViewData["Title"] = "Account";
-	var currentUser = Context.Session.GetObject<Account>("account") ?? null;
-	if (currentUser == null)
-	{
-		Context.Response.Redirect("/Home");
-
-	}
+	var currentUser = Context.Session.GetObject<Account>("account");
 }
 @{
 	ViewBag.Title = "Account";
@@ -14,10 +9,12 @@
 
 	void originalityBlock(ServiceInformation service)
 	{
-		string p1 ="";
+		string p1 = "";
 		string p2 = "";
 		string p3 = "";
 		string p4 = "";
+		int step = 1;
+		string status = "";
 		switch (service.ServiceProgress.Progress1)
 		{
 			case 0:
@@ -27,10 +24,11 @@
 				p1 = "current";
 				break;
 			case 2:
-				p1 = "revision";
+				p1 = "completed";
+				step++;
 				break;
 			case 3:
-				p1 = "completed";
+				p1 = "revision";
 				break;
 
 		}
@@ -44,10 +42,12 @@
 				p2 = "current";
 				break;
 			case 2:
-				p2 = "revision";
+				p2 = "completed";
+				step++;
+
 				break;
 			case 3:
-				p2 = "completed";
+				p2 = "revision";
 				break;
 
 		}
@@ -61,10 +61,12 @@
 				p3 = "current";
 				break;
 			case 2:
-				p3 = "revision";
+				p3 = "completed";
+				step++;
 				break;
 			case 3:
-				p3 = "completed";
+
+				p3 = "revision";
 				break;
 
 		}
@@ -78,18 +80,35 @@
 				p4 = "current";
 				break;
 			case 2:
-				p4 = "revision";
+				p4 = "completed";
 				break;
 			case 3:
-				p4 = "completed";
+				p4 = "revision";
 				break;
 
 		}
+		if (service.ServiceProgress.RunCount >= 3)
+		{
+			status = "Failed";
+		}
+		else if (p4 == "completed")
+		{
+			status = "completed";
+		}
+		else {
+			status = "On-going";
+
+
+		}
+
+
+
+
 		<!--First Service-->
 		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
 			<div class="service-header">
 				<h2 class="service-title">Originality Checking (@service.OC_ManuscriptType) Progress</h2>
-				<span class="service-status status-failed">Failed</span>
+				<span class="service-status status-@status">@status</span>
 			</div>
 			<div class="progress-container">
 				<div class="progress-header">
@@ -107,7 +126,19 @@
 					<div class="step">
 						<div class="step-circle @p1">1</div>
 						<div class="step-content">
-							<div class="step-title">Submision of requirments</div>
+							<div class="step-title">
+								Submision of requirments
+								@{
+									if (p1 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly Submit The Requirments !</span>
+									}
+									else if (p1 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								<div class="step-details">Requirements:</div>
 								<ul>
@@ -124,7 +155,18 @@
 					<div class="step">
 						<div class="step-circle @p2">2</div>
 						<div class="step-content">
-							<div class="step-title">Submission of official receipt</div>
+							<div class="step-title">Submission of official receipt
+								@{
+									if (p2 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly submit proof of payment as instructed below !</span>
+									}
+									else if (p2 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								<div class="step-details">Payment Instructions:</div>
 								<ul>
@@ -141,7 +183,18 @@
 					<div class="step">
 						<div class="step-circle @p3">3</div>
 						<div class="step-content">
-							<div class="step-title">Wait for the Originality Check Service Result</div>
+							<div class="step-title">Wait for the Originality Check Service Result
+								@{
+									if (p3 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly wait for the results !</span>
+									}
+									else if (p3 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+									</div>
 							<div class="step-details">
 								Note: If the similarity index is 10% above in the first
 								run, revise the manuscript according to the
@@ -149,7 +202,7 @@
 								originality checking.
 
 								<div class="step-run-count">
-									<strong>Run Count:</strong> <span id="runCount">4</span>
+									<strong>Run Count:</strong> <span id="runCount">@service.ServiceProgress.RunCount</span>
 								</div>
 								<div class="step-time">Processing Time: 2-3 days</div>
 							</div>
@@ -194,9 +247,9 @@
 					<div>
 						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
 						<button class="submit-btn"
-								id="submitBtn-@service.ServiceId"
-								onclick="submitFiles(@service.ServiceId, 1)"
-								disabled>
+						id="submitBtn-@service.ServiceId"
+						onclick="submitFiles(@service.ServiceId, @step)"
+						disabled>
 							Submit Files
 						</button>
 
@@ -250,12 +303,32 @@
 					<div class="panel-content remarks-area">
 						<div id="remarks-content">
 							<div class="remark info">
+								@{
+									const char safeSeparator = '\u001F';
+
+									string remarkAuthor = "admin";
+									string remarkMessage = service.ServiceProgress.Remarks;
+
+									if (!string.IsNullOrEmpty(remarkMessage) && remarkMessage.Contains(safeSeparator))
+									{
+										string[] parts = remarkMessage.Split(safeSeparator, StringSplitOptions.TrimEntries);
+
+										// If the split was successful, overwrite the defaults
+										if (parts.Length >= 2)
+										{
+											remarkAuthor = parts[0];
+											remarkMessage = parts[1];
+										}
+									}
+
+									// If the 'if' checks fail, the variables just
+									// keep their default values, exactly like your 'catch' block.
+								}
 								<div class="remark-header">
-									<span class="remark-author">RPD Espinosa</span>
-									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+									<span class="remark-author">@remarkAuthor</span>
 								</div>
 								<div class="remark-message">
-									Your paper exceededed 4 Runs, you must avail another Originality Check Service.
+									@remarkMessage
 								</div>
 							</div>
 						</div>
@@ -272,6 +345,8 @@
 		string p2 = "";
 		string p3 = "";
 		string p4 = "";
+		int step = 1;
+		string status = "";
 		switch (service.ServiceProgress.Progress1)
 		{
 			case 0:
@@ -281,10 +356,11 @@
 				p1 = "current";
 				break;
 			case 2:
-				p1 = "revision";
+				p1 = "completed";
+				step++;
 				break;
 			case 3:
-				p1 = "completed";
+				p1 = "revision";
 				break;
 
 		}
@@ -298,10 +374,12 @@
 				p2 = "current";
 				break;
 			case 2:
-				p2 = "revision";
+				p2 = "completed";
+				step++;
+
 				break;
 			case 3:
-				p2 = "completed";
+				p2 = "revision";
 				break;
 
 		}
@@ -315,10 +393,12 @@
 				p3 = "current";
 				break;
 			case 2:
-				p3 = "revision";
+				p3 = "completed";
+				step++;
 				break;
 			case 3:
-				p3 = "completed";
+
+				p3 = "revision";
 				break;
 
 		}
@@ -332,19 +412,32 @@
 				p4 = "current";
 				break;
 			case 2:
-				p4 = "revision";
+				p4 = "completed";
 				break;
 			case 3:
-				p4 = "completed";
+				p4 = "revision";
 				break;
 
 		}
+		if (service.ServiceProgress.RunCount >= 3)
+		{
+			status = "Failed";
+		}
+		else if (p4 == "completed")
+		{
+			status = "completed";
+		}
+		else
+		{
+			status = "On-going";
 
+
+		}
 		<!-- Second Service -->
 		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
 			<div class="service-header">
-				<h2 class="service-title">Instrument Validation Progress</h2>
-				<span class="service-status status-completed">Completed</span>
+				<h2 class="service-title">Instrument Validation</h2>
+				<span class="service-status status-@status">@status</span>
 			</div>
 
 			<div class="progress-container">
@@ -363,7 +456,18 @@
 					<div class="step">
 						<div class="step-circle @p1">1</div>
 						<div class="step-content">
-							<div class="step-title">Submision of requirments</div>
+							<div class="step-title">Submision of requirments
+								@{
+									if (p1 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly Submit The Requirments !</span>
+									}
+									else if (p1 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								<div class="step-details">Requirements:</div>
 								<ul>
@@ -381,7 +485,18 @@
 					<div class="step">
 						<div class="step-circle @p2">2</div>
 						<div class="step-content">
-							<div class="step-title">Submission of official receipt</div>
+							<div class="step-title">Submission of official receipt
+								@{
+									if (p2 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly submit proof of payment as instructed below !</span>
+									}
+									else if (p2 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								<div class="step-details">Payment Instructions:</div>
 								<ul>
@@ -398,11 +513,22 @@
 					<div class="step">
 						<div class="step-circle @p3">3</div>
 						<div class="step-content">
-							<div class="step-title">Wait for the Insturment Validation Service Result</div>
+							<div class="step-title">Wait for the Insturment Validation Service Result
+								@{
+									if (p3 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly wait for the results !</span>
+									}
+									else if (p3 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								Note: Await the validation, review, revision needed and approval of the Instrument Validator.Once approved, the Instrument Validator or thestudent researcher/s must forward the approvedand signed SR03- Instrument Validation ServiceForm to the RPD.
 								<div class="step-run-count">
-									<strong>Run Count:</strong> <span id="runCount">2</span>
+									<strong>Run Count:</strong> <span id="runCount">@service.ServiceProgress.RunCount</span>
 								</div>
 								<div class="step-time">Processing Time: 2-5 days</div>
 							</div>
@@ -443,7 +569,12 @@
 
 					<div>
 						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
-						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+						<button class="submit-btn"
+						id="submitBtn-@service.ServiceId"
+						onclick="submitFiles(@service.ServiceId, @step)"
+						disabled>
+							Submit Files
+						</button>
 					</div>
 
 					<div class="upload-instructions">
@@ -481,12 +612,32 @@
 					<div class="panel-content remarks-area">
 						<div id="remarks-content">
 							<div class="remark info">
+								@{
+									const char safeSeparator = '\u001F';
+
+									string remarkAuthor = "admin";
+									string remarkMessage = service.ServiceProgress.Remarks;
+
+									if (!string.IsNullOrEmpty(remarkMessage) && remarkMessage.Contains(safeSeparator))
+									{
+										string[] parts = remarkMessage.Split(safeSeparator, StringSplitOptions.TrimEntries);
+
+										// If the split was successful, overwrite the defaults
+										if (parts.Length >= 2)
+										{
+											remarkAuthor = parts[0];
+											remarkMessage = parts[1];
+										}
+									}
+
+									// If the 'if' checks fail, the variables just
+									// keep their default values, exactly like your 'catch' block.
+								}
 								<div class="remark-header">
-									<span class="remark-author">RPD Espinosa</span>
-									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+									<span class="remark-author">@remarkAuthor</span>
 								</div>
 								<div class="remark-message">
-									Congratulations, You can now view yout certificate at Account>Certificates
+									@remarkMessage
 								</div>
 							</div>
 						</div>
@@ -502,6 +653,8 @@
 		string p2 = "";
 		string p3 = "";
 		string p4 = "";
+		int step = 1;
+		string status = "";
 		switch (service.ServiceProgress.Progress1)
 		{
 			case 0:
@@ -511,10 +664,11 @@
 				p1 = "current";
 				break;
 			case 2:
-				p1 = "revision";
+				p1 = "completed";
+				step++;
 				break;
 			case 3:
-				p1 = "completed";
+				p1 = "revision";
 				break;
 
 		}
@@ -528,10 +682,12 @@
 				p2 = "current";
 				break;
 			case 2:
-				p2 = "revision";
+				p2 = "completed";
+				step++;
+
 				break;
 			case 3:
-				p2 = "completed";
+				p2 = "revision";
 				break;
 
 		}
@@ -545,10 +701,12 @@
 				p3 = "current";
 				break;
 			case 2:
-				p3 = "revision";
+				p3 = "completed";
+				step++;
 				break;
 			case 3:
-				p3 = "completed";
+
+				p3 = "revision";
 				break;
 
 		}
@@ -562,11 +720,25 @@
 				p4 = "current";
 				break;
 			case 2:
-				p4 = "revision";
-				break;
-			case 3:
 				p4 = "completed";
 				break;
+			case 3:
+				p4 = "revision";
+				break;
+
+		}
+		if (service.ServiceProgress.RunCount >= 3)
+		{
+			status = "Failed";
+		}
+		else if (p4 == "completed")
+		{
+			status = "completed";
+		}
+		else
+		{
+			status = "On-going";
+
 
 		}
 
@@ -574,7 +746,7 @@
 		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
 			<div class="service-header">
 				<h2 class="service-title">Language Editing Progress</h2>
-				<span class="service-status status-pending">Pending</span>
+				<span class="service-status status-@status">@status</span>
 			</div>
 
 			<div class="progress-container">
@@ -594,7 +766,18 @@
 					<div class="step">
 						<div class="step-circle @p1">1</div>
 						<div class="step-content">
-							<div class="step-title">Submision of requirments</div>
+							<div class="step-title">Submision of requirments
+								@{
+									if (p1 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly Submit The Requirments !</span>
+									}
+									else if (p1 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								<div class="step-details">Requirements:</div>
 								<ul>
@@ -613,7 +796,19 @@
 					<div class="step">
 						<div class="step-circle @p2">2</div>
 						<div class="step-content">
-							<div class="step-title">Submission of official receipt</div>
+							<div class="step-title">Submission of official receipt
+								@{
+									if (p2 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly submit proof of payment as instructed below !</span>
+									}
+									else if (p2 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+
+							</div>
 							<div class="step-details">
 								<div class="step-details">Payment Instructions:</div>
 								<ul>
@@ -630,11 +825,22 @@
 					<div class="step">
 						<div class="step-circle @p3">3</div>
 						<div class="step-content">
-							<div class="step-title">Wait for the Language Editing Service Result</div>
+							<div class="step-title">Wait for the Language Editing Service Result
+								@{
+									if (p3 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly wait for the results !</span>
+									}
+									else if (p3 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								Note: Await the Language Editor’s proofreading, editing,revision, and approval of the research manuscript.Once approved, the Editor or the studentresearcher/s must forward the approved andsigned SR07-Language Editing Service Form to theRPD
 								<div class="step-run-count">
-									<strong>Run Count:</strong> <span id="runCount">0</span>
+									<strong>Run Count:</strong> <span id="runCount">@service.ServiceProgress.RunCount</span>
 								</div>
 								<div class="step-time">Processing Time: 2-5 days</div>
 							</div>
@@ -671,8 +877,13 @@
 					</div>
 
 					<div>
-						<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
-						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
+						<button class="submit-btn"
+						id="submitBtn-@service.ServiceId"
+						onclick="submitFiles(@service.ServiceId, @step)"
+						disabled>
+							Submit Files
+						</button>
 					</div>
 
 					<div class="upload-instructions">
@@ -707,12 +918,32 @@
 					<div class="panel-content remarks-area">
 						<div id="remarks-content">
 							<div class="remark info">
+								@{
+									const char safeSeparator = '\u001F';
+
+									string remarkAuthor = "admin";
+									string remarkMessage = service.ServiceProgress.Remarks;
+
+									if (!string.IsNullOrEmpty(remarkMessage) && remarkMessage.Contains(safeSeparator))
+									{
+										string[] parts = remarkMessage.Split(safeSeparator, StringSplitOptions.TrimEntries);
+
+										// If the split was successful, overwrite the defaults
+										if (parts.Length >= 2)
+										{
+											remarkAuthor = parts[0];
+											remarkMessage = parts[1];
+										}
+									}
+
+									// If the 'if' checks fail, the variables just
+									// keep their default values, exactly like your 'catch' block.
+								}
 								<div class="remark-header">
-									<span class="remark-author">RPD Espinosa</span>
-									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+									<span class="remark-author">@remarkAuthor</span>
 								</div>
 								<div class="remark-message">
-									Kindly submit the requirments to proceed with the Language Editing Service, Thank you.
+									@remarkMessage
 								</div>
 							</div>
 						</div>
@@ -729,6 +960,8 @@
 		string p2 = "";
 		string p3 = "";
 		string p4 = "";
+		int step = 1;
+		string status = "";
 		switch (service.ServiceProgress.Progress1)
 		{
 			case 0:
@@ -738,10 +971,11 @@
 				p1 = "current";
 				break;
 			case 2:
-				p1 = "revision";
+				p1 = "completed";
+				step++;
 				break;
 			case 3:
-				p1 = "completed";
+				p1 = "revision";
 				break;
 
 		}
@@ -755,10 +989,12 @@
 				p2 = "current";
 				break;
 			case 2:
-				p2 = "revision";
+				p2 = "completed";
+				step++;
+
 				break;
 			case 3:
-				p2 = "completed";
+				p2 = "revision";
 				break;
 
 		}
@@ -772,10 +1008,12 @@
 				p3 = "current";
 				break;
 			case 2:
-				p3 = "revision";
+				p3 = "completed";
+				step++;
 				break;
 			case 3:
-				p3 = "completed";
+
+				p3 = "revision";
 				break;
 
 		}
@@ -789,19 +1027,32 @@
 				p4 = "current";
 				break;
 			case 2:
-				p4 = "revision";
+				p4 = "completed";
 				break;
 			case 3:
-				p4 = "completed";
+				p4 = "revision";
 				break;
 
 		}
+		if (service.ServiceProgress.RunCount >= 3)
+		{
+			status = "Failed";
+		}
+		else if (p4 == "completed")
+		{
+			status = "completed";
+		}
+		else
+		{
+			status = "On-going";
 
+
+		}
 		<!-- Fourth Service -->
 		<div class="service-detail" data-service="@service.ServiceType-@service.ServiceId">
 			<div class="service-header">
 				<h2 class="service-title">Data Analysis Progress</h2>
-				<span class="service-status status-processing">Processing</span>
+				<span class="service-status status-@status">@status</span>
 			</div>
 
 			<div class="progress-container">
@@ -820,7 +1071,18 @@
 					<div class="step">
 						<div class="step-circle @p1">1</div>
 						<div class="step-content">
-							<div class="step-title">Submision of requirments</div>
+							<div class="step-title">Submision of requirments
+								@{
+									if (p1 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly Submit The Requirments !</span>
+									}
+									else if (p1 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								<div class="step-details">Requirements:</div>
 								<ul>
@@ -839,7 +1101,18 @@
 					<div class="step">
 						<div class="step-circle @p2">2</div>
 						<div class="step-content">
-							<div class="step-title">Submission of official receipt</div>
+							<div class="step-title">Submission of official receipt
+								@{
+									if (p2 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly submit proof of payment as instructed below !</span>
+									}
+									else if (p2 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								<div class="step-details">Payment Instructions:</div>
 								<ul>
@@ -860,11 +1133,22 @@
 					<div class="step">
 						<div class="step-circle @p3">3</div>
 						<div class="step-content">
-							<div class="step-title">Wait for the Language Editing Service Result</div>
+							<div class="step-title">Wait for the Language Editing Service Result
+								@{
+									if (p3 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly wait for the results !</span>
+									}
+									else if (p3 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								Note: Await the Data Analyst’s review, discussion, andanalysis of the dataset. Once approved, the Analystor the student researcher/s must forward theapproved and signed SR05-Data Analysis ServiceForm to the RPD.
 								<div class="step-run-count">
-									<strong>Run Count:</strong> <span id="runCount">0</span>
+									<strong>Run Count:</strong> <span id="runCount">@service.ServiceProgress.RunCount</span>
 								</div>
 								<div class="step-time">Processing Time: 2-3 days</div>
 							</div>
@@ -901,8 +1185,13 @@
 					</div>
 
 					<div>
-						<button class="upload-btn" onclick="selectMultipleFiles()">Select Files</button>
-						<button class="submit-btn" id="submitBtn" onclick="submitFiles()" disabled>Submit Files</button>
+						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
+						<button class="submit-btn"
+								id="submitBtn-@service.ServiceId"
+								onclick="submitFiles(@service.ServiceId, @step)"
+								disabled>
+							Submit Files
+						</button>
 					</div>
 
 					<div class="upload-instructions">
@@ -937,12 +1226,32 @@
 					<div class="panel-content remarks-area">
 						<div id="remarks-content">
 							<div class="remark info">
+								@{
+									const char safeSeparator = '\u001F';
+
+									string remarkAuthor = "admin";
+									string remarkMessage = service.ServiceProgress.Remarks;
+
+									if (!string.IsNullOrEmpty(remarkMessage) && remarkMessage.Contains(safeSeparator))
+									{
+										string[] parts = remarkMessage.Split(safeSeparator, StringSplitOptions.TrimEntries);
+
+										// If the split was successful, overwrite the defaults
+										if (parts.Length >= 2)
+										{
+											remarkAuthor = parts[0];
+											remarkMessage = parts[1];
+										}
+									}
+
+									// If the 'if' checks fail, the variables just
+									// keep their default values, exactly like your 'catch' block.
+								}
 								<div class="remark-header">
-									<span class="remark-author">RPD Espinosa</span>
-									<span class="remark-timestamp">2025-10-16 11:30 AM</span>
+									<span class="remark-author">@remarkAuthor</span>
 								</div>
 								<div class="remark-message">
-									Proceed to the finance department for the payment of Data Analysis Service, Thank you.
+									@remarkMessage
 								</div>
 							</div>
 						</div>
@@ -982,7 +1291,7 @@
 					</div>
 				}
 			}
-			
+
 			<!--
 			<div class="service-item" onclick="showService('student-research-clearance')">
 				<h4>Student Research Clearance</h4>
@@ -995,7 +1304,7 @@
 			</div>
 			-->
 		</div>
-			
+
 
 		<div class="content-area">
 			<div id="service-content">
@@ -1031,11 +1340,11 @@
 					}
 				}
 
-				
+
 			}
 
 
-			
+
 
 
 
@@ -1434,134 +1743,134 @@
 
 
 <script>
-    // Store files per service using service ID as key
-    let serviceFiles = {};
-    let uploadedServiceFiles = {};
-    let remarksData = {};
-    let receivedFilesData = {};
+	// Store files per service using service ID as key
+	let serviceFiles = {};
+	let uploadedServiceFiles = {};
+	let remarksData = {};
+	let receivedFilesData = {};
 
-    function initializeServiceArrays(serviceId) {
-        if (!serviceFiles[serviceId]) {
-            serviceFiles[serviceId] = [];
-        }
-        if (!uploadedServiceFiles[serviceId]) {
-            uploadedServiceFiles[serviceId] = [];
-        }
-        if (!remarksData[serviceId]) {
-            remarksData[serviceId] = [];
-        }
-        if (!receivedFilesData[serviceId]) {
-            receivedFilesData[serviceId] = [];
-        }
-    }
+	function initializeServiceArrays(serviceId) {
+		if (!serviceFiles[serviceId]) {
+			serviceFiles[serviceId] = [];
+		}
+		if (!uploadedServiceFiles[serviceId]) {
+			uploadedServiceFiles[serviceId] = [];
+		}
+		if (!remarksData[serviceId]) {
+			remarksData[serviceId] = [];
+		}
+		if (!receivedFilesData[serviceId]) {
+			receivedFilesData[serviceId] = [];
+		}
+	}
 
-    function showService(serviceId) {
-        const sidebarItems = document.querySelectorAll('.service-item');
-        sidebarItems.forEach(item => item.classList.remove('active'));
-        event.target.closest('.service-item').classList.add('active');
+	function showService(serviceId) {
+		const sidebarItems = document.querySelectorAll('.service-item');
+		sidebarItems.forEach(item => item.classList.remove('active'));
+		event.target.closest('.service-item').classList.add('active');
 
-        const serviceDetails = document.querySelectorAll('.service-detail');
-        serviceDetails.forEach(detail => detail.classList.remove('active'));
+		const serviceDetails = document.querySelectorAll('.service-detail');
+		serviceDetails.forEach(detail => detail.classList.remove('active'));
 
-        const selectedService = document.querySelector(`.service-detail[data-service="${serviceId}"]`);
-        if (selectedService) {
-            selectedService.classList.add('active');
-            // Initialize arrays for this specific service
-            initializeServiceArrays(serviceId);
-        }
-    }
+		const selectedService = document.querySelector(`.service-detail[data-service="${serviceId}"]`);
+		if (selectedService) {
+			selectedService.classList.add('active');
+			// Initialize arrays for this specific service
+			initializeServiceArrays(serviceId);
+		}
+	}
 
-    function selectMultipleFiles(serviceId) {
-        initializeServiceArrays(serviceId);
+	function selectMultipleFiles(serviceId) {
+		initializeServiceArrays(serviceId);
 
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png';
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.multiple = true;
+		input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png';
 
-        input.onchange = function(e) {
-            const files = Array.from(e.target.files);
-            files.forEach(file => {
-                if (file.size <= 10 * 1024 * 1024) {
-                    serviceFiles[serviceId].push({
-                        file: file,
-                        id: Date.now() + Math.random(),
-                        uploaded: false
-                    });
-                } else {
-                    alert(`${file.name} is too large. Maximum file size is 10MB.`);
-                }
-            });
+		input.onchange = function(e) {
+			const files = Array.from(e.target.files);
+			files.forEach(file => {
+				if (file.size <= 10 * 1024 * 1024) {
+					serviceFiles[serviceId].push({
+						file: file,
+						id: Date.now() + Math.random(),
+						uploaded: false
+					});
+				} else {
+					alert(`${file.name} is too large. Maximum file size is 10MB.`);
+				}
+			});
 
-            updateFilesDisplay(serviceId);
-            updateSubmitButton(serviceId);
-        };
+			updateFilesDisplay(serviceId);
+			updateSubmitButton(serviceId);
+		};
 
-        input.click();
-    }
+		input.click();
+	}
 
-    function updateFilesDisplay(serviceId) {
-        const container = document.getElementById('filesContainer-' + serviceId);
-        const uploadSection = container?.closest('.upload-section');
+	function updateFilesDisplay(serviceId) {
+		const container = document.getElementById('filesContainer-' + serviceId);
+		const uploadSection = container?.closest('.upload-section');
 
-        if (!container) return;
+		if (!container) return;
 
-        if (serviceFiles[serviceId] && serviceFiles[serviceId].length > 0) {
-            container.style.display = 'block';
-            if (uploadSection) uploadSection.classList.add('has-files');
+		if (serviceFiles[serviceId] && serviceFiles[serviceId].length > 0) {
+			container.style.display = 'block';
+			if (uploadSection) uploadSection.classList.add('has-files');
 
-            container.innerHTML = serviceFiles[serviceId].map(fileObj => `
-                <div class="file-item">
-                    <div class="file-info">
-                        <div class="file-icon">📄</div>
-                        <div class="file-details">
-                            <div class="file-name">${fileObj.uploaded ? '✅' : '📎'} ${fileObj.file.name}</div>
-                            <div class="file-size">${formatFileSize(fileObj.file.size)}</div>
-                        </div>
-                    </div>
-                    <button class="remove-file" onclick="removeFile('${serviceId}', '${fileObj.id}')">${fileObj.uploaded ? 'Remove' : '✕'}</button>
-                </div>
-            `).join('');
-        } else {
-            container.style.display = 'none';
-            if (uploadSection) uploadSection.classList.remove('has-files');
-        }
-    }
+			container.innerHTML = serviceFiles[serviceId].map(fileObj => `
+				<div class="file-item">
+					<div class="file-info">
+						<div class="file-icon">📄</div>
+						<div class="file-details">
+							<div class="file-name">${fileObj.uploaded ? '✅' : '📎'} ${fileObj.file.name}</div>
+							<div class="file-size">${formatFileSize(fileObj.file.size)}</div>
+						</div>
+					</div>
+					<button class="remove-file" onclick="removeFile('${serviceId}', '${fileObj.id}')">${fileObj.uploaded ? 'Remove' : '✕'}</button>
+				</div>
+			`).join('');
+		} else {
+			container.style.display = 'none';
+			if (uploadSection) uploadSection.classList.remove('has-files');
+		}
+	}
 
-    function removeFile(serviceId, fileId) {
-        if (serviceFiles[serviceId]) {
-            serviceFiles[serviceId] = serviceFiles[serviceId].filter(f => f.id != fileId);
-        }
-        if (uploadedServiceFiles[serviceId]) {
-            uploadedServiceFiles[serviceId] = uploadedServiceFiles[serviceId].filter(f => f.id != fileId);
-        }
-        updateFilesDisplay(serviceId);
-        updateSubmitButton(serviceId);
-    }
+	function removeFile(serviceId, fileId) {
+		if (serviceFiles[serviceId]) {
+			serviceFiles[serviceId] = serviceFiles[serviceId].filter(f => f.id != fileId);
+		}
+		if (uploadedServiceFiles[serviceId]) {
+			uploadedServiceFiles[serviceId] = uploadedServiceFiles[serviceId].filter(f => f.id != fileId);
+		}
+		updateFilesDisplay(serviceId);
+		updateSubmitButton(serviceId);
+	}
 
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+	function formatFileSize(bytes) {
+		if (bytes === 0) return '0 Bytes';
+		const k = 1024;
+		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	}
 
-    function updateSubmitButton(serviceId) {
-        const submitBtn = document.getElementById('submitBtn-' + serviceId);
+	function updateSubmitButton(serviceId) {
+		const submitBtn = document.getElementById('submitBtn-' + serviceId);
 
-        if (!submitBtn) return;
+		if (!submitBtn) return;
 
-        const unuploadedFiles = serviceFiles[serviceId]?.filter(f => !f.uploaded) || [];
+		const unuploadedFiles = serviceFiles[serviceId]?.filter(f => !f.uploaded) || [];
 
-        if (unuploadedFiles.length > 0) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = `Submit ${unuploadedFiles.length} File(s)`;
-        } else {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'No files to submit';
-        }
-    }
+		if (unuploadedFiles.length > 0) {
+			submitBtn.disabled = false;
+			submitBtn.textContent = `Submit ${unuploadedFiles.length} File(s)`;
+		} else {
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'No files to submit';
+		}
+	}
 
 	   function submitFiles(serviceId, progressStep) {
 		const unuploadedFiles = serviceFiles[serviceId]?.filter(f => !f.uploaded) || [];
@@ -1594,42 +1903,42 @@
 	}
 
 
-    function downloadFile(fileId, serviceId) {
-        const fileNames = {
-            'turnitin-report': 'Turnitin_Report_Draft1.pdf',
-            'revision-notes': 'Revision_Notes_Comments.docx',
-            'similarity-report': 'Similarity_Index_Report.pdf'
-        };
+	function downloadFile(fileId, serviceId) {
+		const fileNames = {
+			'turnitin-report': 'Turnitin_Report_Draft1.pdf',
+			'revision-notes': 'Revision_Notes_Comments.docx',
+			'similarity-report': 'Similarity_Index_Report.pdf'
+		};
 
-        const fileName = fileNames[fileId] || 'document.pdf';
-        alert(`Downloading: ${fileName} from service: ${serviceId}`);
-        console.log(`Downloading file: ${fileName} from service: ${serviceId}`);
-    }
+		const fileName = fileNames[fileId] || 'document.pdf';
+		alert(`Downloading: ${fileName} from service: ${serviceId}`);
+		console.log(`Downloading file: ${fileName} from service: ${serviceId}`);
+	}
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const serviceItems = document.querySelectorAll('.service-item');
-        const serviceDetails = document.querySelectorAll('.service-detail');
-        const noServiceMsg = document.getElementById('no-service');
+	document.addEventListener('DOMContentLoaded', function() {
+		const serviceItems = document.querySelectorAll('.service-item');
+		const serviceDetails = document.querySelectorAll('.service-detail');
+		const noServiceMsg = document.getElementById('no-service');
 
-        const hasServices = serviceItems.length > 0;
+		const hasServices = serviceItems.length > 0;
 
-        if (hasServices) {
-            if (noServiceMsg) noServiceMsg.style.display = 'none';
+		if (hasServices) {
+			if (noServiceMsg) noServiceMsg.style.display = 'none';
 
-            serviceItems.forEach(item => item.classList.remove('active'));
-            if (serviceItems) {
-                serviceItems.classList.add('active');
-                const firstServiceId = serviceItems.getAttribute('onclick').match(/'([^']+)'/);
-                initializeServiceArrays(firstServiceId);
-            }
+			serviceItems.forEach(item => item.classList.remove('active'));
+			if (serviceItems) {
+				serviceItems.classList.add('active');
+				const firstServiceId = serviceItems.getAttribute('onclick').match(/'([^']+)'/);
+				initializeServiceArrays(firstServiceId);
+			}
 
-            serviceDetails.forEach(detail => detail.classList.remove('active'));
-            if (serviceDetails) {
-                serviceDetails.classList.add('active');
-            }
-        } else {
-            if (noServiceMsg) noServiceMsg.style.display = 'block';
-            serviceDetails.forEach(detail => detail.classList.remove('active'));
-        }
-    });
+			serviceDetails.forEach(detail => detail.classList.remove('active'));
+			if (serviceDetails) {
+				serviceDetails.classList.add('active');
+			}
+		} else {
+			if (noServiceMsg) noServiceMsg.style.display = 'block';
+			serviceDetails.forEach(detail => detail.classList.remove('active'));
+		}
+	});
 </script>

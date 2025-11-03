@@ -1,5 +1,6 @@
 ﻿@{
     var hideLayout = ViewData["HideLayout"] as bool? ?? false;
+    var currentUser = Context.Session.GetObject<Account>("account");
 }
 
 <!DOCTYPE html>
@@ -23,7 +24,7 @@
                 </div>
                 <div class="logo-text-group">
                     <div class="logo-text">Letran Research & Publication Department</div>
-                    <div class="logo-subtitle">=== Admin (Name) ===</div>
+                    <div class="logo-subtitle">Admin @currentUser.FirstName @currentUser.LastName</div>
                 </div>
             </div>
         </div>
@@ -96,14 +97,22 @@
                     </div>
                 </a>
             </div>
+            <a href="/Home/Home" class="nav-link">
+                <div class="nav-main">
+                    <div class="nav-icon"><i class="fa-solid fa-user"></i></div>
+                    <div class="nav-text">Go back to user view</div>
+                    <div class="nav-tooltip">Go back to user view</div>
+                </div>
+            </a>
             <div class="nav-item">
-                <a href="#" class="nav-link" onclick="setActiveNav(this)">
+                <a href="/account/logout" class="nav-link">
                     <div class="nav-main">
                         <div class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
-                    <div class="nav-text">Logout</div>
-                    <div class="nav-tooltip">Logout</div>
+                        <div class="nav-text">Logout</div>
+                        <div class="nav-tooltip">Logout</div>
                     </div>
                 </a>
+                
             </div>
         </div>
     </nav>

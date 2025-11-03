@@ -1,5 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_AdminNav.cshtml";
+    var currentUser = Context.Session.GetObject<Account>("account");
 }
 @using LetranRPD.Models
 @model List<ServiceInformation>
@@ -187,57 +188,59 @@
 
     // --- DATA TRANSFORMATION ---
 
-    function transformDbData(si) {
-        const prog = si.serviceProgress;
+            function transformDbData(si) {
+                const prog = si.serviceProgress;
         const stepStatuses = [
-            getStepStatus(prog.progress1),
-            getStepStatus(prog.progress2),
-            getStepStatus(prog.progress3),
-            getStepStatus(prog.progress4)
-        ];
-
+                    getStepStatus(prog.progress1),
+                    getStepStatus(prog.progress2),
+                    getStepStatus(prog.progress3),
+                    getStepStatus(prog.progress4)
+                ];
         let status = "processing";
-        if (stepStatuses.includes("revision")) {
-            status = "failed";
+                if (stepStatuses.includes("revision")) {
+                    status = "failed";
         } else if (stepStatuses.every(s => s === "complete")) {
-            status = "complete";
+                    status = "complete";
         }
 
-        let currentStep = stepStatuses.findIndex(s => s === "current") + 1;
+                let currentStep = stepStatuses.findIndex(s => s === "current") + 1;
         if (currentStep === 0 && status !== 'complete' && status !== 'failed') {
-            currentStep = stepStatuses.findIndex(s => s === "pending") + 1;
+                    currentStep = stepStatuses.findIndex(s => s === "pending") + 1;
         }
-        if (currentStep === 0 && status === 'complete') {
-            currentStep = stepStatuses.length;
+                if (currentStep === 0 && status === 'complete') {
+                    currentStep = stepStatuses.length;
         }
 
-        const serviceKey = si.serviceType.toLowerCase().replace(/ /g, '-');
+                const serviceKey = si.serviceType.toLowerCase().replace(/ /g, '-');
         const allReceivedFiles = [
-            ...(prog.progress1files || []),
-            ...(prog.progress2files || []),
-            ...(prog.progress3files || []),
-            ...(prog.progress4files || [])
-        ];
+                    ...(prog.progress1files || []),
+                    ...(prog.progress2files || []),
+                    ...(prog.progress3files || []),
+                    ...(prog.progress4files || [])
+                ];
         return {
-            "id": si.serviceId, // This is the ServiceId
-            "name": si.author,
-            "studentNumber": si.studentNumber,
-            "department": si.subject,
-            "course": "N/A",
-            "service": serviceKey,
-            "serviceName": si.serviceType,
-            "status": status,
-            "currentStep": currentStep,
-            "totalSteps": 4,
-            "runCount": prog.runCount || 1, // <-- FIXED: Load from DB
-            "dateSubmitted": prog.appliedDate,
-            "lastUpdated": prog.appliedDate, // You might want a different 'lastUpdated' field
-            "receivedFiles": allReceivedFiles,
-            "sendFiles": 0,
-            "remarks": prog.remarks || "", // <-- FIXED: Load from DB
-            "stepStatuses": stepStatuses
-        };
-    }
+                    "id": si.serviceId, // This is the ServiceId
+                    "name": si.author,
+                    "studentNumber": si.studentNumber,
+                    "department": si.subject,
+                    "course": si.email,
+                    "service": serviceKey,
+                    "serviceName": si.serviceType,
+                    "title": si.title, // <-- **FIX 1: ADDED THIS LINE**
+                 "status": status,
+                    "currentStep": currentStep,
+                    "totalSteps": 4,
+                    "runCount": prog.runCount ||
+        1,
+                    "dateSubmitted": prog.appliedDate,
+                    "lastUpdated": prog.appliedDate,
+                    "receivedFiles": allReceivedFiles,
+                    "sendFiles": 0,
+                    "remarks": prog.remarks ||
+        "",
+                    "stepStatuses": stepStatuses
+                };
+        }
 
     // --- APPLICATION STATE (RENAMED) ---
 
@@ -498,61 +501,62 @@
         tableContainer.innerHTML = table;
     }
 
-    function createSubmissionRow(submission) { // RENAMED
-        const isComplete = submission.status === 'complete';
-        const currentStepForProgress = isComplete ? submission.totalSteps : submission.currentStep;
-        const progressPercentage = Math.round((currentStepForProgress / submission.totalSteps) * 100);
-        const statusClass = `status-${submission.status}`;
+            function createSubmissionRow(submission) { // RENAMED
+                const isComplete = submission.status === 'complete';
+                const currentStepForProgress = isComplete ?
+        submission.totalSteps : submission.currentStep;
+                const progressPercentage = Math.round((currentStepForProgress / submission.totalSteps) * 100);
+                const statusClass = `status-${submission.status}`;
         const initials = submission.name.split(' ').map(n => n[0]).join('').substring(0, 2);
-
-        return `
-            <tr class="student-row" onclick="toggleSubmissionDetails('${submission.id}')" data-service-id="${submission.id}">
-                <td>
-                    <div class="student-info">
-                        <div class="student-avatar">${initials}</div>
-                        <div class="student-details">
-                            <h4>${submission.name}</h4>
-                            <p>${submission.studentNumber} • ${submission.course}</p>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="department-text">${submission.department}</span>
-                </td>
-                 <td>
-                    <span class="department-text">${submission.title}</span>
-                </td>
-                 <td>
-                        <span class="department-text">${submission.departments}</span>
-                    </td>
-                <td>
-                    <span class="service-badge">${submission.serviceName}</span>
-                </td>
-                <td>
-                    <span class="status-badge ${statusClass}">${submission.status}</span>
-                </td>
-                <td>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill ${statusClass}" style="width: ${progressPercentage}%"></div>
-                        </div>
-                        <div class="progress-text">${currentStepForProgress}/${submission.totalSteps} steps</div>
-                    </div>
-                </td>
-                <td>${formatDate(submission.lastUpdated)}</td>
-                <td>
-                    <button class="action-btn info-btn" onclick="event.stopPropagation(); showServiceSteps('${submission.service}')" title="View Service Steps">
-                        <i class="fas fa-info-circle"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr class="expanded-content hidden" id="expanded-${submission.id}">
-                <td colspan="7">
-                    ${createExpandedContent(submission)}
-                </td>
-            </tr>
-        `;
-    }
+                return `
+                    <tr class="student-row" onclick="toggleSubmissionDetails('${submission.id}')" data-service-id="${submission.id}">
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">${initials}</div>
+                                <div class="student-details">
+                                    <h4>${submission.name}</h4>
+                                    <p>${submission.studentNumber} • ${submission.course}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="department-text">${submission.department}</span>
+                        </td>
+                        <td>
+                            <span class="department-text">${submission.title}</span>
+                        </td>
+                        <td>
+                            <span class="department-text">${submission.department}</span> 
+                        </td>
+                        <td>
+                            <span class="service-badge">${submission.serviceName}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${statusClass}">${submission.status}</span>
+                        </td>
+                        <td>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill ${statusClass}" style="width: ${progressPercentage}%"></div>
+                                </div>
+                                <div class="progress-text">${currentStepForProgress}/${submission.totalSteps} steps</div>
+                            </div>
+                        </td>
+                        <td>${formatDate(submission.lastUpdated)}</td>
+                        <td>
+                            <button class="action-btn info-btn" onclick="event.stopPropagation();
+        showServiceSteps('${submission.service}')" title="View Service Steps">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="expanded-content hidden" id="expanded-${submission.id}">
+                        <td colspan="9">
+                            ${createExpandedContent(submission)}
+                        </td>
+                    </tr>
+                `;
+            }
 
     function createExpandedContent(submission) { // RENAMED
         return `
@@ -731,7 +735,7 @@
 }
 
     function switchFileTab(event, serviceId, tabType) { // RENAMED
-        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId));
         if (!submission) return;
 
         // Update tab states
@@ -753,7 +757,7 @@
     // --- LOCAL DATA UPDATES (RENAMED) ---
 
     function updateGeneralStatus(serviceId, newStatus) { // RENAMED
-        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+             const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId)); // RENAMED
         if (submission) {
             submission.status = newStatus;
             submission.lastUpdated = new Date().toISOString(); // More precise
@@ -786,7 +790,7 @@
     }
 
     function updateRunCount(serviceId, delta) { // RENAMED
-        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId));
         if (submission) {
             const newCount = Math.max(1, (submission.runCount || 1) + delta); // Default to 1, min 1
             submission.runCount = newCount;
@@ -799,13 +803,13 @@
     }
 
     function updateStepStatus(serviceId, stepIndex, newStatus) { // RENAMED
-        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId));
         if (submission && stepIndex >= 0 && stepIndex < submission.stepStatuses.length) {
             submission.stepStatuses[stepIndex] = newStatus;
 
             // Auto-update general status
             if (submission.stepStatuses.includes("revision")) {
-                submission.status = "failed";
+                submission.status = "processing";
             } else if (submission.stepStatuses.every(s => s === "complete")) {
                 submission.status = "complete";
             } else {
@@ -855,7 +859,7 @@
     }
 
     function updateRemarks(serviceId, remarks) { // RENAMED
-        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+        const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId));// RENAMED
         if (submission) {
             submission.remarks = remarks;
         }
@@ -900,7 +904,7 @@
     // --- SERVER COMMUNICATION (RENAMED) ---
 
     async function saveChanges(serviceId) { // RENAMED
-        const submission = applicationData.submissions.find(s => s.id === serviceId); // RENAMED
+                const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId));
         if (!submission) {
             alert('Error: Could not find submission data.');
             return;
@@ -911,7 +915,7 @@
             saveButton.disabled = true;
             saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
         }
-
+        var remarks = "@currentUser.FirstName" + " " + "@currentUser.LastName" + "\u001F" + submission.remarks;
         const payload = {
             serviceId: submission.id, // This is the ServiceId
             progress1: convertJsStatusToDbInt(submission.stepStatuses[0]),
@@ -919,7 +923,7 @@
             progress3: convertJsStatusToDbInt(submission.stepStatuses[2]),
             progress4: convertJsStatusToDbInt(submission.stepStatuses[3]),
             runCount: submission.runCount,
-            remarks: submission.remarks
+            remarks: remarks
         };
             console.log(payload);
 

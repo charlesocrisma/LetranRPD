@@ -23,18 +23,43 @@ namespace LetranRPD.Controllers
         }
         public IActionResult Originality_Check()
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
         public IActionResult Instrument_Validation()
         {
+
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
         public IActionResult Data_Analysis()
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
         public IActionResult Language_Editing()
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
@@ -54,14 +79,15 @@ namespace LetranRPD.Controllers
                 ResearchAdviser = viewModel.ResearchAdviser,
                 Subject = viewModel.Subject,
                 OC_ManuscriptType = viewModel.OC_ManuscriptType,
-                ServiceProgress = new ServiceProgress {
+                ServiceProgress = new ServiceProgress
+                {
                     Progress1 = 1,
                     Progress2 = 0,
                     Progress3 = 0,
                     Progress4 = 0,
                     AppliedDate = DateTime.Now
                 }
-                
+
 
             };
 

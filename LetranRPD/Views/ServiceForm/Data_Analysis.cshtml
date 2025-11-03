@@ -1,12 +1,7 @@
 ﻿@{
     ViewBag.Title = "Data Analysis";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-    var currentUser = Context.Session.GetObject<Account>("account") ?? null;
-    if (currentUser == null)
-    {
-        Context.Response.Redirect("/Home");
-
-    }
+    var currentUser = Context.Session.GetObject<Account>("account");
 
     @model LetranRPD.Models.ServiceInformation
 }

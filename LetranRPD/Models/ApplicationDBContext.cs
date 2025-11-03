@@ -20,7 +20,6 @@ namespace LetranRPD.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            // One-to-one relationship between ServiceInformation and ServiceProgress
             modelBuilder.Entity<ServiceInformation>()
                 .HasOne(si => si.ServiceProgress)
                 .WithOne(sp => sp.SI)
@@ -36,13 +35,14 @@ namespace LetranRPD.Models
             modelBuilder.Entity<ServiceProgress>()
                 .Property(p => p.AppliedDate)
                 .HasDefaultValueSql("GETDATE()");
-            /*
-            modelBuilder.Entity<Article>()
-    .HasOne(a => a.JournalName)
-    .WithMany(j => j.Articles)
-    .HasForeignKey(a => a.JournalId)
-    .OnDelete(DeleteBehavior.Cascade);
-            */
+        
+
+
+        modelBuilder.Entity<Article>()
+                .HasOne(a => a.Journal)
+                .WithMany(j => j.Articles)
+                .HasForeignKey(a => a.JournalId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
 
