@@ -40,13 +40,14 @@ body {
     background-color: var(--background-color);
     color: var(--text-primary);
     line-height: 1.6;
+    margin-left: 15rem;
 }
 
 .main-container {
     max-width: 1600px;
     margin: 0 auto;
     padding: 2rem;
-    }
+}
 
 /* Page Header */
 .page-header {
@@ -1459,7 +1460,7 @@ body {
     margin-left: 0 !important;
     width: 80% !important;
     padding: 0 !important;
-    margin-left:9rem;
+    margin-left: 9rem;
 }
 
 .table-container {
@@ -1648,11 +1649,10 @@ body {
 
 /* FIX 6: Main Container Alignment */
 .main-container {
-    max-width: 90% !important;
+    max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 2rem !important;
-    margin-left:13rem;
+    padding: 2rem !important;    
 }
 
 /* FIX 7: Filters Grid */
@@ -1700,3 +1700,211 @@ body {
         flex-direction: column;
     }
 }
+
+
+/* ===== FIX TABLE POSITIONING ===== */
+.table-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    overflow-x: auto;
+}
+
+table {
+    width: 80% !important;
+    margin: 0 !important;
+}
+
+/* ===== CHECKBOX STYLING ===== */
+input[type="checkbox"].bulk-checkbox {
+    cursor: pointer;
+    accent-color: #3b82f6;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+}
+
+    input[type="checkbox"].bulk-checkbox:hover {
+        transform: scale(1.15);
+    }
+
+th.checkbox-cell,
+td.checkbox-cell {
+    width: 40px;
+    text-align: center;
+    padding: 1rem 0.75rem !important;
+}
+
+/* ===== BULK ACTIONS SECTION ===== */
+.bulk-actions-section {
+    background: var(--surface-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--primary-blue-lightest);
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.selection-count {
+    font-weight: 600;
+    color: var(--primary-blue);
+    font-size: 0.95rem;
+}
+
+.bulk-actions-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.bulk-status-dropdown {
+    padding: 0.65rem 1rem;
+    border: 2px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: var(--surface-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 180px;
+}
+
+    .bulk-status-dropdown:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+.apply-bulk-btn {
+    padding: 0.65rem 1.5rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .apply-bulk-btn:hover:not(:disabled) {
+        background: #059669;
+    }
+
+.clear-selections-btn {
+    padding: 0.65rem 1.5rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .clear-selections-btn:hover {
+        background: #dc2626;
+    }
+
+/* ===== MODAL STYLES ===== */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.custom-modal-content {
+    background: var(--surface-color);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.custom-modal-message {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.custom-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.custom-modal-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .custom-modal-button.confirm {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+        .custom-modal-button.confirm:hover {
+            background: #1c389a;
+        }
+
+    .custom-modal-button.cancel {
+        background: var(--border-light);
+        color: var(--text-primary);
+    }
+
+        .custom-modal-button.cancel:hover {
+            background: var(--border-medium);
+        }
+
+/* ===== ROW SELECTION HIGHLIGHTING ===== */
+.student-row:has(.submission-checkbox:checked) {
+    background-color: rgba(59, 130, 246, 0.08);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .bulk-actions-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .bulk-actions-controls {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .bulk-status-dropdown,
+    .apply-bulk-btn,
+    .clear-selections-btn {
+        width: 100%;
+    }
+
+    th.checkbox-cell,
+    td.checkbox-cell {
+        width: 35px;
+        padding: 0.75rem 0.5rem !important;
+    }
+}
+

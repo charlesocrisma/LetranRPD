@@ -34,6 +34,12 @@ namespace LetranRPD.Controllers
         public string role { get; set; }
     }
 
+    public class BulkUpdateRequest
+    {
+        public string Ids { get; set; }
+        public string Status { get; set; }
+    }
+     
     public class DeleteViewModel
     {
         public int id { get; set; }
@@ -55,16 +61,16 @@ namespace LetranRPD.Controllers
         }
 
         // ====== Admin Views (Combined from both files) ======
-        public IActionResult Dashboard() 
+        public IActionResult Dashboard()
         {
             var currentUser = HttpContext.Session.GetObject<Account>("account");
 
-            if (currentUser == null || currentUser.isAdmin ==false)
+            if (currentUser == null || currentUser.isAdmin == false)
             {
                 return RedirectToAction("Index", "Home");
             }
             return View();
-        } 
+        }
         public IActionResult Research()
         {
             var currentUser = HttpContext.Session.GetObject<Account>("account");
@@ -104,7 +110,7 @@ namespace LetranRPD.Controllers
                 return RedirectToAction("Index", "Home");
             }
             return View();
-        }  // From AdminController1
+        }
         public IActionResult Certificates()
         {
             var currentUser = HttpContext.Session.GetObject<Account>("account");
@@ -392,5 +398,79 @@ namespace LetranRPD.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> BulkUpdateStatus([FromBody] BulkUpdateRequest request)
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+            if (currentUser == null || currentUser.isAdmin == false)
+                return Json(new { success = false, message = "Unauthorized" });
+
+            if (string.IsNullOrEmpty(request?.Ids))
+                return Json(new { success = false, message = "No submissions selected" });
+
+            try
+            {
+                var idList = request.Ids.Split(',')
+                    .Where(id => !string.IsNullOrEmpty(id.Trim()))
+                    .ToList();
+
+                // Map status to numeric value
+                int statusValue = request.Status switch
+                {
+                    "1" or "processing" => 1,
+                    "2" or "complete" => 2,
+                    "3" or "failed" => 3,
+                    "4" or "archived" => 4,
+                    _ => -1
+                };
+
+                if (statusValue == -1)
+                    return Json(new { success = false, message = "Invalid status" });
+
+                int updatedCount = 0;
+
+                foreach (var idStr in idList)
+                {
+                    if (int.TryParse(idStr.Trim(), out int serviceId))
+                    {
+                        var submission = await _context.ServiceInformations
+                            .Include(si => si.ServiceProgress)
+                            .FirstOrDefaultAsync(si => si.ServiceId == serviceId);
+
+                        if (submission != null && submission.ServiceProgress != null)
+                        {
+                            submission.ServiceProgress.Progress1 = statusValue;
+                            _context.ServiceInformations.Update(submission);
+                            updatedCount++;
+                        }
+                    }
+                }
+
+                if (updatedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Bulk update completed: {updatedCount} submissions updated to status {statusValue}");
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Updated {updatedCount} submission(s) successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during bulk status update");
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred while updating statuses: " + ex.Message
+                });
+            }
+        }
+
+
     }
 }
