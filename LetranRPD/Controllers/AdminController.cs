@@ -246,55 +246,32 @@ namespace LetranRPD.Controllers
 
         [File: AdminController.cs]
 
-        // ===== Progress Update (With File Handling) =====
         [HttpPost]
-        public async Task<IActionResult> UpdateProgress(ProgressUpdateModel model, IFormFileCollection files)
+        public async Task<IActionResult> UpdateProgress([FromBody] ProgressUpdateModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            _logger.LogInformation($"Attempting update for ServiceId: {model.ServiceId} with {files?.Count ?? 0} file(s).");
+            _logger.LogInformation($"Attempting update for ServiceId: {model.ServiceId}");
 
-            var existingRecord = await _context.ServiceProgresses.AsNoTracking()
+            var existingRecord = await _context.ServiceProgresses.AsNoTracking() // Using _context
                 .FirstOrDefaultAsync(p => p.ServiceId == model.ServiceId);
 
             if (existingRecord == null)
                 return NotFound("ServiceProgress record not found.");
 
-            var savedFileNames = new List<string>();
-            if (files != null && files.Count > 0)
-            {
-                // Define the upload path: e.g., wwwroot/uploads/servicefiles/{ServiceId}
-
-                var directory = Path.Combine("wwwroot", "uploads", "Service_" + model.ServiceId,"AdminToStudent");
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), directory);
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-                
-
-                foreach (var file in files)
-                {
-                    // Create a unique file name (GUID) to prevent overwrites
-                    var safeFileName = Path.GetFileName(file.FileName);
-                    var uniqueFileName = $"{DateTime.Now.ToString("yyyyMMddHHmm")}_{safeFileName}";
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                    savedFileNames.Add(uniqueFileName);
-                }
-            }
+            // Manually set properties on the original object
+            // This is necessary because the original object was loaded AsNoTracking
+            // We must re-attach it with its original Id
             var updatedProgress = new ServiceProgress
             {
-                Id = existingRecord.Id,
-                ServiceId = existingRecord.ServiceId,
-                AppliedDate = existingRecord.AppliedDate,
-                Progress1files = existingRecord.Progress1files,
-                Progress2files = existingRecord.Progress2files,
-                Progress3files = existingRecord.Progress3files,
-                Progress4files = existingRecord.Progress4files,
+                Id = existingRecord.Id, // <-- Preserve the original Primary Key
+                ServiceId = existingRecord.ServiceId, // Preserve the Foreign Key
+                AppliedDate = existingRecord.AppliedDate, // Preserve original date
+                Progress1files = existingRecord.Progress1files, // Preserve files
+                Progress2files = existingRecord.Progress2files, // Preserve files
+                Progress3files = existingRecord.Progress3files, // Preserve files
+                Progress4files = existingRecord.Progress4files, // Preserve files
 
                 // Update the values from the model
                 Progress1 = model.Progress1,
@@ -302,24 +279,19 @@ namespace LetranRPD.Controllers
                 Progress3 = model.Progress3,
                 Progress4 = model.Progress4,
                 RunCount = model.RunCount,
-                Remarks = model.Remarks,
-                AdminToStudentFiles = savedFileNames.Any() ? savedFileNames : existingRecord.AdminToStudentFiles
-
+                Remarks = model.Remarks
             };
+
             try
             {
-                _context.ServiceProgresses.Update(updatedProgress);
-                await _context.SaveChangesAsync();
-
-                // Clear files from temp storage in the client-side array after successful save
-                // (This is done in the JavaScript's success block, but mentioned here for completeness)
-
-                return Json(new { success = true, message = "Progress and files processed successfully." });
+                _context.ServiceProgresses.Update(updatedProgress); // Using _context
+                await _context.SaveChangesAsync(); // Using _context
+                return Json(new { success = true, message = "Progress updated successfully." });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during progress update for ServiceId: {ServiceId}", model.ServiceId);
-                return StatusCode(500, "An error occurred while saving progress.");
+                _logger.LogError(ex, "Error during update for ServiceId: {ServiceId}", model.ServiceId);
+                return StatusCode(500, "An error occurred while saving.");
             }
         }
 
