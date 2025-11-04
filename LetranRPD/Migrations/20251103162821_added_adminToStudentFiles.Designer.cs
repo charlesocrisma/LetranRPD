@@ -4,6 +4,7 @@ using LetranRPD.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LetranRPD.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251103162821_added_adminToStudentFiles")]
+    partial class added_adminToStudentFiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -223,9 +226,6 @@ namespace LetranRPD.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.PrimitiveCollection<string>("AdminToStudentFiles")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("AppliedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -263,6 +263,9 @@ namespace LetranRPD.Migrations
 
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
+
+                    b.PrimitiveCollection<string>("adminToStudentFiles")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

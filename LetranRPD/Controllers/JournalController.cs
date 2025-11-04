@@ -1,15 +1,8 @@
 ﻿using LetranRPD.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-public class ApplicationDbContext : DbContext
-{
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
 
-    public DbSet<Journal> Journals { get; set; }
-    public DbSet<Article> Articles { get; set; }
+namespace LetranRPD.Controllers {
 
     public class JournalController : Controller
     {

@@ -38,6 +38,7 @@ namespace LetranRPD.Models
         public DateTime AppliedDate { get; set; }
         public int RunCount { get; set; } = 1;
         public string? Remarks { get; set; }
+        public List<string>? AdminToStudentFiles { get; set; }
     }
     public class ServiceInformation
     {
