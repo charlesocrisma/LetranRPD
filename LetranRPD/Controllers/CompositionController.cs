@@ -15,7 +15,7 @@ public class CompositionController : Controller
     }
 
     [HttpPost]
-    public IActionResult AddArticle(ArticleModel article)
+    public IActionResult AddArticle(Article article)
     {
         if (article == null)
             return Json(new { success = false, message = "Article is null" });
@@ -24,7 +24,7 @@ public class CompositionController : Controller
         Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
         var json = System.IO.File.Exists(filePath) ? System.IO.File.ReadAllText(filePath) : "[]";
-        var articles = JsonSerializer.Deserialize<List<ArticleModel>>(json) ?? new List<ArticleModel>();
+        var articles = JsonSerializer.Deserialize<List<Article>>(json) ?? new List<Article>();
 
         articles.Add(article);
         var updatedJson = JsonSerializer.Serialize(articles, new JsonSerializerOptions { WriteIndented = true });

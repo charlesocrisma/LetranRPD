@@ -12,8 +12,9 @@ namespace LetranRPD.Models
         public DbSet<ServiceInformation> ServiceInformations { get; set; } = null!;
          public DbSet<ServiceProgress> ServiceProgresses { get; set; }
 
-        public DbSet<Journal> Journals { get; set; }
-        public DbSet<Article> Articles { get; set; }
+        public DbSet<JournalModel> Journalss { get; set; } = null!;
+        public DbSet<Article> Articless { get; set; }
+        public DbSet<NewsModel> News { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -4,6 +4,7 @@ using LetranRPD.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LetranRPD.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251028053141_BonifacioUpdateContent")]
+    partial class BonifacioUpdateContent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,94 +24,6 @@ namespace LetranRPD.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Article", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Abstract")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Authors")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("JournalId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PdfUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JournalId");
-
-                    b.ToTable("Articles");
-                });
-
-            modelBuilder.Entity("Journal", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EISSN")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ISSN")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("JournalName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PublishedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Publisher")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SubVolume")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Volume")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Journals");
-                });
 
             modelBuilder.Entity("LetranRPD.Models.Account", b =>
                 {
@@ -174,6 +89,9 @@ namespace LetranRPD.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("JournalModelId")
+                        .HasColumnType("int");
+
                     b.Property<string>("JournalName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -192,7 +110,9 @@ namespace LetranRPD.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Articless");
+                    b.HasIndex("JournalModelId");
+
+                    b.ToTable("Articles");
                 });
 
             modelBuilder.Entity("LetranRPD.Models.JournalModel", b =>
@@ -202,6 +122,10 @@ namespace LetranRPD.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("JournalName")
                         .IsRequired()
@@ -217,7 +141,7 @@ namespace LetranRPD.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Journalss");
+                    b.ToTable("Journals");
                 });
 
             modelBuilder.Entity("LetranRPD.Models.ServiceInformation", b =>
@@ -293,9 +217,6 @@ namespace LetranRPD.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.PrimitiveCollection<string>("AdminToStudentFiles")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("AppliedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -342,49 +263,11 @@ namespace LetranRPD.Migrations
                     b.ToTable("ServiceProgresses");
                 });
 
-<<<<<<< Updated upstream
-            modelBuilder.Entity("Article", b =>
+            modelBuilder.Entity("LetranRPD.Models.Article", b =>
                 {
-                    b.HasOne("Journal", "Journal")
+                    b.HasOne("LetranRPD.Models.JournalModel", null)
                         .WithMany("Articles")
-                        .HasForeignKey("JournalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Journal");
-=======
-            modelBuilder.Entity("NewsModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImagePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("News");
->>>>>>> Stashed changes
+                        .HasForeignKey("JournalModelId");
                 });
 
             modelBuilder.Entity("LetranRPD.Models.ServiceProgress", b =>
@@ -398,7 +281,7 @@ namespace LetranRPD.Migrations
                     b.Navigation("SI");
                 });
 
-            modelBuilder.Entity("Journal", b =>
+            modelBuilder.Entity("LetranRPD.Models.JournalModel", b =>
                 {
                     b.Navigation("Articles");
                 });
