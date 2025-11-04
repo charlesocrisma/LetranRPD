@@ -1,4 +1,6 @@
-﻿public class Journal
+﻿
+/*
+ public class Journal
 {
     public int Id { get; set; }
     public string JournalName { get; set; } // e.g. "Letran Business and Economics Reviews"
@@ -13,3 +15,4 @@
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 }
+*/

@@ -1,16 +1,50 @@
 [
   {
+    "Id": 0,
     "JournalName": "Brillar",
     "Volume": "3",
     "SubVolume": "1",
     "Date": null,
-    "Articles": []
+    "Articless": []
   },
   {
+    "Id": 0,
     "JournalName": "The Horizon",
     "Volume": "5",
     "SubVolume": "7",
     "Date": null,
-    "Articles": []
+    "Articless": []
+  },
+  {
+    "Id": 0,
+    "JournalName": "The Horizon",
+    "Volume": "11",
+    "SubVolume": "13",
+    "Date": null,
+    "Articless": []
+  },
+  {
+    "Id": 0,
+    "JournalName": "Brillar",
+    "Volume": "7",
+    "SubVolume": "77",
+    "Date": null,
+    "Articless": []
+  },
+  {
+    "Id": 0,
+    "JournalName": "The Horizon",
+    "Volume": "777",
+    "SubVolume": "77",
+    "Date": null,
+    "Articless": []
+  },
+  {
+    "Id": 0,
+    "JournalName": "The Horizon",
+    "Volume": "888",
+    "SubVolume": "8",
+    "Date": null,
+    "Articless": []
   }
 ]

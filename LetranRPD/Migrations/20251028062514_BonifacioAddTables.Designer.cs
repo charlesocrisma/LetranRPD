@@ -4,6 +4,7 @@ using LetranRPD.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LetranRPD.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251028062514_BonifacioAddTables")]
+    partial class BonifacioAddTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,6 +89,9 @@ namespace LetranRPD.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("JournalModelId")
+                        .HasColumnType("int");
+
                     b.Property<string>("JournalName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -104,6 +110,8 @@ namespace LetranRPD.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("JournalModelId");
+
                     b.ToTable("Articless");
                 });
 
@@ -114,6 +122,10 @@ namespace LetranRPD.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("JournalName")
                         .IsRequired()
@@ -251,37 +263,11 @@ namespace LetranRPD.Migrations
                     b.ToTable("ServiceProgresses");
                 });
 
-            modelBuilder.Entity("NewsModel", b =>
+            modelBuilder.Entity("LetranRPD.Models.Article", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImagePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("News");
+                    b.HasOne("LetranRPD.Models.JournalModel", null)
+                        .WithMany("Articless")
+                        .HasForeignKey("JournalModelId");
                 });
 
             modelBuilder.Entity("LetranRPD.Models.ServiceProgress", b =>
@@ -293,6 +279,11 @@ namespace LetranRPD.Migrations
                         .IsRequired();
 
                     b.Navigation("SI");
+                });
+
+            modelBuilder.Entity("LetranRPD.Models.JournalModel", b =>
+                {
+                    b.Navigation("Articless");
                 });
 
             modelBuilder.Entity("LetranRPD.Models.ServiceInformation", b =>

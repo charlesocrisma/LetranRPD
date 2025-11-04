@@ -42,6 +42,26 @@
 
         <form id="articleForm" method="post">
             <div class="form-group mb-3">
+                <label for="articleJournal">Journal</label>
+                <select id="articleJournal" name="JournalName" class="form-control" required>
+                    <option value="">Select Journal</option>
+                    <option value="Luz y Saber">Luz y Saber</option>
+                    <option value="Antorcha">Antorcha</option>
+                    <option value="Letran Business and Economics Review">Letran Business and Economics Review</option>
+                    <option value="Brillar">Brillar</option>
+                    <option value="The Horizon">The Horizon</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="articleVolume">Volume Number</label>
+                <input type="text" id="articleVolume" name="Volume" class="form-control" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="articleSubVolume">Subnumber</label>
+                <input type="text" id="articleSubVolume" name="SubVolume" class="form-control" required>
+            </div>
+            <div class="form-group mb-3">
                 <label for="articleTitle">Title</label>
                 <input type="text" id="articleTitle" name="Title" class="form-control" required>
             </div>
@@ -56,27 +76,9 @@
                 <textarea id="articleAbstract" name="Abstract" class="form-control" rows="4" required></textarea>
             </div>
 
-            <div class="form-group mb-3">
-                <label for="articleJournal">Journal</label>
-                <select id="articleJournal" name="JournalName" class="form-control" required>
-                    <option value="">Select Journal</option>
-                    <option value="Luz y Saber">Luz y Saber</option>
-                    <option value="Antorcha">Antorcha</option>
-                    <option value="Letran Business and Economics Review">Letran Business and Economics Review</option>
-                    <option value="Brillar">Brillar</option>
-                    <option value="The Horizon">The Horizon</option>
-                </select>
-            </div>
 
-            <div class="form-group mb-3">
-                <label for="articleVolume">Volume Number</label>
-                <input type="text" id="articleVolume" name="Volume" class="form-control" required>
-            </div>
 
-            <div class="form-group mb-3">
-                <label for="articleSubVolume">Subnumber</label>
-                <input type="text" id="articleSubVolume" name="SubVolume" class="form-control" required>
-            </div>
+           
 
             <div class="form-group mb-3">
                 <label for="articleCategory">Category</label>
@@ -126,7 +128,7 @@
 
             <div class="modal-body">
                 <form id="editForm">
-                    <input type="hidden" id="originalTitle">
+                    <input type="hidden" id="editArticleId">
 
                     <div class="form-group">
                         <label>Journal Name</label>
@@ -175,7 +177,7 @@
     <div class="container mt-4">
         <h2>Manage News</h2>
         <hr />
-    
+
 
         <!-- Add News Button -->
         <button class="btn-primary mb-3" onclick="openAddNewsModal()">Add News</button>
@@ -226,407 +228,438 @@
                     <div id="imagePreviewContainer" style="margin-top:10px;">
                         <img id="imagePreview" src="" alt="Preview" style="display:none; max-width:100%; border-radius:8px;" />
                     </div>
-            </div>
+                </div>
 
-            <div class="modalF">
-                <button class="modal-btn secondary" onclick="closeNewsModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="saveNews()">Save</button>
+                <div class="modalF">
+                    <button class="modal-btn secondary" onclick="closeNewsModal()">Cancel</button>
+                    <button class="modal-btn primary" onclick="saveNews()">Save</button>
+                </div>
             </div>
         </div>
+
+
     </div>
 
 
-</div>
 
 
+    <script>
 
+        // ===== Journal Publish Logic =====
+             document.getElementById("journalForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-<script>
-
-    // ===== Journal Publish Logic =====
-        document.getElementById("journalForm").addEventListener("submit", async function (e) {
-        e.preventDefault();
-
-        try {
-            const res = await fetch("/Admin/SaveJournal", {
-                method: "POST",
-                body: new FormData(this)
-            });
-
-            const result = await res.json();
-
-            if (result.success) {
-                alert(result.message || "✅ Journal published successfully!");
-                this.reset();
-            } else {
-                alert(result.message || "❌ Failed to publish journal.");
-            }
-        } catch (err) {
-            console.error("Error publishing journal:", err);
-            alert("⚠️ Error publishing journal.");
-        }
-    });
-
-
-    // ===== Article Publish Logic =====
-       // ===== Journal Publish Logic =====
-    document.getElementById("journalForm").addEventListener("submit", async function (e) {
-        e.preventDefault();
-
-        try {
-            const res = await fetch("/Admin/SaveJournal", {
-                method: "POST",
-                body: new FormData(this)
-            });
-
-            const result = await res.json();
-
-            if (result.success) {
-                alert(result.message || "✅ Journal published successfully!");
-                this.reset();
-            } else {
-                alert(result.message || "❌ Failed to publish journal.");
-            }
-        } catch (err) {
-            console.error("Error publishing journal:", err);
-            alert("⚠️ Error publishing journal.");
-        }
-    });
-
-    // ===== Article Publish Logic =====
-    document.getElementById("publishArticleBtn").addEventListener("click", async function () {
-        const form = document.getElementById("articleForm");
-        const messageDiv = document.getElementById("articleMessage");
-
-        const newArticle = {
-            Title: form.articleTitle.value.trim(),
-            Authors: form.articleAuthors.value.trim(),
-            Abstract: form.articleAbstract.value.trim(),
-            JournalName: form.articleJournal.value.trim(),
-            Volume: form.articleVolume.value.trim(),
-            SubVolume: form.articleSubVolume.value.trim(),
-            Category: form.articleCategory.value.trim(),
-        };
-
-        if (!newArticle.Title || !newArticle.Authors || !newArticle.Abstract ||
-            !newArticle.JournalName || !newArticle.Volume || !newArticle.SubVolume) {
-            messageDiv.innerHTML = `<div class="alert alert-warning">⚠️ Please fill in all required fields.</div>`;
-            return;
-        }
-
-        try {
-            const response = await fetch("/Admin/AddArticle", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newArticle)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                messageDiv.innerHTML = `<div class="alert alert-success">✅ Article Published Successfully</div>`;
-                form.reset();
-                loadArticles();
-            } else {
-                messageDiv.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
-            }
-        } catch (err) {
-            messageDiv.innerHTML = `<div class="alert alert-danger">⚠️ Error publishing article.</div>`;
-            console.error(err);
-        }
-    });
-
-    // ===== Load Articles =====
-    async function loadArticles() {
-        const res = await fetch("/js/articles.json");
-        if (!res.ok) return;
-        const articles = await res.json();
-        const tbody = document.getElementById("articlesBody");
-        tbody.innerHTML = "";
-
-        articles.forEach(article => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${article.Title}</td>
-                <td>${article.Authors}</td>
-                <td>${article.JournalName}</td>
-                <td>${article.Volume}</td>
-                <td>${article.SubVolume}</td>
-                <td>${article.Category || ''}</td>
-                <td>
-                    <button class="table-action-btn btn-edit" onclick="openEditModal('${article.JournalName}','${article.Volume}','${article.SubVolume}','${article.Title}')">Edit</button>
-                    <button class="table-action-btn btn-delete" onclick="deleteArticle('${article.JournalName}','${article.Volume}','${article.SubVolume}','${article.Title}')">Delete</button>
-                </td>`;
-            tbody.appendChild(row);
-        });
-    }
-
-    // ===== OPEN EDIT MODAL =====
-       // ===== OPEN / CLOSE MODAL =====
-      const editModal = document.getElementById("editModal");
-    const closeEditModal = document.getElementById("closeEditModal");
-    const cancelEdit = document.getElementById("cancelEdit");
-
-    // ✅ Open modal and populate fields
-    function openEditModal(journal, volume, subVolume, title) {
-        fetch("/js/articles.json")
-            .then(res => res.json())
-            .then(articles => {
-                const article = articles.find(a =>
-                    a.JournalName === journal &&
-                    a.Volume === volume &&
-                    a.SubVolume === subVolume &&
-                    a.Title === title
-                );
-
-                if (!article) {
-                    alert("Article not found.");
-                    return;
-                }
-
-                document.getElementById("editModalTitle").innerText =
-                    `Edit: ${article.JournalName} Vol. ${article.Volume} No. ${article.SubVolume}`;
-                document.getElementById("editJournalName").value = article.JournalName;
-                document.getElementById("editVolume").value = article.Volume;
-                document.getElementById("editSubVolume").value = article.SubVolume;
-                document.getElementById("originalTitle").value = article.Title;
-                document.getElementById("editTitle").value = article.Title;
-                document.getElementById("editAuthors").value = article.Authors;
-                document.getElementById("editAbstract").value = article.Abstract;
-                document.getElementById("editCategory").value = article.Category || "";
-
-                // ✅ Show as overlay popup
-                editModal.style.display = "flex";
-            });
-    }
-
-    // Close modal handlers
-    closeEditModal.onclick = () => (editModal.style.display = "none");
-    cancelEdit.onclick = e => {
-        e.preventDefault();
-        editModal.style.display = "none";
-    };
-    window.onclick = e => {
-        if (e.target === editModal) editModal.style.display = "none";
-    };
-
-
-
-    // ===== SAVE EDIT =====
-    document.getElementById("saveEditBtn").addEventListener("click", async function () {
-        const updatedArticle = {
-            JournalName: document.getElementById("editJournalName").value,
-            Volume: document.getElementById("editVolume").value,
-            SubVolume: document.getElementById("editSubVolume").value,
-            OriginalTitle: document.getElementById("originalTitle").value,
-            Title: document.getElementById("editTitle").value.trim(),
-            Authors: document.getElementById("editAuthors").value.trim(),
-            Abstract: document.getElementById("editAbstract").value.trim(),
-            Category: document.getElementById("editCategory").value.trim()
-        };
-
-        try {
-            const res = await fetch("/Admin/EditArticle", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedArticle)
-            });
-            const result = await res.json();
-            alert(result.message || (result.success ? "✅ Article updated successfully!" : "❌ Failed to update article."));
-            if (result.success) {
-                editModal.style.display = "none"; // ✅ Hide modal
-                loadArticles(); // refresh table
-            }
-        } catch (err) {
-            console.error("Error editing article:", err);
-            alert("⚠️ Error editing article.");
-        }
-    });
-
-    // ===== INITIALIZE =====
-    document.addEventListener("DOMContentLoaded", loadArticles);
-
-        // ===== DELETE ARTICLE =====
-    async function deleteArticle(journal, volume, subVolume, title) {
-        if (!confirm(`🗑️ Are you sure you want to delete "${title}" from ${journal} Vol. ${volume} No. ${subVolume}?`)) {
-            return;
-        }
-
-        try {
-            const response = await fetch("/Admin/DeleteArticle", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    JournalName: journal,
-                    Volume: volume,
-                    SubVolume: subVolume,
-                    Title: title
-                })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert(result.message || "✅ Article deleted successfully!");
-                loadArticles(); // refresh table
-            } else {
-                alert(result.message || "❌ Failed to delete article.");
-            }
-        } catch (err) {
-            console.error("Error deleting article:", err);
-            alert("⚠️ Error deleting article.");
-        }
-    }
-
-    // ===== News Functions =====
-        document.addEventListener("DOMContentLoaded", loadNews);
-
-    function loadNews() {
-        fetch("/js/news.json")
-            .then(res => res.json())
-            .then(data => {
-                const tbody = document.getElementById("newsBody");
-                tbody.innerHTML = "";
-
-                data.forEach(news => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${news.Title}</td>
-                        <td>${news.Category}</td>
-                        <td>${news.Date}</td>
-                        <td>
-                            <button class="table-action-btn btn-edit" onclick="editNews('${news.Id}')">Edit</button>
-                            <button class="table-action-btn btn-delete" onclick="deleteNews('${news.Id}')">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(err => console.error("Error loading news:", err));
-    }
-
-    // ==== Modal Handling ====
-    function openAddNewsModal() {
-        document.getElementById("newsModalTitle").innerText = "Add News";
-        document.getElementById("newsId").value = "";
-        document.getElementById("newsTitle").value = "";
-        document.getElementById("newsContent").value = "";
-        document.getElementById("newsCategory").value = "";
-        document.getElementById("newsModal").style.display = "flex";
-    }
-
-    function closeNewsModal() {
-        document.getElementById("newsModal").style.display = "none";
-    }
-    // ===== Upload Image =====
-            function ImageUrl(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const output = document.getElementById('ImageUrl');
-                output.src = reader.result;
-                output.style.display = 'block';
+            const newJournal = {
+                JournalName: document.getElementById("journalSelect").value.trim(),
+                Volume: document.getElementById("volume").value.trim(),
+                SubVolume: document.getElementById("subVolume").value.trim()
             };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    // ==== Save (Add / Edit) ====
-               async function saveNews() {
-            const id = document.getElementById("newsId").value;
-            const title = document.getElementById("newsTitle").value.trim();
-            const content = document.getElementById("newsContent").value.trim();
-            const category = document.getElementById("newsCategory").value.trim();
-            const imageInput = document.getElementById("ImagePath");
 
-            if (!title || !content || !category) {
-                alert("Please fill in all fields.");
+            if (!newJournal.JournalName || !newJournal.Volume || !newJournal.SubVolume) {
+                alert("⚠️ Please fill in all required fields.");
                 return;
             }
 
-            const formData = new FormData();
-            formData.append("Title", title);
-            formData.append("Content", content);
-            formData.append("Category", category);
-            if (imageInput.files.length > 0) {
-                formData.append("ImageFile", imageInput.files[0]);
-            }
-            if (id) {
-                formData.append("Id", id);
-            }
-
-            const url = id ? "/Admin/EditNews" : "/Admin/AddNews";
-
             try {
-                const res = await fetch(url, { method: "POST", body: formData });
+                const res = await fetch("/Admin/AddJournal", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newJournal)
+                });
+
                 const result = await res.json();
 
                 if (result.success) {
-                    alert(result.message);
-                    closeNewsModal();
-                    loadNews();
+                    alert(result.message || "✅ Journal published successfully!");
+                    this.reset();
                 } else {
-                    alert(result.message);
+                    alert(result.message || "❌ Failed to publish journal.");
                 }
             } catch (err) {
-                alert("Error saving news: " + err.message);
+                console.error("Error publishing journal:", err);
+                alert("⚠️ Error publishing journal.");
+            }
+        });
+
+
+
+        // ===== Article Publish Logic =====
+        document.getElementById("publishArticleBtn").addEventListener("click", async function () {
+            const form = document.getElementById("articleForm");
+            const messageDiv = document.getElementById("articleMessage");
+
+            const newArticle = {
+                Title: form.articleTitle.value.trim(),
+                Authors: form.articleAuthors.value.trim(),
+                Abstract: form.articleAbstract.value.trim(),
+                JournalName: form.articleJournal.value.trim(),
+                Volume: form.articleVolume.value.trim(),
+                SubVolume: form.articleSubVolume.value.trim(),
+                Category: form.articleCategory.value.trim(),
+            };
+
+            if (!newArticle.Title || !newArticle.Authors || !newArticle.Abstract ||
+                !newArticle.JournalName || !newArticle.Volume || !newArticle.SubVolume) {
+                messageDiv.innerHTML = `<div class="alert alert-warning">⚠️ Please fill in all required fields.</div>`;
+                return;
+            }
+
+            try {
+                const response = await fetch("/Admin/AddArticle", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newArticle)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    messageDiv.innerHTML = `<div class="alert alert-success">✅ Article Published Successfully</div>`;
+                    form.reset();
+                    loadArticles();
+                } else {
+                    messageDiv.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+                }
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="alert alert-danger">⚠️ Error publishing article.</div>`;
+                console.error(err);
+            }
+        });
+
+        // ===== Load Articles =====
+               async function loadArticles() {
+            const res = await fetch("/Admin/GetArticlesAdmin");
+            if (!res.ok) return;
+            const articles = await res.json();
+            const tbody = document.getElementById("articlesBody");
+            tbody.innerHTML = "";
+
+            articles.forEach(article => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${article.title}</td>
+                    <td>${article.authors}</td>
+                    <td>${article.journalName}</td>
+                    <td>${article.volume}</td>
+                    <td>${article.subVolume}</td>
+                    <td>${article.category || ''}</td>
+                    <td>
+                        <button class="table-action-btn btn-edit" onclick="openEditModal(${article.id})">Edit</button>
+                        <button class="table-action-btn btn-delete" onclick="deleteArticle(${article.id})">Delete</button>
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+
+        // ===== OPEN EDIT MODAL =====
+           // ===== OPEN / CLOSE MODAL =====
+          const editModal = document.getElementById("editModal");
+        const closeEditModal = document.getElementById("closeEditModal");
+        const cancelEdit = document.getElementById("cancelEdit");
+
+               let currentArticleId = null; // store the ID of the article being edited
+
+        // ✅ Open modal and populate fields with article data (from DB, not JSON)
+        function openEditModal(id) {
+            fetch(`/Admin/GetArticleById?id=${id}`)
+                .then(res => res.json())
+                .then(article => {
+                    if (!article || !article.id) {
+                        alert("Article not found.");
+                        return;
+                    }
+
+                    currentArticleId = article.id;
+                    document.getElementById("editArticleId").value = article.id; // ✅ Set hidden input
+
+
+                    // Fill modal inputs
+                    document.getElementById("editModalTitle").innerText =
+                        `Edit: ${article.journalName} Vol. ${article.volume} No. ${article.subVolume}`;
+                    document.getElementById("editJournalName").value = article.journalName;
+                    document.getElementById("editVolume").value = article.volume;
+                    document.getElementById("editSubVolume").value = article.subVolume;
+                    document.getElementById("editTitle").value = article.title;
+                    document.getElementById("editAuthors").value = article.authors;
+                    document.getElementById("editAbstract").value = article.abstract;
+                    document.getElementById("editCategory").value = article.category || "";
+
+                    // Show modal
+                    document.getElementById("editModal").style.display = "flex";
+                })
+                .catch(err => {
+                    console.error("Error loading article:", err);
+                    alert("Failed to load article data.");
+                });
+        }
+
+        // ✅ Save article edits
+        function saveArticleChanges() {
+            if (!currentArticleId) {
+                alert("No article selected.");
+                return;
+            }
+
+            const updated = {
+                Id: currentArticleId,
+                JournalName: document.getElementById("editJournalName").value.trim(),
+                Volume: document.getElementById("editVolume").value.trim(),
+                SubVolume: document.getElementById("editSubVolume").value.trim(),
+                Title: document.getElementById("editTitle").value.trim(),
+                Authors: document.getElementById("editAuthors").value.trim(),
+                Abstract: document.getElementById("editAbstract").value.trim(),
+                Category: document.getElementById("editCategory").value.trim()
+            };
+
+            fetch("/Admin/EditArticle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updated)
+            })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        alert("✅ " + result.message);
+                        closeEditModal();
+                        // Reload data to reflect changes
+                        loadData();
+                    } else {
+                        alert("⚠️ " + result.message);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error updating article:", err);
+                    alert("An error occurred while saving changes.");
+                });
+        }
+
+
+        // Close modal handlers
+        closeEditModal.onclick = () => (editModal.style.display = "none");
+        cancelEdit.onclick = e => {
+            e.preventDefault();
+            editModal.style.display = "none";
+        };
+        window.onclick = e => {
+            if (e.target === editModal) editModal.style.display = "none";
+        };
+
+
+
+              // ===== SAVE EDIT =====
+        document.getElementById("saveEditBtn").addEventListener("click", async function () {
+            const Id = document.getElementById("editArticleId").value; // ✅ Get ID
+
+            const updatedArticle = {
+                Id: Id, // ✅ Include ID for backend lookup
+                JournalName: document.getElementById("editJournalName").value.trim(),
+                Volume: document.getElementById("editVolume").value.trim(),
+                SubVolume: document.getElementById("editSubVolume").value.trim(),
+                Title: document.getElementById("editTitle").value.trim(),
+                Authors: document.getElementById("editAuthors").value.trim(),
+                Abstract: document.getElementById("editAbstract").value.trim(),
+                Category: document.getElementById("editCategory").value.trim()
+            };
+
+            try {
+                const res = await fetch("/Admin/EditArticle", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedArticle)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    alert("✅ " + result.message);
+                    document.getElementById("editModal").style.display = "none";
+                    loadArticles(); // ✅ Refresh updated list
+                } else {
+                    alert("⚠️ " + result.message);
+                }
+            } catch (err) {
+                console.error("Error editing article:", err);
+                alert("⚠️ Error editing article.");
+            }
+        });
+
+        // ===== INITIALIZE =====
+        document.addEventListener("DOMContentLoaded", loadArticles);
+
+            // ===== DELETE ARTICLE =====
+        async function deleteArticle(id) {
+            if (!confirm("🗑️ Are you sure you want to delete this article?")) return;
+
+            try {
+                const response = await fetch(`/Admin/DeleteArticle?id=${id}`, {
+                    method: "DELETE"
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message || "✅ Article deleted successfully!");
+                    loadArticles(); // refresh
+                } else {
+                    alert(result.message || "❌ Failed to delete article.");
+                }
+            } catch (err) {
+                console.error("Error deleting article:", err);
+                alert("⚠️ Error deleting article.");
             }
         }
 
-    // ==== Edit ====
-                 function editNews(Id) {
+
+        // ===== News Functions =====
+            document.addEventListener("DOMContentLoaded", loadNews);
+
+        function loadNews() {
             fetch("/js/news.json")
                 .then(res => res.json())
                 .then(data => {
-                    const news = data.find(n => n.Id === Id);
-                    if (!news) return alert("News not found!");
+                    const tbody = document.getElementById("newsBody");
+                    tbody.innerHTML = "";
 
-                    // Set modal title
-                    document.getElementById("newsModalTitle").innerText = `Edit News: ${news.Title}`;
-
-                    // Fill inputs
-                    document.getElementById("newsId").value = news.Id;
-                    document.getElementById("newsTitle").value = news.Title;
-                    document.getElementById("newsContent").value = news.Content;
-                    document.getElementById("newsCategory").value = news.Category;
-
-                    // Show existing image if available
-                    const preview = document.getElementById("imagePreview");
-                    if (news.ImagePath) {
-                        preview.src = news.ImagePath;
-                        preview.style.display = "block";
-                    } else {
-                        preview.src = "";
-                        preview.style.display = "none";
-                    }
-
-                    // Reset file input
-                    document.getElementById("ImagePath").value = "";
-
-                    // Open modal
-                    document.getElementById("newsModal").style.display = "flex";
+                    data.forEach(news => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${news.Title}</td>
+                            <td>${news.Category}</td>
+                            <td>${news.Date}</td>
+                            <td>
+                                <button class="table-action-btn btn-edit" onclick="editNews('${news.Id}')">Edit</button>
+                                <button class="table-action-btn btn-delete" onclick="deleteNews('${news.Id}')">Delete</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
                 })
-                .catch(err => console.error("Error loading news for edit:", err));
+                .catch(err => console.error("Error loading news:", err));
+        }
+
+        // ==== Modal Handling ====
+        function openAddNewsModal() {
+            document.getElementById("newsModalTitle").innerText = "Add News";
+            document.getElementById("newsId").value = "";
+            document.getElementById("newsTitle").value = "";
+            document.getElementById("newsContent").value = "";
+            document.getElementById("newsCategory").value = "";
+            document.getElementById("newsModal").style.display = "flex";
+        }
+
+        function closeNewsModal() {
+            document.getElementById("newsModal").style.display = "none";
+        }
+        // ===== Upload Image =====
+                function ImageUrl(event) {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const output = document.getElementById('ImageUrl');
+                    output.src = reader.result;
+                    output.style.display = 'block';
+                };
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        // ==== Save (Add / Edit) ====
+                   async function saveNews() {
+                const id = document.getElementById("newsId").value;
+                const title = document.getElementById("newsTitle").value.trim();
+                const content = document.getElementById("newsContent").value.trim();
+                const category = document.getElementById("newsCategory").value.trim();
+                const imageInput = document.getElementById("ImagePath");
+
+                if (!title || !content || !category) {
+                    alert("Please fill in all fields.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("Title", title);
+                formData.append("Content", content);
+                formData.append("Category", category);
+                if (imageInput.files.length > 0) {
+                    formData.append("ImageFile", imageInput.files[0]);
+                }
+                if (id) {
+                    formData.append("Id", id);
+                }
+
+                const url = id ? "/Admin/EditNews" : "/Admin/AddNews";
+
+                try {
+                    const res = await fetch(url, { method: "POST", body: formData });
+                    const result = await res.json();
+
+                    if (result.success) {
+                        alert(result.message);
+                        closeNewsModal();
+                        loadNews();
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (err) {
+                    alert("Error saving news: " + err.message);
+                }
+            }
+
+        // ==== Edit ====
+                     function editNews(Id) {
+                fetch("/js/news.json")
+                    .then(res => res.json())
+                    .then(data => {
+                        const news = data.find(n => n.Id === Id);
+                        if (!news) return alert("News not found!");
+
+                        // Set modal title
+                        document.getElementById("newsModalTitle").innerText = `Edit News: ${news.Title}`;
+
+                        // Fill inputs
+                        document.getElementById("newsId").value = news.Id;
+                        document.getElementById("newsTitle").value = news.Title;
+                        document.getElementById("newsContent").value = news.Content;
+                        document.getElementById("newsCategory").value = news.Category;
+
+                        // Show existing image if available
+                        const preview = document.getElementById("imagePreview");
+                        if (news.ImagePath) {
+                            preview.src = news.ImagePath;
+                            preview.style.display = "block";
+                        } else {
+                            preview.src = "";
+                            preview.style.display = "none";
+                        }
+
+                        // Reset file input
+                        document.getElementById("ImagePath").value = "";
+
+                        // Open modal
+                        document.getElementById("newsModal").style.display = "flex";
+                    })
+                    .catch(err => console.error("Error loading news for edit:", err));
+            }
+
+
+        // ==== Delete ====
+        function deleteNews(id) {
+            if (!confirm("Are you sure you want to delete this news article?")) return;
+
+            fetch("/Admin/DeleteNews", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        alert(res.message);
+                        loadNews();
+                    } else {
+                        alert(res.message);
+                    }
+                })
+                .catch(err => alert("Error deleting news: " + err.message));
         }
 
 
-    // ==== Delete ====
-    function deleteNews(id) {
-        if (!confirm("Are you sure you want to delete this news article?")) return;
-
-        fetch("/Admin/DeleteNews", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id })
-        })
-            .then(res => res.json())
-            .then(res => {
-                if (res.success) {
-                    alert(res.message);
-                    loadNews();
-                } else {
-                    alert(res.message);
-                }
-            })
-            .catch(err => alert("Error deleting news: " + err.message));
-    }
-
-
-</script>
+    </script>
