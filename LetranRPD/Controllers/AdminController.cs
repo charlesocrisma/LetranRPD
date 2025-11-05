@@ -111,6 +111,16 @@ namespace LetranRPD.Controllers
             }
             return View();
         }
+        public IActionResult Reports()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
         public IActionResult Certificates()
         {
             var currentUser = HttpContext.Session.GetObject<Account>("account");
@@ -328,7 +338,7 @@ namespace LetranRPD.Controllers
                 return StatusCode(500, "An error occurred while saving progress.");
             }
         }
-        }
+        
 
         // ====== Save Journal ======
         [HttpPost]
@@ -442,6 +452,7 @@ namespace LetranRPD.Controllers
                 return Json(new { success = false, message = "Error retrieving journals." });
             }
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetArticles()
@@ -720,6 +731,55 @@ namespace LetranRPD.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        // AUDIT LOG 
+        [HttpGet]
+        public async Task<IActionResult> GetAuditLogs()
+        {
+            var data = await _context.ServiceInformations
+                .Select(s => new
+                {
+                    service = s.ServiceType,
+                    student = s.ContactPerson,
+                    idNo = s.StudentNumber,
+
+                    department = _context.Accounts
+                        .Where(a => a.StudentNumber == s.StudentNumber)
+                        .Select(a => a.Level)
+                        .FirstOrDefault(),
+
+                    // Most recent applied date
+                    appliedDate = _context.ServiceProgresses
+                        .Where(p => p.ServiceId == s.ServiceId)
+                        .OrderByDescending(p => p.AppliedDate)
+                        .Select(p => p.AppliedDate)
+                        .FirstOrDefault(),
+
+                    // Latest RunCount (attempts)
+                    attempts = _context.ServiceProgresses
+                        .Where(p => p.ServiceId == s.ServiceId)
+                        .OrderByDescending(p => p.AppliedDate)
+                        .Select(p => p.RunCount)
+                        .FirstOrDefault(),
+
+                    // ✅ Result based on attempts
+                    result = _context.ServiceProgresses
+                        .Where(p => p.ServiceId == s.ServiceId)
+                        .OrderByDescending(p => p.AppliedDate)
+                        .Select(p =>
+
+                            p.RunCount == 4 ? "Failed" :
+                            p.Progress4 == 2 ? "Success" :
+                    (p.Progress4 == 1 || p.Progress4 == 0) ? "In Progress" :
+                            "Success")
+                        .FirstOrDefault()
+
+                })
+                .ToListAsync();
+
+            return Json(data);
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

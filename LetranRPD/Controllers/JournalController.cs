@@ -2,12 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-<<<<<<< Updated upstream
+
 namespace LetranRPD.Controllers {
-=======
-    public DbSet<JournalModel> Journals { get; set; }
-    public DbSet<Article> Articles { get; set; }
->>>>>>> Stashed changes
+
+ 
+
 
     public class JournalController : Controller
     {

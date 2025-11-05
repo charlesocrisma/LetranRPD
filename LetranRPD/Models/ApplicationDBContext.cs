@@ -38,11 +38,11 @@ namespace LetranRPD.Models
         
 
 
-        modelBuilder.Entity<Article>()
+       /* modelBuilder.Entity<Article>()
                 .HasOne(a => a.Journal)
                 .WithMany(j => j.Articles)
                 .HasForeignKey(a => a.JournalId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade); */
         }
 
 
