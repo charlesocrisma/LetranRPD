@@ -194,7 +194,7 @@
 										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
 									}
 								}
-									</div>
+							</div>
 							<div class="step-details">
 								Note: If the similarity index is 10% above in the first
 								run, revise the manuscript according to the
@@ -265,35 +265,40 @@
 						<span style="font-size: 20px;">📥</span>
 						<h5>Received Files from Admin</h5>
 					</div>
-
-					<div id="receivedFilesContainer">
-						<div class="received-file-item">
-							<div class="received-file-info">
-								<div class="received-file-icon">📋</div>
-								<div class="received-file-details">
-									<div class="received-file-name">Ocrisma-For_Revision.docx</div>
-									<div class="received-file-meta">Received: Feb 11, 2025 | Size: 2.3 MB | From: Research & Publication Department</div>
+					<div class="file-list">
+						@if (service.ServiceProgress.AdminToStudentFiles != null && service.ServiceProgress.AdminToStudentFiles.Any())
+						{
+							@* Iterate through the list of received files using a C# foreach loop *@
+							foreach (var fileName in service.ServiceProgress.AdminToStudentFiles)
+							{
+								<div class="file-item">
+									<div class="file-icon">
+										@* Call a C# method or helper function to get the icon class *@
+										<div class="received-file-icon">📋</div>
+									</div>
+									<div class="file-info">
+										@* Output the file name *@
+										<div class="file-name">@fileName</div>
+									</div>
+									<div class="file-actions">
+										@* Construct the download link using C# string interpolation or concatenation *@
+										<a href="/uploads/Service_@service.ServiceId/AdminToStudent/@fileName"
+										class="file-action-btn btn-download"
+										title="Download @fileName"
+										download>
+											<i class="fas fa-download"></i>
+										</a>
+									</div>
 								</div>
-							</div>
-							<div>
-								<button class="download-btn" onclick="downloadFile('turnitin-report')">Download</button>
-							</div>
-						</div>
-
-						<div class="received-file-item">
-							<div class="received-file-info">
-								<div class="received-file-icon">📝</div>
-								<div class="received-file-details">
-									<div class="received-file-name">Ocrisma-Complete.pdf</div>
-									<div class="received-file-meta">Received: April 11, 2025 | Size: 856 KB | From: Research & Publication Department</div>
-								</div>
-							</div>
-							<div>
-								<button class="download-btn" onclick="downloadFile('revision-notes')">Download</button>
-							</div>
-						</div>
-
+							}
+						}
+						else
+						{
+							@* Display this content if the file list is empty or null *@
+							<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>
+						}
 					</div>
+
 				</div>
 
 				<div class="panel">
@@ -319,6 +324,12 @@
 											remarkAuthor = parts[0];
 											remarkMessage = parts[1];
 										}
+									}
+
+									else
+									{
+										remarkMessage = "None";
+
 									}
 
 									// If the 'if' checks fail, the variables just
@@ -588,20 +599,38 @@
 						<h5>Received Files from Admin</h5>
 					</div>
 
-					<div id="receivedFilesContainer">
-
-						<div class="received-file-item">
-							<div class="received-file-info">
-								<div class="received-file-icon">📝</div>
-								<div class="received-file-details">
-									<div class="received-file-name">Ocrisma-Complete.pdf</div>
-									<div class="received-file-meta">Received: April 11, 2025 | Size: 856 KB | From: Research & Publication Department</div>
+					<div class="file-list">
+						@if (service.ServiceProgress.AdminToStudentFiles != null && service.ServiceProgress.AdminToStudentFiles.Any())
+						{
+							@* Iterate through the list of received files using a C# foreach loop *@
+							foreach (var fileName in service.ServiceProgress.AdminToStudentFiles)
+							{
+								<div class="file-item">
+									<div class="file-icon">
+										@* Call a C# method or helper function to get the icon class *@
+										<div class="received-file-icon">📋</div>
+									</div>
+									<div class="file-info">
+										@* Output the file name *@
+										<div class="file-name">@fileName</div>
+									</div>
+									<div class="file-actions">
+										@* Construct the download link using C# string interpolation or concatenation *@
+										<a href="/uploads/Service_@service.ServiceId/AdminToStudent/@fileName"
+										class="file-action-btn btn-download"
+										title="Download @fileName"
+										download>
+											<i class="fas fa-download"></i>
+										</a>
+									</div>
 								</div>
-							</div>
-							<div>
-								<button class="download-btn" onclick="downloadFile('revision-notes')">Download</button>
-							</div>
-						</div>
+							}
+						}
+						else
+						{
+							@* Display this content if the file list is empty or null *@
+							<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>
+						}
 					</div>
 				</div>
 
@@ -628,6 +657,12 @@
 											remarkAuthor = parts[0];
 											remarkMessage = parts[1];
 										}
+									}
+
+									else
+									{
+										remarkMessage = "None";
+
 									}
 
 									// If the 'if' checks fail, the variables just
@@ -897,17 +932,38 @@
 						<h5>Received Files from Admin</h5>
 					</div>
 
-					<div id="receivedFilesContainer">
-
-						<div class="received-file-item">
-							<div class="received-file-info">
-								<div class="received-file-icon">📝</div>
-								<div class="received-file-details">
-									<div class="received-file-name">No Files</div>
+					<div class="file-list">
+						@if (service.ServiceProgress.AdminToStudentFiles != null && service.ServiceProgress.AdminToStudentFiles.Any())
+						{
+							@* Iterate through the list of received files using a C# foreach loop *@
+							foreach (var fileName in service.ServiceProgress.AdminToStudentFiles)
+							{
+								<div class="file-item">
+									<div class="file-icon">
+										@* Call a C# method or helper function to get the icon class *@
+										<div class="received-file-icon">📋</div>
+									</div>
+									<div class="file-info">
+										@* Output the file name *@
+										<div class="file-name">@fileName</div>
+									</div>
+									<div class="file-actions">
+										@* Construct the download link using C# string interpolation or concatenation *@
+										<a href="/uploads/Service_@service.ServiceId/AdminToStudent/@fileName"
+										class="file-action-btn btn-download"
+										title="Download @fileName"
+										download>
+											<i class="fas fa-download"></i>
+										</a>
+									</div>
 								</div>
-							</div>
-						</div>
-
+							}
+						}
+						else
+						{
+							@* Display this content if the file list is empty or null *@
+							<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>
+						}
 					</div>
 				</div>
 
@@ -934,6 +990,13 @@
 											remarkAuthor = parts[0];
 											remarkMessage = parts[1];
 										}
+
+									}
+
+									else
+									{
+										remarkMessage = "None";
+
 									}
 
 									// If the 'if' checks fail, the variables just
@@ -1187,9 +1250,9 @@
 					<div>
 						<button class="upload-btn" onclick="selectMultipleFiles(@service.ServiceId)">Select Files</button>
 						<button class="submit-btn"
-								id="submitBtn-@service.ServiceId"
-								onclick="submitFiles(@service.ServiceId, @step)"
-								disabled>
+						id="submitBtn-@service.ServiceId"
+						onclick="submitFiles(@service.ServiceId, @step)"
+						disabled>
 							Submit Files
 						</button>
 					</div>
@@ -1205,17 +1268,38 @@
 						<h5>Received Files from Admin</h5>
 					</div>
 
-					<div id="receivedFilesContainer">
-
-						<div class="received-file-item">
-							<div class="received-file-info">
-								<div class="received-file-icon">📝</div>
-								<div class="received-file-details">
-									<div class="received-file-name">No Files</div>
+					<div class="file-list">
+						@if (service.ServiceProgress.AdminToStudentFiles != null && service.ServiceProgress.AdminToStudentFiles.Any())
+						{
+							@* Iterate through the list of received files using a C# foreach loop *@
+							foreach (var fileName in service.ServiceProgress.AdminToStudentFiles)
+							{
+								<div class="file-item">
+									<div class="file-icon">
+										@* Call a C# method or helper function to get the icon class *@
+										<div class="received-file-icon">📋</div>
+									</div>
+									<div class="file-info">
+										@* Output the file name *@
+										<div class="file-name">@fileName</div>
+									</div>
+									<div class="file-actions">
+										@* Construct the download link using C# string interpolation or concatenation *@
+										<a href="/uploads/Service_@service.ServiceId/AdminToStudent/@fileName"
+										class="file-action-btn btn-download"
+										title="Download @fileName"
+										download>
+											<i class="fas fa-download"></i>
+										</a>
+									</div>
 								</div>
-							</div>
-						</div>
-
+							}
+						}
+						else
+						{
+							@* Display this content if the file list is empty or null *@
+							<p style="text-align: center; color: #6b7280; padding: 2rem;">No files received yet</p>
+						}
 					</div>
 				</div>
 
@@ -1243,6 +1327,11 @@
 											remarkMessage = parts[1];
 										}
 									}
+									else
+									{
+										remarkMessage = "None";
+
+											}
 
 									// If the 'if' checks fail, the variables just
 									// keep their default values, exactly like your 'catch' block.

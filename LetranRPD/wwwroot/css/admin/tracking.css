@@ -250,11 +250,12 @@ body {
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
     overflow: hidden;
-    margin-left: 0rem;
+    overflow: visible !important;
 }
 
 .table-container {
     width: 100%;
+    overflow: visible !important;
 }
 
 .table-header {
@@ -1457,16 +1458,16 @@ body {
 
 /* FIX 2: Table Positioning (Remove left margin push) */
 .table-wrapper {
-    margin-left: 0 !important;
-    width: 80% !important;
+    margin: 0 !important;
+    width: 100% !important;
     padding: 0 !important;
-    margin-left: 9rem;
 }
 
 .table-container {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+   
 }
 
 .students-table {
@@ -1701,6 +1702,29 @@ body {
     }
 }
 
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
 
 /* ===== FIX TABLE POSITIONING ===== */
 .table-wrapper {
@@ -1708,10 +1732,11 @@ body {
     padding: 0 !important;
     width: 100% !important;
     overflow-x: auto;
+    margin-left:0rem !important;
 }
 
 table {
-    width: 80% !important;
+    width: 100% !important;
     margin: 0 !important;
 }
 
@@ -1748,6 +1773,8 @@ td.checkbox-cell {
     justify-content: space-between;
     gap: 1.5rem;
     flex-wrap: wrap;
+    overflow: visible !important;
+    z-index: 50 !important;
 }
 
 .selection-count {
@@ -1761,6 +1788,8 @@ td.checkbox-cell {
     gap: 1rem;
     align-items: center;
     flex-wrap: wrap;
+    overflow: visible !important;
+    z-index: 100 !important;
 }
 
 .bulk-status-dropdown {
@@ -1773,6 +1802,8 @@ td.checkbox-cell {
     cursor: pointer;
     transition: all 0.2s ease;
     min-width: 180px;
+    z-index: 100 !important;
+    position: relative;
 }
 
     .bulk-status-dropdown:focus {
@@ -1907,4 +1938,60 @@ td.checkbox-cell {
         padding: 0.75rem 0.5rem !important;
     }
 }
+
+.bulk-status-dropdown {
+    padding: 0.65rem 1rem !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 0.875rem !important;
+    background: white !important;
+    color: #1f2937 !important;
+    cursor: pointer !important;
+    width: auto !important;
+    min-width: 180px !important;
+    position: relative !important;
+    z-index: 1000 !important;
+    appearance: auto !important;
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+}
+
+    .bulk-status-dropdown:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+
+    .bulk-status-dropdown option {
+        padding: 0.75rem 1rem !important;
+        background: white !important;
+        color: #1f2937 !important;
+        border: none !important;
+        margin: 0.5rem 0 !important;
+    }
+
+.bulk-actions-section {
+    overflow: visible !important;
+    position: relative;
+    z-index: 999;
+}
+
+.bulk-actions-controls {
+    overflow: visible !important;
+    position: relative;
+    z-index: 999;
+}
+
+.table-wrapper {
+    overflow: visible !important;
+}
+
+.table-container {
+    overflow: visible !important;
+}
+
+.filter-section {
+    overflow: visible !important;
+}
+
 

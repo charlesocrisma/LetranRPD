@@ -39,7 +39,7 @@ namespace LetranRPD.Controllers
         public string Ids { get; set; }
         public string Status { get; set; }
     }
-     
+
     public class DeleteViewModel
     {
         public int id { get; set; }
@@ -401,7 +401,7 @@ namespace LetranRPD.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<JsonResult> BulkUpdateStatus([FromBody] BulkUpdateRequest request)
+        public async Task<IActionResult> BulkUpdateStatus([FromBody] BulkUpdateRequest request)
         {
             var currentUser = HttpContext.Session.GetObject<Account>("account");
             if (currentUser == null || currentUser.isAdmin == false)
@@ -430,7 +430,6 @@ namespace LetranRPD.Controllers
                     return Json(new { success = false, message = "Invalid status" });
 
                 int updatedCount = 0;
-
                 foreach (var idStr in idList)
                 {
                     if (int.TryParse(idStr.Trim(), out int serviceId))
