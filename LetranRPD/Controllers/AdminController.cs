@@ -111,6 +111,16 @@ namespace LetranRPD.Controllers
             }
             return View();
         }
+        public IActionResult Reports()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null || currentUser.isAdmin == false)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
         public IActionResult Certificates()
         {
             var currentUser = HttpContext.Session.GetObject<Account>("account");
@@ -328,28 +338,232 @@ namespace LetranRPD.Controllers
                 return StatusCode(500, "An error occurred while saving progress.");
             }
         }
+        
+
+        // ====== Save Journal ======
+        [HttpPost]
+        public async Task<IActionResult> SaveJournal(string JournalName, string Volume, string SubVolume)
+        {
+            if (string.IsNullOrWhiteSpace(JournalName) || string.IsNullOrWhiteSpace(Volume) || string.IsNullOrWhiteSpace(SubVolume))
+            {
+                return Json(new { success = false, message = "⚠️ Please fill in all required fields." });
+            }
+
+            try
+            {
+                // ✅ Prevent duplicate Journal + Volume + SubVolume in the database
+                bool isDuplicate = await _context.Journalss.AnyAsync(j =>
+                    j.JournalName.ToLower() == JournalName.ToLower() &&
+                    j.Volume.ToLower() == Volume.ToLower() &&
+                    j.SubVolume.ToLower() == SubVolume.ToLower()
+                );
+
+                if (isDuplicate)
+                {
+                    return Json(new { success = false, message = "❌ Duplicate SubVolume detected for this Journal and Volume." });
+                }
+
+                // ✅ Create a new journal entry
+                var newJournal = new JournalModel
+                {
+                    JournalName = JournalName,
+                    Volume = Volume,
+                    SubVolume = SubVolume
+            
+                };
+
+                // ✅ Save to the database
+                _context.Journalss.Add(newJournal);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "✅ Journal published successfully!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving journal");
+                return Json(new { success = false, message = $"⚠️ Error saving journal: {ex.Message}" });
+            }
+        }
 
         // ===== Article Management (From AdminController1) =====
         [HttpPost]
-        public IActionResult AddArticle([FromBody] ArticleModel article)
+        public async Task<IActionResult> AddArticle([FromBody] Article article)
         {
-            string filePath = Path.Combine(_env.WebRootPath, "js", "articles.json");
-            if (!System.IO.File.Exists(filePath))
-                System.IO.File.WriteAllText(filePath, "[]");
+            if (article == null)
+                return Json(new { success = false, message = "Invalid article data." });
 
-            var json = System.IO.File.ReadAllText(filePath);
-            var articles = JsonSerializer.Deserialize<List<ArticleModel>>(json) ?? new();
+            try
+            {
+                var newArticle = new Article
+                {
+                    JournalName = article.JournalName,
+                    Volume = article.Volume,
+                    SubVolume = article.SubVolume,
+                    Title = article.Title,
+                    Authors = article.Authors,
+                    Abstract = article.Abstract,
+                    Category = article.Category,
+                    Date = string.IsNullOrWhiteSpace(article.Date)
+                        ? DateTime.Now.ToString("MMMM dd, yyyy")
+                        : article.Date
+                };
 
-            article.Date = DateTime.Now.ToString("MMMM dd, yyyy");
-            articles.Add(article);
+                _context.Articless.Add(newArticle);
+                await _context.SaveChangesAsync();
 
-            var updatedJson = JsonSerializer.Serialize(articles, new JsonSerializerOptions { WriteIndented = true });
-            System.IO.File.WriteAllText(filePath, updatedJson);
+                return Json(new { success = true, message = "Article added successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding article");
+                return Json(new { success = false, message = "Error adding article." });
+            }
+        }
+        // ====== Content.cshtml fetch articles from Database ======
+        [HttpGet]
+        public async Task<IActionResult> GetArticlesAdmin()
+        {
+            var articles = await _context.Articless.ToListAsync();
+            return Json(articles);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetJournals()
+        {
+            try
+            {
+                // Fetch all journals from the database, ordered by latest
+                var journals = await _context.Journalss
+                    .OrderByDescending(j => j.Id)
+                    .Select(j => new
+                    {
+                        j.Id,
+                        j.JournalName,
+                        j.Volume,
+                        j.SubVolume
+                    })
+                    .ToListAsync();
 
-            return Json(new { success = true });
+                // ✅ Unified format for frontend script
+                return Json(new { success = true, data = journals });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching journals");
+                return Json(new { success = false, message = "Error retrieving journals." });
+            }
         }
 
-        // ===== News Management (From AdminController1) =====
+
+        [HttpGet]
+        public async Task<IActionResult> GetArticles()
+        {
+            try
+            {
+                var articles = await _context.Articless
+                    .OrderByDescending(a => a.Id)
+                    .Select(a => new
+                    {
+                        a.Id,
+                        a.Title,
+                        a.Authors,
+                        a.Date,
+                        a.Category,
+                        a.Abstract,
+                        a.JournalName,
+                        a.Volume,
+                        a.SubVolume
+                    })
+                    .ToListAsync();
+
+                // ✅ Match GetJournals structure
+                return Json(new { success = true, data = articles });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching articles");
+                return Json(new { success = false, message = "Error retrieving articles." });
+            }
+        }
+
+
+        // ====== Edit Article ======
+        [HttpPost]
+        public async Task<IActionResult> EditArticle([FromBody] Article updated)
+        {
+            if (updated == null)
+                return Json(new { success = false, message = "Invalid article data." });
+
+            var existing = await _context.Articless
+                .FirstOrDefaultAsync(a => a.Id == updated.Id);
+
+            if (existing == null)
+                return Json(new { success = false, message = "Article not found." });
+
+            existing.Title = updated.Title;
+            existing.Authors = updated.Authors;
+            existing.Abstract = updated.Abstract;
+            existing.Category = updated.Category;
+            existing.JournalName = updated.JournalName;
+            existing.Volume = updated.Volume;
+            existing.SubVolume = updated.SubVolume;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Article updated successfully." });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetArticleById(int id)
+        {
+            var article = await _context.Articless
+                .Where(a => a.Id == id)
+                .Select(a => new {
+                    a.Id,
+                    a.Title,
+                    a.Authors,
+                    a.Abstract,
+                    a.Category,
+                    a.JournalName,
+                    a.Volume,
+                    a.SubVolume
+                })
+                .FirstOrDefaultAsync();
+
+            if (article == null)
+                return Json(new { success = false, message = "Article not found." });
+
+            return Json(article);
+        }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteArticle(int id)
+        {
+            try
+            {
+                var article = await _context.Articless.FindAsync(id);
+                if (article == null)
+                    return Json(new { success = false, message = "Article not found." });
+
+                _context.Articless.Remove(article);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Article deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting article");
+                return Json(new { success = false, message = "Error deleting article." });
+            }
+        }
+
+        // ====== Display Journals with Articles ======
+
+
+
+
+
+
+
+
         [HttpPost]
         public IActionResult AddNews(IFormFile ImageFile, string Title, string Content, string Category)
         {
@@ -362,29 +576,38 @@ namespace LetranRPD.Controllers
                 var json = System.IO.File.ReadAllText(filePath);
                 var newsList = JsonSerializer.Deserialize<List<NewsModel>>(json) ?? new List<NewsModel>();
 
+                // Handle image upload
                 string imageFileName = null;
-                if (ImageFile != null)
+                if (ImageFile != null && ImageFile.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "news");
-                    Directory.CreateDirectory(uploadsFolder);
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
 
                     imageFileName = Guid.NewGuid() + Path.GetExtension(ImageFile.FileName);
                     string imagePath = Path.Combine(uploadsFolder, imageFileName);
-                    using var stream = new FileStream(imagePath, FileMode.Create);
-                    ImageFile.CopyTo(stream);
+                    using (var stream = new FileStream(imagePath, FileMode.Create))
+                    {
+                        ImageFile.CopyTo(stream);
+                    }
                 }
 
-                newsList.Add(new NewsModel
+                var nextId = newsList.Any() ? newsList.Max(n => n.Id) + 1 : 1;
+                var newNews = new NewsModel
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = nextId,
                     Title = Title,
                     Content = Content,
                     Category = Category,
                     ImagePath = imageFileName != null ? $"/uploads/news/{imageFileName}" : null,
                     Date = DateTime.Now.ToString("yyyy-MM-dd")
-                });
+                };
 
-                System.IO.File.WriteAllText(filePath, JsonSerializer.Serialize(newsList, new JsonSerializerOptions { WriteIndented = true }));
+                newsList.Add(newNews);
+
+                var updatedJson = JsonSerializer.Serialize(newsList, new JsonSerializerOptions { WriteIndented = true });
+                System.IO.File.WriteAllText(filePath, updatedJson);
+
                 return Json(new { success = true, message = "News added successfully." });
             }
             catch (Exception ex)
@@ -393,11 +616,170 @@ namespace LetranRPD.Controllers
             }
         }
 
+
+
+        // ===== Edit News =====
+        [HttpPost]
+        public IActionResult EditNews(IFormFile ImageFile, string Id, string Title, string Content, string Category)
+        {
+            try
+            {
+                string filePath = Path.Combine(_env.WebRootPath, "js", "news.json");
+                if (!System.IO.File.Exists(filePath))
+                    return Json(new { success = false, message = "News file not found." });
+
+                var json = System.IO.File.ReadAllText(filePath);
+                var newsList = JsonSerializer.Deserialize<List<NewsModel>>(json) ?? new List<NewsModel>();
+                int parsedId = int.Parse(Id);
+                var news = newsList.FirstOrDefault(n => n.Id == parsedId);
+
+                if (news == null)
+                    return Json(new { success = false, message = "News not found." });
+
+                // Update text fields
+                news.Title = Title;
+                news.Content = Content;
+                news.Category = Category;
+
+                // Handle optional image update
+                if (ImageFile != null && ImageFile.Length > 0)
+                {
+                    string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "news");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    string imageFileName = Guid.NewGuid() + Path.GetExtension(ImageFile.FileName);
+                    string imagePath = Path.Combine(uploadsFolder, imageFileName);
+
+                    using (var stream = new FileStream(imagePath, FileMode.Create))
+                    {
+                        ImageFile.CopyTo(stream);
+                    }
+
+                    news.ImagePath = $"/uploads/news/{imageFileName}";
+                }
+
+                // Save changes
+                var updatedJson = JsonSerializer.Serialize(newsList, new JsonSerializerOptions { WriteIndented = true });
+                System.IO.File.WriteAllText(filePath, updatedJson);
+
+                return Json(new { success = true, message = "News updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error editing news: {ex.Message}" });
+            }
+        }
+
+        // ===== Delete News =====
+        [HttpPost]
+        public IActionResult DeleteNews([FromBody] NewsModel news)
+        {
+            try
+            {
+                string filePath = Path.Combine(_env.WebRootPath, "js", "news.json");
+                if (!System.IO.File.Exists(filePath))
+                    return Json(new { success = false, message = "News file not found." });
+
+                var json = System.IO.File.ReadAllText(filePath);
+                var newsList = JsonSerializer.Deserialize<List<NewsModel>>(json) ?? new List<NewsModel>();
+
+                var existing = newsList.FirstOrDefault(n => n.Id == news.Id);
+                if (existing == null)
+                    return Json(new { success = false, message = "News not found." });
+
+                newsList.Remove(existing);
+                System.IO.File.WriteAllText(filePath, JsonSerializer.Serialize(newsList, new JsonSerializerOptions { WriteIndented = true }));
+
+                return Json(new { success = true, message = "News deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error deleting news: {ex.Message}" });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddJournal([FromBody] JournalModel model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.JournalName))
+                return Json(new { success = false, message = "Invalid journal data." });
+
+            // Prevent duplicate Journal + Volume + SubVolume
+            bool exists = await _context.Journalss.AnyAsync(j =>
+                j.JournalName == model.JournalName &&
+                j.Volume == model.Volume &&
+                j.SubVolume == model.SubVolume);
+
+            if (exists)
+                return Json(new { success = false, message = "A journal with this name, volume, and subvolume already exists." });
+
+            try
+            {
+                _context.Journalss.Add(model);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Journal added successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding journal");
+                return Json(new { success = false, message = "Error adding journal." });
+            }
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        // AUDIT LOG 
+        [HttpGet]
+        public async Task<IActionResult> GetAuditLogs()
+        {
+            var data = await _context.ServiceInformations
+                .Select(s => new
+                {
+                    service = s.ServiceType,
+                    student = s.ContactPerson,
+                    idNo = s.StudentNumber,
+
+                    department = _context.Accounts
+                        .Where(a => a.StudentNumber == s.StudentNumber)
+                        .Select(a => a.Level)
+                        .FirstOrDefault(),
+
+                    // Most recent applied date
+                    appliedDate = _context.ServiceProgresses
+                        .Where(p => p.ServiceId == s.ServiceId)
+                        .OrderByDescending(p => p.AppliedDate)
+                        .Select(p => p.AppliedDate)
+                        .FirstOrDefault(),
+
+                    // Latest RunCount (attempts)
+                    attempts = _context.ServiceProgresses
+                        .Where(p => p.ServiceId == s.ServiceId)
+                        .OrderByDescending(p => p.AppliedDate)
+                        .Select(p => p.RunCount)
+                        .FirstOrDefault(),
+
+                    // ✅ Result based on attempts
+                    result = _context.ServiceProgresses
+                        .Where(p => p.ServiceId == s.ServiceId)
+                        .OrderByDescending(p => p.AppliedDate)
+                        .Select(p =>
+
+                            p.RunCount == 4 ? "Failed" :
+                            p.Progress4 == 2 ? "Success" :
+                    (p.Progress4 == 1 || p.Progress4 == 0) ? "In Progress" :
+                            "Success")
+                        .FirstOrDefault()
+
+                })
+                .ToListAsync();
+
+            return Json(data);
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

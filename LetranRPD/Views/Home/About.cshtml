@@ -8,34 +8,348 @@
 <title>About</title>
 <link rel="stylesheet" href="~/css/About.css" asp-append-version="true" />
 
-<div class="container">
-	<main class="main-content">
-			<h1 class="page-title">ABOUT US</h1>
-            
-            
-      <div class="services-grid">
-      <div class="service-card">
-      <h2>Mission</h2>
-        <div class="divider"></div>
-        <p>The ACE Letran Research Center is committed to develop a culture of research through the enhancement of the capability of every member of the 
-           institution to become a community of professionals making just decisions in addressing global issues guided by the Dominican charism.</p>
-         </div>
-      </a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About RPD - Letran Research & Publication Department</title>
+</head>
+<body>
 
-          <div class="service-card">
-           <h2>Vision</h2>
-     <div class="divider"></div>
-       <p>The Letran Research Center envisions itself in the forefront of scholarly researches in the Philippines recognized by the international academic community.   </p>
-         </div>
-     </a>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>RESEARCH & PUBLICATION DEPARTMENT</h1>
+            <p class="tagline">Siempre Arriba! Siempre Letran!</p>
+            <p class="subtitle">Pushing the frontiers of knowledge and intensifying research culture at Colegio de San Juan de Letran</p>
+        </div>
+    
+ 
+        <div class="mission-vision">
+            <div class="mv-card">
+                <h3>Our Mission</h3>
+                <p>The Letran Research Center is committed to develop a culture of research through the enhancement of the capability of every member of the institution to become a community of professionals making just decisions in addressing global issues guided by the Dominican charism.</p>
+            </div>
+            <div class="mv-card2">
+                <h3>Our Vision</h3>
+                <p>The Letran Research Center envisions itself in the forefront of scholarly researches in the Philippines recognized by the international academic community.</p>
+            </div>
+        </div>
+        
+
+        
+        <!-- Photo-Card -->
+        <div class="gallery-grid">
+            <div class="container3">
+                <div class="photo-card" onclick="openModal('modal1')">
+                    <img src="~/Gallery/Orgchart LRC.png" alt="Org Chart">
+                    <div class="card-content">
+                        <div class="card-title">Organizational Chart</div>
+                        <div class="card-hint">Click to read the full message</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- First Modal -->
+            <div id="modal1" class="modal" onclick="closeModal(event, 'modal1')">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <div class="modal-title">Research Agenda</div>
+                    <div class="modal-header">
+                        <img src="~/Gallery/Orgchart LRC.png" alt="Agenda">
+                        <button class="close-btn" onclick="closeModal(event, 'modal1')">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Card -->
+            <div class="container1">
+                <div class="photo-card" onclick="openModal('modal2')">
+                    <img src="~/Gallery/Agenda.png" alt="Program">
+                    <div class="card-content">
+                        <div class="card-title">Research Program Framework</div>
+                        <div class="card-hint">Click to read the full message</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Modal -->
+            <div id="modal2" class="modal" onclick="closeModal(event, 'modal2')">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <div class="modal-title">Research Agenda Framework</div>
+                    <div class="modal-header">
+                        <img src="~/Gallery/Agenda.png" alt="Program">
+                        <button class="close-btn" onclick="closeModal(event, 'modal2')">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            The revised research agenda of the LRC is ultimately aimed at research, development, and innovation. Research ventures on Nature and Environment, Local Responsiveness and Policy Studies, Product Development, Sustainability, Society, Culture, and Human Behavior, Gender Responsive Research, Quality Standards in Education, and ‘Glocalization’ are prioritized, along with fostering research collaboration in meeting the demands of the interconnected research agenda framework.
+                        </p>
+
+                        <h3>Research Subjects and Descriptions</h3>
+                        <h5>Nature and Environment</h5>
+                        <p>
+                            Researches on environmental and biodiversity awareness, trends in the scientific community of natural and physical sciences, climate change and its effects to attitudes and behavior is included in this agenda.
+                            It includes, but not limited to, studies on waste management; energy and resources conservation; ecological economics, green business and technology; pollution control and prevention; risk reduction and response management; area/geographical studies; and food security
+                        </p>
+                        <h5>Local Responsiveness and Policy Studies</h5>
+                        <p>
+                            In this agenda, researches on different disciplines responding to the needs and challenges of the local/national community, of the national scale, and of various industries are prioritized.
+
+                            It includes, but is not limited to, studies on the culture and communities of indigenous people and other marginalized sectors; politics, governance, and local/national policy studies; prevalent/emerging local and national issues; baseline studies for community program development; and school-community partnerships.
+                        </p>
+                        <h5>Business and Product Development</h5>
+                        <p>
+                            This agenda focuses on research studies regarding the creation of products, software and prototypes with new or different characteristics that offers new or additional benefits to stakeholders.
+
+                            It includes studies on product formulation, food fortification and enrichment, and prototype assembly in preparation for possible patenting. This agenda also includes office and business management, breakthroughs in the corporate and business worlds, and the overall process of strategic and organizational planning from product conceptualization, marketing/advertising, evaluation to
+                        </p>
+                        <h5>Sustainability and Heritage</h5>
+                        <p>
+                            Researches on conservation of the environment and biodiversity, environmental sustainability, the role of business in nature and society, and the sustainability of cultural heritage, are the foundations of this agenda.
+
+                            It includes, but is not limited to, studies on renewable energy technologies, pollution control and prevention, social responsiveness, positive psychology, psychology of disaster response, disaster and mental health, conservation of Letran and Intramuros as an important historical site, the Philippine arts (visual, performing, music, physical, etc.), cultural heritage mapping (built, movable, personalities, intangible), linguistics and language conservation, and historical researches.
+                        </p>
+                        <h5>Society, Culture, and Human Behavior</h5>
+                        <p>
+                            In this agenda, studies on the general society, the Filipino culture, and behavioral/social sciences are the primary focus of the Center.
+
+                            This includes researches regarding, but not limited to, sociological and psychological analyses, Filipino identity studies, current and contemporary events, media (mass, social, print, broadcast, etc.), law and human rights, mental health and wellness, socio- and intercultural studies, philosophy and theology, advocacy and NGO studies, institutional studies on the society, culture, and behavior of Letranites and the Colegio’s stakeholders, inequality/poverty studies, and impact studies.
+                        </p>
+                        <h5>Gender Responsive Research</h5>
+                        <p>
+                            As mandated by the Commission on Higher Education, researches on gender and women studies, gender and development, and emerging gender issues shall be focused on in this agenda.
+
+                            This includes researches regarding, but not limited to, gender and economic empowerment, gender in power and decision making, gender planning and budgeting, indigenous women and girls, Violence Against Women and Children (VAWC), women in history, feminist literature, gender identities and sexual orientation, intersectional studies on social issues and gender, gender sensitivity, and gender-based
+                        </p>
+                        <h5>Quality Standards in Education</h5>
+                        <p>Researches focused on the development of education, pedagogy, policies on education, teacher education, and ICT education shall be catered in this agenda. This includes researches regarding, but not limited to, graduate tracer studies, use of technology in teaching, indigenous education, trends in education, educational benchmarking, e-learning and distance learning, classroom-based research, and new ecologies of learning.</p>
+                        <h5>'Glocalization'</h5
+                           <p>A new term in international studies, Glocalization is concerned with globalization and localization of cultural and social elements. This agenda is focused on international linkages, international studies, and the interconnectedness of the global society.
+
+                              It includes studies on, but not limited to, globalization, area studies, international business, millennium development goals, tourism, entrepreneurship, development studies, international trends, the contemporary world, foreign relations, global scale research, ASEAN integration, and global culture.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Card -->
+            <div class="container3">
+                <div class="photo-card" onclick="openModal('modal3')">
+                    <img src="~/Gallery/lrcprogram.png" alt="Agenda">
+                    <div class="card-content">
+                        <div class="card-title">Research Program</div>
+                        <div class="card-hint">Click to read the full message</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Modal -->
+            <div id="modal3" class="modal" onclick="closeModal(event, 'modal3')">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <div class="modal-title">Research Program</div>
+                    <div class="modal-header">
+                        <img src="~/Gallery/lrcprogram.png" alt="Agenda">
+                        <button class="close-btn" onclick="closeModal(event, 'modal3')">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                          The five year Arriba Research Program consists of six pillars—The Agenda, Capacity Building, Assistance, Publication, Visibility, and Linkages. These will form the framework for a revitalized research culture in the Colegio.
+                        </p>
+
+                        <img src="~/Gallery/Screenshot 2025-10-03 011048.png" style="width: 750px;" />
+                         <h5>Research Capacity Building Program (RCBP)</h5>
+                         <br />
+                          
+                           <li>Research Data Banking (Project ReDaB)</li>
+                              <p>This project involves the data banking of all the research information and endeavors of all the members of the Colegio, both employees and students.</p>
+                           <li>Training and Needs Assessment (Project TraNeA)</li>
+                              <p>This project seeks to identify the currenct state of research in the Colegio including the members' needs and training requirements to increase research productivity and engagement.</p>
+                           <li>Training Opportunities for Research Competence Honing (Project TORCH)</li>
+                              <p>This project involves a package of comprehensive training and seminar-workshop programs and activities that provide both faculty, students, and employees opportunity to further hone their research skills and be exposed to current research trends.</p>
+                           <li>Improving Competence on Advising and Networking (Project iCAN)</li>
+                              <p>Designed specifically for research advisers, this project seeks to enchance advising and networking skills of researchers for more sophistication & rigor in research output.</p>
+                           <li>Assisting Researchers thru the Mentor-Mentee Scheme (Project ARMMS)</li>
+                               <p>This project aims to hone the capabilities of junior employee/faculty researchers in the conduct of research and research writing through a face-to-face intensive training with senior employee/faculty researchers.</p>                        
+
+                     
+                        <h5>Research Publication Program (RPP)</h5>
+                            <li>Research Output Tracking for Empowerment (Project ROTE)</li>
+                              <p>The project aims to assist the researchers in the conduct of their research by providing constructive feedback on their research output on a piecemeal basis.</p>
+                           <li>Research Output Publication for Empowerment (Project ROPE)</li>
+                              <p>The project aims to assist the researchers in the publication of their research ouputs through the Colegio's Research Journal, Luz y Saber and other national and international referred research journals. </p>
+                           <li>Research Awards on Publications and Patents (Project ReAPP)</li>
+                              <p>The project aims to recognize the productivity of researchers, not only through moentary incentives, but also through recognition by administration and peers.</p>
+      
+                        <h5>Reseatch Assistance Program (RAP)</h5>
+                        <li>Research Assistance & Direction (Project ReAD) on employee and student researches</li>
+                              <p> This project aims to assist both graduate and undergraduate students in the conduct of their research by providing them with the necessary assistance on statistical treatment, language editing and certification of originality of their researches. </p>
+                        <li>Increasing Funding from International and National Organizations (Project iFINO)</li>
+                              <p>This project aims to scout for funding institutions for financial support of research projects and to prepare proposals for grants based on the institution's research agenda in collaboration with the employee researchers and the program coordinators. </p>
+
+                        <h5>Research Visibility Program (RVP)</h5>
+                        <li>Research Collaboration, Initiative and Networking (Project ReCoIN)</li>
+                              <p>This project aims to establish favorable linkages and initiatives with national and international agencies / institutions to define parameters for faculty development and exchange programs including research collaboration </p>
+                        <li>Research Overseas Research Training and Exposure (Project FORTE)</li>
+                              <p>The project gives opportunity to resident faculty researchers to further hone their research skills and know-how through exposure to research scholarship and/or fellowship. Additionall, it gives an opportunity for the faculty researcher to disseminate relevant research findings in recognized seminars and conferences for increased visibility index. </p>
+                        <li>Instituting Database of Research Efforts for Academic Merit (Project iDream)</li>
+                              <p>This project seeks to document all the research efforts of the faculty and students of the Colegio through an iCloud research repository and showcase the best outputs through a well-maintained research hub. </p>
+                        <li>Investing on Memberships in Organizations for Linkages and Direction (Project iMOLD)</li>
+                              <p>This project aims to provide opportunities for employee researchers to be members of professional organizations for possible linkages and collaborations. </p>
+                        <li>Presentation Opportunity Skills Enchancement (Project POSE)</li>
+                              <p>This project seeks to hone the research presentation skills of both faculty and students in research forums, colloquia and conferences. </p>
+                      <ul> </ul>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function openModal(modalId) {
+                    document.getElementById(modalId).style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                }
+
+                function closeModal(event, modalId) {
+                    if (event) {
+                        event.stopPropagation();
+                    }
+                    document.getElementById(modalId).style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+
+                // Close modal when pressing Escape key
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        ['modal1', 'modal2', 'modal3'].forEach(modalId => {
+                            document.getElementById(modalId).style.display = 'none';
+                        });
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            </script>
         </div>
 
-        <h1 class="page-title">Organizational Chart</h1>
-        <div class="service-card">
-            <img src="~/Gallery/Orgchart LRC.png" alt="Originality Check">
+        <br>
+
+        <h2 class="section-title">Meet Our Team</h2>
+    <div class="card-grid">
+        <div class="card">
+            <img class="card__background"
+                 src="https://i.imgur.com/QYWAcXk.jpeg"
+                 alt="Photo of Cartagena's cathedral at the background and some colonial style houses"
+                 width="1920"
+                 height="2193" />
+            <div class="card__content | flow">
+                <div class="card__content--container | flow">
+                    <h2 class="card__title">Mr. Jayver John Zingapan</h2>
+                    <p class="card__description">
+                        Knowledge-Technology Transfer and Continuing Education Coordinator
+                    </p>
+                </div>
+            </div>
         </div>
 
-</div>
+            <div class="card">
+                <img class="card__background"
+                     src="https://i.imgur.com/QYWAcXk.jpeg"
+                     alt="Photo of Cartagena's cathedral at the background and some colonial style houses"
+                     width="1920"
+                     height="2193" />
+                <div class="card__content | flow">
+                    <div class="card__content--container | flow">
+                        <h2 class="card__title">Ms. Eanah Zhelyne M. Espinosa</h2>
+                        <p class="card__description">
+                            Employee Research Coordinator
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <img class="card__background"
+                     src="https://i.imgur.com/QYWAcXk.jpeg"
+                     alt="Photo of Cartagena's cathedral at the background and some colonial style houses"
+                     width="1920"
+                     height="2193" />
+                <div class="card__content | flow">
+                    <div class="card__content--container | flow">
+                        <h2 class="card__title">Mr. Dominic Enrique Sarip</h2>
+                        <p class="card__description">
+                            Employee Research Coordinator
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <img class="card__background"
+                     src="~/Gallery/Mariano, Louie Ian Balboa_95608.jpg"
+                     alt="director"
+                     width="1920"
+                     height="2193" />
+                <div class="card__content | flow">
+                    <div class="card__content--container | flow">
+                        <h2 class="card__title">Asst. Prof. Louie Ian B. Mariano, RChE, MEN</h2>
+                        <p class="card__description">
+                             Director, Letran Research center
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <img class="card__background"
+                     src="~/Gallery/Mariano, Louie Ian Balboa_95608.jpg"
+                     alt="Photo of Cartagena's cathedral at the background and some colonial style houses"
+                     width="1920"
+                     height="2193" />
+                <div class="card__content | flow">
+                    <div class="card__content--container | flow">
+                        <h2 class="card__title">Mrs. Lea Angela Hernaez-Bongay</h2>
+                        <p class="card__description">
+                            Management Staff
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card1">
+            <div class="card-text">
+                <div class="portada">
+                    <img class="portada"
+                        src="~/Gallery/Mariano, Louie Ian Balboa_95608.jpg"
+                        alt="director"
+                        width="1920"
+                        height="2193"/>
+                </div>
+                <div class="title-total">
+                    
+                    <h2>Asst. Prof. Louie Ian B. Mariano, RChE, MEN</h2>
+                    <div class="title" style="font-weight:700; font-size:larger;" >Director's Message</div>
+                    <div class="desc">
+                        There is no doubt that research is one of the pillars of education, alongside instruction and community service. Through research, we can gather new knowledge and information for the enhancement of intellectual understanding and guide in decision-making abilities.
+                        <br />
+                        <br />
+                        The Letran Research Center is responsible in providing quality researches and publications to intensify the research culture of the Colegio. Along with its mission to become the torch of light and knowledge, the Center also aims to rigorously develop the research skills of all members of the Colegio—students, faculty members, staff, and administrators—in order to push the frontiers of knowledge while under the wing of the Dominican Province of the Philippines.
+                        <br />
+                        <br />
+                        In the long run, we envision the Center to be in the forefront of scholarly researches in the Philippines that is recognized and accredited by the international academic community. This would be realized through the development of the capacity and capability of every member of the Colegio in order to become a community of intellectual professionals that are responsive to pressing and various national and international issues.
+                        <br />
+                        <br />
+                        Both the Employee and Student arms of the Letran Research Center are working hard to ensure the prompt and quality delivery of research services to the Colegio. From the conduct of research and provision of grants and incentives to close monitoring of scholarly projects of the students in all aspects, we ensure our contribution to the Colegio’s commitment to quality and Dominican education.
+                        <br />
+                        <br />
+                        ¡Siempre Arriba! ¡Siempre Letran!
+                    </div>
+                </div>
+
+            </div>
 
 
+
+        </div>
+    </div>
+
+    
+
+</body>
+</html>
 

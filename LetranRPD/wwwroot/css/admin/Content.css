@@ -17,6 +17,9 @@ body {
     padding: 50px 70px;
     border-radius: 12px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
 }
 
     /* Title section */
@@ -97,6 +100,7 @@ textarea.form-control {
 /* Form spacing */
 .mb-3 {
     margin-bottom: 22px !important;
+
 }
 
 /* Small screen responsiveness */
@@ -558,3 +562,4 @@ table td .table-action-btn {
         width: 95%;
     }
 }
+
