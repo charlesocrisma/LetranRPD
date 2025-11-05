@@ -1940,46 +1940,45 @@ td.checkbox-cell {
 }
 
 .bulk-status-dropdown {
-    padding: 0.65rem 1rem !important;
-    border: 2px solid #e5e7eb !important;
-    border-radius: 8px !important;
-    font-size: 0.875rem !important;
-    background: white !important;
-    color: #1f2937 !important;
-    cursor: pointer !important;
-    width: auto !important;
-    min-width: 180px !important;
-    position: relative !important;
-    z-index: 1000 !important;
-    appearance: auto !important;
-    -webkit-appearance: menulist !important;
-    -moz-appearance: menulist !important;
+    padding: 0.65rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: white;
+    color: #1f2937;
+    cursor: pointer;
+    min-width: 180px;
+    width: auto;
+    z-index: 100;
+    position: relative;
 }
 
+    .bulk-status-dropdown:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
     .bulk-status-dropdown:focus {
-        outline: none !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
     .bulk-status-dropdown option {
-        padding: 0.75rem 1rem !important;
-        background: white !important;
-        color: #1f2937 !important;
-        border: none !important;
-        margin: 0.5rem 0 !important;
+        padding: 0.75rem 1rem;
+        background: white;
+        color: #1f2937;
+        margin: 0.5rem 0;
     }
 
 .bulk-actions-section {
     overflow: visible !important;
     position: relative;
-    z-index: 999;
 }
 
 .bulk-actions-controls {
     overflow: visible !important;
     position: relative;
-    z-index: 999;
 }
 
 .table-wrapper {
@@ -1993,5 +1992,6 @@ td.checkbox-cell {
 .filter-section {
     overflow: visible !important;
 }
+
 
 
