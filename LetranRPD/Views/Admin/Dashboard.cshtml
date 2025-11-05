@@ -20,17 +20,17 @@
 						<div class="stat-title">Total Students</div>
 						<div class="stat-icon" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">👨‍🎓</div>
 					</div>
-					<div class="stat-value">1,247</div>
-					<div class="stat-change positive">↗ +12% from last month</div>
+					<div class="stat-value">@ViewBag.TotalStudents</div>
+					
 				</div>
 
 				<div class="stat-card">
 					<div class="stat-header">
-						<div class="stat-title">Active Researches</div>
+						<div class="stat-title">Total Admins</div>
 						<div class="stat-icon" style="background: rgba(56, 161, 105, 0.1); color: #38a169;">📝</div>
 					</div>
-					<div class="stat-value">89</div>
-					<div class="stat-change positive">↗ +8% from last week</div>
+					<div class="stat-value">@ViewBag.TotalAdmins</div>
+					
 				</div>
 
 				<div class="stat-card">
@@ -38,17 +38,8 @@
 						<div class="stat-title">Pending Reviews</div>
 						<div class="stat-icon" style="background: rgba(237, 137, 54, 0.1); color: #ed8936;">⏳</div>
 					</div>
-					<div class="stat-value">23</div>
-					<div class="stat-change negative">↘ -5% from yesterday</div>
-				</div>
-
-				<div class="stat-card">
-					<div class="stat-header">
-						<div class="stat-title">Certificates Issued</div>
-						<div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">🏆</div>
-					</div>
-					<div class="stat-value">456</div>
-					<div class="stat-change positive">↗ +15% this month</div>
+					<div class="stat-value">@ViewBag.TotalPending</div>
+				
 				</div>
 			</div>
 
@@ -57,9 +48,7 @@
 				<div class="chart-header">
 					<h3 class="chart-title">Most Used Services</h3>
 					<div class="chart-filters">
-						<button class="filter-btn active" onclick="filterChart('month')">Month</button>
-						<button class="filter-btn" onclick="filterChart('semester')">Semester</button>
-						<button class="filter-btn" onclick="filterChart('year')">Year</button>
+						<button class="filter-btn active" onclick="filterChart('overall', event)">Overall</button>
 					</div>
 				</div>
 
@@ -67,154 +56,116 @@
 					<canvas id="servicesChart"></canvas>
 				</div>
 
-				<div class="chart-legend">
-					<div class="legend-items">
-						<div class="legend-item">
-							<div class="legend-color" style="background: #667eea;"></div>
-							<span>Originality Check</span>
-							<span class="legend-value" id="originalitycheck">342</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background: #38a169;"></div>
-							<span>Instrument Validation</span>
-							<span class="legend-value" id="instrumentvalidation">156</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background: #ed8936;"></div>
-							<span>Language Editing</span>
-							<span class="legend-value" id="languageediting">89</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background: #e53e3e;"></div>
-							<span>Data Analysis</span>
-							<span class="legend-value" id="dataanalysis">67</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background: #8b5cf6;"></div>
-							<span>Student Research Clearance</span>
-							<span class="legend-value" id="srudentresearchclearance">134</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background: #f56565;"></div>
-							<span>Ethics Review</span>
-							<span class="legend-value" id="ethicsreview">78</span>
-						</div>
-					</div>
+				<!-- Legend -->
+
+				<div class="legend-item">
+					<div class="legend-color" style="background: #667eea;"></div>
+					<span>Originality Check</span>
+					<span class="legend-value">@((ViewBag.ServiceCounts != null && ViewBag.ServiceCounts.ContainsKey("Originality Check")) ? ViewBag.ServiceCounts["Originality Check"] : 0)</span>
+				</div>
+
+				<div class="legend-item">
+					<div class="legend-color" style="background: #38a169;"></div>
+					<span>Instrument Validation</span>
+					<span class="legend-value">@((ViewBag.ServiceCounts != null && ViewBag.ServiceCounts.ContainsKey("Instrument Validation")) ? ViewBag.ServiceCounts["Instrument Validation"] : 0)</span>
+				</div>
+
+				<div class="legend-item">
+					<div class="legend-color" style="background: #ed8936;"></div>
+					<span>Language Editing</span>
+					<span class="legend-value">@((ViewBag.ServiceCounts != null && ViewBag.ServiceCounts.ContainsKey("Language Editing")) ? ViewBag.ServiceCounts["Language Editing"] : 0)</span>
+				</div>
+
+				<div class="legend-item">
+					<div class="legend-color" style="background: #e53e3e;"></div>
+					<span>Data Analysis</span>
+					<span class="legend-value">@((ViewBag.ServiceCounts != null && ViewBag.ServiceCounts.ContainsKey("Data Analysis")) ? ViewBag.ServiceCounts["Data Analysis"] : 0)</span>
+				</div>
+
+				<div class="legend-item">
+					<div class="legend-color" style="background: #8b5cf6;"></div>
+					<span>Student Research Clearance</span>
+					<span class="legend-value">@((ViewBag.ServiceCounts != null && ViewBag.ServiceCounts.ContainsKey("Student Research Clearance")) ? ViewBag.ServiceCounts["Student Research Clearance"] : 0)</span>
+				</div>
+
+				<div class="legend-item">
+					<div class="legend-color" style="background: #f56565;"></div>
+					<span>Ethics Review</span>
+					<span class="legend-value">@((ViewBag.ServiceCounts != null && ViewBag.ServiceCounts.ContainsKey("Ethics Review")) ? ViewBag.ServiceCounts["Ethics Review"] : 0)</span>
 				</div>
 			</div>
-
-			
 		</div>
 	</div>
 </div>
 
-
 <script>
 	let servicesChart;
+	const serviceCounts = @Html.Raw(Json.Serialize(ViewBag.ServiceCounts ?? new Dictionary<string, int>()));
 
-	// Data for each service across months, semesters, and years
-	const chartData = {
-		"Originality Check": {
-			month: [342, 345, 380, 400, 350, 320, 310, 300, 330, 320, 350, 340],  // example month data
-			semester: [600, 700],  // 1st Sem, 2nd Sem
-			year: [1890, 2000, 2500]  // example year data
-		},
-		"Instrument Validation": {
-			month: [156, 160, 170, 180, 150, 140, 130, 125, 135, 140, 150, 155],
-			semester: [300, 350],
-			year: [1200, 1300, 1400]
-		},
-		"Language Editing": {
-			month: [89, 95, 105, 110, 90, 85, 95, 100, 110, 120, 125, 130],
-			semester: [200, 250],
-			year: [950, 1000, 1100]
-		},
-		"Data Analysis": {
-			month: [67, 70, 72, 80, 75, 74, 68, 65, 70, 80, 85, 90],
-			semester: [150, 200],
-			year: [700, 750, 800]
-		},
-		"Research Clearance": {
-			month: [134, 140, 150, 160, 150, 145, 130, 120, 135, 140, 150, 160],
-			semester: [300, 350],
-			year: [900, 950, 1000]
-		},
-		"Ethics Review": {
-			month: [78, 85, 90, 95, 80, 75, 70, 85, 95, 100, 105, 110],
-			semester: [170, 200],
-			year: [600, 650, 700]
-		}
-	};
-
-	// Function to render the chart based on the selected period (Month, Semester, Year)
-	function renderChart(period) {
+	function renderChart() {
 		const ctx = document.getElementById('servicesChart').getContext('2d');
 
-		// Destroy the previous chart before rendering a new one
+		// Destroy old chart instance
 		if (servicesChart) {
 			servicesChart.destroy();
 		}
 
-		// Prepare data for the selected period (Month, Semester, Year)
-		const periods = period === 'month' ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-						: period === 'semester' ? ['1st Sem', '2nd Sem']
-						: ['2020', '2021', '2022'];  // Years
+		// Extract actual labels and counts
+		const labels = Object.keys(serviceCounts);
+		const dataValues = Object.values(serviceCounts);
 
-		// Prepare datasets for each service
-		const datasets = Object.keys(chartData).map((service, i) => ({
-			label: service,
-			data: chartData[service][period],
-			borderColor: [
-				"#667eea", "#38a169", "#ed8936", "#e53e3e", "#8b5cf6", "#f56565"
-			][i],
-			backgroundColor: "transparent",
-			borderWidth: 2,
-			fill: false,
-			tension: 0.3,
-			pointRadius: 5,
-			pointHoverRadius: 7
-		}));
+		// Define colors (same as your legend)
+		const colors = ["#667eea", "#38a169", "#ed8936", "#e53e3e", "#8b5cf6", "#f56565"];
 
-		// Create the chart
+		// Chart configuration (keep your original line style)
 		servicesChart = new Chart(ctx, {
 			type: 'line',
 			data: {
-				labels: periods,  // Dynamically set based on the period
-				datasets: datasets
+				labels: labels,
+				datasets: [{
+					label: 'Total Availed Services',
+					data: dataValues,
+					borderColor: colors,
+					backgroundColor: "transparent",
+					borderWidth: 3,
+					fill: false,
+					tension: 0.3,
+					pointRadius: 6,
+					pointHoverRadius: 8
+				}]
 			},
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
 				plugins: {
-					legend: { display: true, position: 'bottom' }
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'Total Availed Services per Type',
+						font: { size: 16 }
+					}
 				},
 				scales: {
 					y: {
 						beginAtZero: true,
-						title: { display: true, text: "Number of Availed Services" }
+						title: { display: true, text: "Number of Services" }
 					},
 					x: {
-						title: { display: true, text: period === 'month' ? "Month" : period === 'semester' ? "Semester" : "Year" }
+						title: { display: true, text: "Service Type" }
 					}
 				}
 			}
 		});
 	}
 
-	// Filter function to switch between Month, Semester, and Year
-	function filterChart(period) {
-		// Update chart with the selected period's data
-		renderChart(period);
+	function filterChart(period, event) {
+		renderChart();
 
-		// Mark the active filter button
 		document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
 		event.target.classList.add('active');
 	}
 
-	// Initial chart render on page load (default to Month)
 	document.addEventListener("DOMContentLoaded", () => {
-		renderChart('month');
+		renderChart();
 	});
 </script>
-
-

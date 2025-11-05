@@ -69,8 +69,38 @@ namespace LetranRPD.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+
+            // ✅ 1. Count total students (non-admin users)
+            int totalStudents = _context.Accounts.Count(a => a.isAdmin == false);
+
+            // ✅ 2. Count total admins
+            int totalAdmins = _context.Accounts.Count(a => a.isAdmin == true);
+
+            // ✅ 3. Count pending / in-progress services
+            int totalPending = _context.ServiceProgresses
+                .Count(p => p.Progress4 == 1 || p.Progress4 == 0);
+
+            // ✅ 4. Group service counts by ServiceType
+            var serviceCounts = _context.ServiceInformations
+                .GroupBy(s => s.ServiceType)
+                .Select(g => new
+                {
+                    ServiceType = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
+
+            // ✅ 5. Pass data to the View
+            ViewBag.ServiceCounts = serviceCounts.ToDictionary(s => s.ServiceType, s => s.Count);
+            ViewBag.TotalStudents = totalStudents;
+            ViewBag.TotalAdmins = totalAdmins;
+            ViewBag.TotalPending = totalPending;
+
             return View();
         }
+
+
+
         public IActionResult Research()
         {
             var currentUser = HttpContext.Session.GetObject<Account>("account");
@@ -852,6 +882,7 @@ namespace LetranRPD.Controllers
             }
         }
 
+      
 
     }
 }
