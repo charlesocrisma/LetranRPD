@@ -33,6 +33,20 @@
 			default: return "Pending";
 		}
 	};
+
+	    Func<string, string> GetServiceCode = (serviceName) =>
+    {
+        switch (serviceName)
+        {
+            case "Originality Check": return "oc";
+            case "Instrument Validation": return "iv";
+            case "Language Editing": return "le";
+            case "Data Analysis": return "da";
+            case "Student Research Clearance": return "src";
+            case "Ethics Review": return "er";
+            default: return "all_services";
+        }
+    };
 }
 
 
@@ -78,8 +92,7 @@
 		</div>
 
 		<!-- Collapsible Filter Section -->
-		<!-- Collapsible Filter Section with Dropdowns and Bulk Actions -->
-		<div class="filter-section collapsed" id="filterSection">
+		<div class="filter-section" id="filterSection">
 			<div class="filter-toggle" id="filterToggle">
 				<span class="filter-toggle-text">
 					<i class="fas fa-filter"></i>
@@ -102,7 +115,7 @@
 						<select id="statusFilter" class="filter-dropdown">
 							<option value="all">All Statuses</option>
 							<option value="processing">Processing</option>
-							<option value="complete">Complete</option>
+							<option value="completed">Completed</option>
 							<option value="failed">Failed</option>
 							<option value="archived">Archived</option>
 						</select>
@@ -131,7 +144,13 @@
 					<div class="filter-group">
 						<label class="filter-label">Department:</label>
 						<div class="filter-tabs" id="departmentTabs">
-							<!-- Tabs will be populated by JavaScript -->
+							<select id="departmentFilter" class="filter-dropdown">
+								<option value="all_department">All Department</option>
+								<option value="CEIT">College of Engineering and Information Technology</option>
+								<option value="CBAA">College of Business Administration and Accountancy</option>
+								<option value="CELAS">College of Education, Liberal Arts, and Sciences</option>
+								<option value="SHS">Senior High School Department</option>
+							</select>
 						</div>
 					</div>
 
@@ -139,20 +158,36 @@
 					<div class="filter-group">
 						<label class="filter-label">Service:</label>
 						<div class="filter-tabs" id="serviceTabs">
-							<!-- Tabs will be populated by JavaScript -->
+							<select id="serviceFilter" class="filter-dropdown">
+								<option value="all_services">All Services</option>
+								<option value="oc">Originality Check</option>
+								<option value="iv">Instrument Validation</option>
+								<option value="le">Language Editing</option>
+								<option value="da">Data Analysis</option>
+								<option value="src">Student Research Clearance</option>
+								<option value="er">Ethics Review</option>
+							</select>
 						</div>
 					</div>
 
-					<!-- Clear Filters Button (NEW) -->
-					<div class="filter-group">
-						<button id="clearFiltersBtn" class="clear-filters-button" type="button">
-							<i class="fas fa-redo"></i> Reset Filters
-						</button>
-
-					</div>
+						<!-- Clear Filters Button (NEW) -->
+				<!-- Clear Filters Button -->
+				<div class="filter-group">
+					<button id="clearFiltersBtn" class="clear-filters-button" type="button">
+						<i class="fas fa-redo"></i> Reset Filters
+					</button>
+				</div>
+			
+				<!-- NEW: Apply Filters Button -->
+				<div class="filter-group">
+					<button id="applyFiltersBtn" class="apply-filters-button" type="button">
+						<i class="fas fa-check"></i> Apply Filters
+					</button>
 				</div>
 			</div>
 		</div>
+	</div>
+
 
 		<!-- BULK ACTIONS SECTION -->
 		<div class="bulk-actions-section" id="bulkActionsSection">
@@ -164,7 +199,7 @@
 
 				<div class="bulk-actions-controls">
 					<label for="bulkStatusSelect" class="sr-only">Change Status To</label>
-					<select id="bulkStatusSelect" class="bulk-status-dropdown" disabled>
+					<select id="bulkStatusSelect" class="bulk-status-dropdown">
 						<option value="">Change Status To...</option>
 						<option value="1">Processing</option>
 						<option value="2">Complete</option>
@@ -172,11 +207,11 @@
 						<option value="4">Archived</option>
 					</select>
 
-					<button id="applyBulkStatus" class="apply-bulk-btn" disabled>
+					<button id="applyBulkStatus" class="apply-bulk-btn">
 						<i class="fas fa-check"></i> Apply
 					</button>
 
-					<button id="clearSelections" class="clear-selections-btn" disabled>
+					<button id="clearSelections" class="clear-selections-btn">
 						<i class="fas fa-times"></i> Clear
 					</button>
 				</div>
@@ -262,6 +297,21 @@
 							default: return 'fa-file-alt'; // Default file icon
 						}
 					}
+
+								const filterToggle = document.getElementById('filterToggle');
+			const filterSection = document.getElementById('filterSection');
+			const filterContent = document.getElementById('filterContent');
+
+			if (filterToggle && filterSection && filterContent) {
+				// Start with the filter collapsed
+				filterSection.classList.add('collapsed');
+
+				// Add the click event
+				filterToggle.addEventListener('click', () => {
+					filterSection.classList.toggle('collapsed');
+				});
+			}
+
 
 					// --- DATA TRANSFORMATION ---
 
@@ -979,76 +1029,86 @@
 						tableContainer.innerHTML = table;
 					}
 
-									function createSubmissionRow(submission) { // RENAMED
-										const isComplete = submission.status === 'complete';
-										const currentStepForProgress = isComplete ? submission.totalSteps : submission.currentStep;
-										const progressPercentage = Math.round((currentStepForProgress / submission.totalSteps) * 100);
-										const statusClass = `status-${submission.status}`;
-										const initials = submission.name.split(' ').map(n => n[0]).join('').substring(0, 2);
-										
-										return `
-												<tr class="student-row" onclick="toggleSubmissionDetails('${submission.id}')" data-service-id="${submission.id}">
+												function createSubmissionRow(submission) {
+				const isComplete = submission.status === 'complete';
+				const currentStepForProgress = isComplete ? submission.totalSteps : submission.currentStep;
+				const progressPercentage = Math.round((currentStepForProgress / submission.totalSteps) * 100);
+				const statusClass = `status-${submission.status}`;
+				const initials = submission.name.split(' ').map(n => n[0]).join('').substring(0, 2);
 
-											<td onclick="event.stopPropagation();" style="text-align:center;">
-											<input
-												type="checkbox"
-												class="bulk-checkbox"
-												data-id="${submission.id}"
-												style="width:18px;height:18px;cursor:pointer;"
-											/>
-										</td>
-											<td>
-												<div class="student-info">
-													<div class="student-avatar">${initials}
-													</div>
-													<div class="student-details">
-														<h4>${submission.name}</h4>
-														<p>${submission.studentNumber} • ${submission.course}</p>
-													</div>
-												</div>
-											</td>
-											<td>
-												<span class="department-text">${submission.department}</span>
-											</td>
-											<td>
-												<span class="department-text">${submission.title}</span>
-											</td>
-											<td>
-												<span class="department-text">${submission.department}</span>
-											</td>
-											<td>
-												<span class="service-badge">${submission.serviceName}</span>
-											</td>
-											<td>
-												<span class="status-badge ${statusClass}">${submission.status}</span>
-											</td>
-											<td>
-												<div class="progress-container">
-													<div class="progress-bar">
-														<div class="progress-fill ${statusClass}" style="width: ${progressPercentage}%">
-														</div>
-													</div>
-													<div class="progress-text">${currentStepForProgress}/${submission.totalSteps} steps
-													</div>
-												</div>
-											</td>
-											<td>${formatDate(submission.lastUpdated)}</td>
-											<td>
-												 <button class="action-btn info-btn" onclick="event.stopPropagation();
-								showServiceSteps('${submission.service}')" title="View Service Steps">
-														<i class="fas fa-info-circle"></i>
-													</button>
-											</td>
+				return `
+					<!-- REMOVED onclick from <tr> -->
+					<tr class="student-row" data-service-id="${submission.id}">
 
-											</tr>
+						<!-- CHECKBOX CELL - NO onclick -->
+						<td onclick="event.stopPropagation();" style="text-align:center;">
+							<input type="checkbox" class="bulk-checkbox" data-id="${submission.id}"
+								   style="width:18px;height:18px;cursor:pointer;" />
+						</td>
 
-										<tr class="expanded-content hidden" id="expanded-${submission.id}">
-											<td colspan="10">
-												${createExpandedContent(submission)}
-											</td>
-										</tr>
-															`;
-														}
+						<!-- CONTENT CELLS - ADD onclick to each -->
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							<div class="student-info">
+								<div class="student-avatar">${initials}</div>
+								<div class="student-details">
+									<h4>${submission.name}</h4>
+									<p>${submission.studentNumber} • ${submission.course}</p>
+								</div>
+							</div>
+						</td>
+
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							<span class="department-text">${submission.department}</span>
+						</td>
+
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							<span class="department-text">${submission.title}</span>
+						</td>
+
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							<span class="department-text">${submission.department}</span>
+						</td>
+
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							<span class="service-badge">${submission.serviceName}</span>
+						</td>
+
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							<span class="status-badge ${statusClass}">${submission.status}</span>
+						</td>
+
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							<div class="progress-container">
+								<div class="progress-bar">
+									<div class="progress-fill ${statusClass}" style="width: ${progressPercentage}%"></div>
+								</div>
+								<div class="progress-text">${currentStepForProgress}/${submission.totalSteps} steps</div>
+							</div>
+						</td>
+
+						<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
+							${formatDate(submission.lastUpdated)}
+						</td>
+
+						<!-- BUTTON CELL - NO onclick on td -->
+						<td onclick="event.stopPropagation();">
+							<button class="action-btn info-btn"
+									onclick="event.stopPropagation(); showServiceSteps('${submission.service}')"
+									title="View Service Steps">
+								<i class="fas fa-info-circle"></i>
+							</button>
+						</td>
+
+					</tr>
+
+					<tr class="expanded-content hidden" id="expanded-${submission.id}">
+						<td colspan="10">
+							${createExpandedContent(submission)}
+						</td>
+					</tr>
+				`;
+			}
+
 
 							function createExpandedContent(submission) { // RENAMED
 
@@ -1642,136 +1702,295 @@
 					}
 
 
-							document.addEventListener('DOMContentLoaded', function () {
+							// Filter Functionality Script
+// This script handles all filter, search, and sorting operations
 
-									// --- New Filter Logic ---
-									const applyFilterBtn = document.getElementById('apply-filter-btn');
-									if (applyFilterBtn) {
-										applyFilterBtn.addEventListener('click', filterAndSortTable);
-									}
+document.addEventListener('DOMContentLoaded', function() {
+  // Get all filter elements
+  const filterToggle = document.getElementById('filterToggle');
+  const filterContent = document.getElementById('filterContent');
+  const filterSection = document.getElementById('filterSection');
 
-									function filterAndSortTable() {
-										const statusFilter = document.getElementById('status-filter').value;
-										const sortOrder = document.getElementById('sort-filter').value;
-										const startDate = document.getElementById('start-date').value;
-										const endDate = document.getElementById('end-date').value;
+  const searchInput = document.getElementById('searchInput');
+  const statusFilter = document.getElementById('statusFilter');
+  const dateSortFilter = document.getElementById('dateSortFilter');
+  const dateFromFilter = document.getElementById('dateFromFilter');
+  const dateToFilter = document.getElementById('dateToFilter');
+  const departmentFilter = document.getElementById('departmentFilter');
+  const serviceFilter = document.getElementById('serviceFilter');
 
-										const tableBody = document.getElementById('submissions-tbody');
-										const rows = Array.from(tableBody.querySelectorAll('tr[data-status]'));
+  const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+  const applyFiltersBtn = document.getElementById('applyFiltersBtn');
 
-										// 1. Filter rows
-										let filteredRows = rows.filter(row => {
-											const status = row.dataset.status;
-											const date = row.dataset.date;
+  // Get the table/list container (adjust selector based on your table)
+  const tableContainer = document.querySelector('.students-table');
+  const tableRows = document.querySelectorAll('.students-table tbody tr');
 
-											// Status filter logic
-											let statusMatch = false;
-											if (statusFilter === 'all') {
-												// "All" excludes "Archived" (status 4)
-												statusMatch = status !== '4';
-											} else {
-												// Specific status match
-												statusMatch = status === statusFilter;
-											}
+  // ============================================
+  // 1. FILTER TOGGLE FUNCTIONALITY
+  // ============================================
+  filterToggle.addEventListener('click', function() {
+	filterSection.classList.toggle('collapsed');
+  });
 
-											// Date range filter logic
-											let dateMatch = true; // Assume true if no dates are set
-											if (startDate && date < startDate) {
-												dateMatch = false;
-											}
-											if (endDate && date > endDate) {
-												dateMatch = false;
-											}
+  // ============================================
+  // 2. SEARCH FUNCTIONALITY
+  // ============================================
+  searchInput.addEventListener('input', function(e) {
+	const searchTerm = e.target.value.toLowerCase();
+	filterTable(searchTerm);
+  });
 
-											return statusMatch && dateMatch;
-										});
+  // ============================================
+  // 3. REAL-TIME FILTER CHANGES
+  // ============================================
+  statusFilter.addEventListener('change', applyAllFilters);
+  dateSortFilter.addEventListener('change', applyAllFilters);
+  dateFromFilter.addEventListener('change', applyAllFilters);
+  dateToFilter.addEventListener('change', applyAllFilters);
+  departmentFilter.addEventListener('change', applyAllFilters);
+  serviceFilter.addEventListener('change', applyAllFilters);
 
-										// 2. Sort filtered rows
-										filteredRows.sort((a, b) => {
-											const dateA = new Date(a.dataset.date);
-											const dateB = new Date(b.dataset.date);
+  // ============================================
+  // 4. MAIN FILTER FUNCTION
+  // ============================================
+  function applyAllFilters() {
+	const searchTerm = searchInput.value.toLowerCase();
+	const status = statusFilter.value;
+	const sortOrder = dateSortFilter.value;
+	const dateFrom = dateFromFilter.value;
+	const dateTo = dateToFilter.value;
+	const department = departmentFilter.value;
+	const service = serviceFilter.value;
 
-											if (sortOrder === 'asc') {
-												return dateA - dateB;
-											} else {
-												return dateB - dateA; // Default to descending
-											}
-										});
+	// Get all table rows
+	const rows = Array.from(document.querySelectorAll('.students-table tbody tr'));
 
-										// 3. Re-render table
-										tableBody.innerHTML = ''; // Clear the table
-										if (filteredRows.length > 0) {
-											filteredRows.forEach(row => {
-												tableBody.appendChild(row);
-											});
-										} else {
-											tableBody.innerHTML = '<tr><td colspan="7" class="no-data">No submissions match your filters.</td></tr>';
-										}
-									}
+	// Filter rows
+	const filteredRows = rows.filter(row => {
+	  // Get row data
+	  const studentName = row.getAttribute('data-student-name') || row.textContent;
+	  const studentNumber = row.getAttribute('data-student-number') || '';
+	  const rowStatus = row.getAttribute('data-status') || '';
+	  const rowDate = row.getAttribute('data-date') || '';
+	  const rowDepartment = row.getAttribute('data-department') || '';
+	  const rowService = row.getAttribute('data-service') || '';
 
-									const selectAllCheckbox = document.getElementById('select-all-checkbox');
-									const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-									const bulkActionsBar = document.getElementById('bulk-actions-bar');
-									const selectedCountSpan = document.getElementById('selected-count');
-									const bulkUpdateBtn = document.getElementById('bulk-update-btn');
+	  // Search filter
+	  const searchMatch = 
+		studentName.toLowerCase().includes(searchTerm) ||
+		studentNumber.toLowerCase().includes(searchTerm) ||
+		rowService.toLowerCase().includes(searchTerm);
 
-									if (selectAllCheckbox) {
-										selectAllCheckbox.addEventListener('change', function () {
-											rowCheckboxes.forEach(checkbox => {
-												checkbox.checked = this.checked;
-											});
-											updateBulkActionsUI();
-										});
-									}
+	  if (!searchMatch) return false;
 
-									rowCheckboxes.forEach(checkbox => {
-										checkbox.addEventListener('change', updateBulkActionsUI);
-									});
+	  // Status filter
+	  if (status !== 'all' && rowStatus !== status) {
+		return false;
+	  }
 
-									function updateBulkActionsUI() {
-										const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-										const selectedCount = selectedCheckboxes.length;
+	  // Department filter
+	  if (department !== 'all_department' && rowDepartment !== department) {
+		return false;
+	  }
 
-										if (selectedCount > 0) {
-											bulkActionsBar.style.display = 'flex';
-											selectedCountSpan.textContent = selectedCount;
-										} else {
-											bulkActionsBar.style.display = 'none';
-										}
+	  // Service filter
+	  if (service !== 'all_services' && rowService !== service) {
+		return false;
+	  }
 
-										if (selectedCount === 0) {
-											selectAllCheckbox.checked = false;
-											selectAllCheckbox.indeterminate = false;
-										} else if (selectedCount === rowCheckboxes.length) {
-											selectAllCheckbox.checked = true;
-											selectAllCheckbox.indeterminate = false;
-										} else {
-											selectAllCheckbox.checked = false;
-											selectAllCheckbox.indeterminate = true;
-										}
-									}
+	  // Date range filter
+	  if (dateFrom || dateTo) {
+		const rowDateObj = new Date(rowDate);
+		if (dateFrom) {
+		  const fromDate = new Date(dateFrom);
+		  if (rowDateObj < fromDate) return false;
+		}
+		if (dateTo) {
+		  const toDate = new Date(dateTo);
+		  toDate.setHours(23, 59, 59, 999); // Include entire day
+		  if (rowDateObj > toDate) return false;
+		}
+	  }
 
-									if (bulkUpdateBtn) {
-										bulkUpdateBtn.addEventListener('click', function () {
-											const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-											const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
-											const newStatus = document.getElementById('bulk-status-update').value;
+	  return true;
+	});
 
-											if (selectedIds.length === 0) {
-												alert('Please select at least one submission to update.');
-												return;
-											}
+	// Sort by date
+	if (sortOrder === 'asc') {
+	  filteredRows.sort((a, b) => {
+		const dateA = new Date(a.getAttribute('data-date') || 0);
+		const dateB = new Date(b.getAttribute('data-date') || 0);
+		return dateA - dateB;
+	  });
+	} else {
+	  filteredRows.sort((a, b) => {
+		const dateA = new Date(a.getAttribute('data-date') || 0);
+		const dateB = new Date(b.getAttribute('data-date') || 0);
+		return dateB - dateA;
+	  });
+	}
 
-											console.log('--- Bulk Update Action ---');
-											console.log('Selected IDs:', selectedIds);
-											console.log('New Status:', newStatus);
-											console.log('Form Token:', document.querySelector('input[name="__RequestVerificationToken"]').value);
+	// Update table visibility
+	rows.forEach(row => row.style.display = 'none');
+	filteredRows.forEach(row => row.style.display = 'table-row');
 
-											alert('Bulk Update UI is functional.\n\nA server-side endpoint (Controller Action) is required to process this request.\n\nCheck the browser console (F12) to see the data that would be sent.');
-										});
-									}
+	// Show "no results" message if needed
+	updateNoResultsMessage(filteredRows.length);
+  }
 
-								});
+  // ============================================
+  // 5. SEARCH ONLY FILTER
+  // ============================================
+  function filterTable(searchTerm) {
+	const rows = document.querySelectorAll('.students-table tbody tr');
+
+	rows.forEach(row => {
+	  const studentName = row.getAttribute('data-student-name') || row.textContent;
+	  const studentNumber = row.getAttribute('data-student-number') || '';
+	  const service = row.getAttribute('data-service') || '';
+
+	  const matches = 
+		studentName.toLowerCase().includes(searchTerm) ||
+		studentNumber.toLowerCase().includes(searchTerm) ||
+		service.toLowerCase().includes(searchTerm);
+
+	  row.style.display = matches ? 'table-row' : 'none';
+	});
+  }
+
+  // ============================================
+  // 6. CLEAR ALL FILTERS
+  // ============================================
+  clearFiltersBtn.addEventListener('click', function() {
+	// Reset all filter inputs
+	searchInput.value = '';
+	statusFilter.value = 'all';
+	dateSortFilter.value = 'desc';
+	dateFromFilter.value = '';
+	dateToFilter.value = '';
+	departmentFilter.value = 'all_department';
+	serviceFilter.value = 'all_services';
+
+	// Show all rows
+	const rows = document.querySelectorAll('.students-table tbody tr');
+	rows.forEach(row => row.style.display = 'table-row');
+
+	// Update message
+	updateNoResultsMessage(rows.length);
+  });
+
+  // ============================================
+  // 7. APPLY FILTERS BUTTON
+  // ============================================
+  applyFiltersBtn.addEventListener('click', function() {
+	applyAllFilters();
+
+	// Optional: Show a notification
+	console.log('Filters applied successfully');
+  });
+
+  // ============================================
+  // 8. NO RESULTS MESSAGE
+  // ============================================
+  function updateNoResultsMessage(visibleCount) {
+	let noResultsMsg = document.getElementById('noResultsMessage');
+	const tbody = document.querySelector('.students-table tbody');
+
+	if (visibleCount === 0) {
+	  if (!noResultsMsg) {
+		noResultsMsg = document.createElement('tr');
+		noResultsMsg.id = 'noResultsMessage';
+		noResultsMsg.innerHTML = `
+		  <td colspan="100%" style="text-align: center; padding: 2rem; color: #9ca3af;">
+			<i class="fas fa-search" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+			No submissions found matching your filters
+		  </td>
+		`;
+		tbody.appendChild(noResultsMsg);
+	  }
+	  noResultsMsg.style.display = 'table-row';
+	} else {
+	  if (noResultsMsg) {
+		noResultsMsg.style.display = 'none';
+	  }
+	}
+  }
+
+  // ============================================
+  // 9. INITIALIZE DATA ATTRIBUTES
+  // ============================================
+  // This function should be called to set up data attributes on table rows
+  // If your data comes from the server, make sure each row has these attributes:
+  // data-student-name, data-student-number, data-status, data-date, 
+  // data-department, data-service
+
+  function initializeTableData() {
+	const rows = document.querySelectorAll('.students-table tbody tr');
+	rows.forEach(row => {
+	  // Extract data from row cells (adjust selectors based on your table structure)
+	  // Example: const name = row.querySelector('td:nth-child(2)')?.textContent.trim();
+	  // Then: row.setAttribute('data-student-name', name);
+
+	  // This is a placeholder - adjust based on your actual table structure
+	});
+  }
+
+  // Call initialization
+  initializeTableData();
+
+  // ============================================
+  // 10. KEYBOARD SHORTCUTS
+  // ============================================
+  document.addEventListener('keydown', function(e) {
+	// Ctrl/Cmd + K to focus search
+	if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+	  e.preventDefault();
+	  searchInput.focus();
+	}
+	// Escape to clear search
+	if (e.key === 'Escape' && document.activeElement === searchInput) {
+	  searchInput.value = '';
+	  applyAllFilters();
+	}
+  });
+
+  // ============================================
+  // 11. DEBOUNCE FUNCTION FOR PERFORMANCE
+  // ============================================
+  function debounce(func, wait) {
+	let timeout;
+	return function executedFunction(...args) {
+	  const later = () => {
+		clearTimeout(timeout);
+		func(...args);
+	  };
+	  clearTimeout(timeout);
+	  timeout = setTimeout(later, wait);
+	};
+  }
+
+  // Optional: Apply debouncing to search for better performance
+  // searchInput.addEventListener('input', debounce(function(e) {
+  //   applyAllFilters();
+  // }, 300));
+
+});
+
+// ============================================
+// EXPORT FOR USE IN OTHER PARTS OF APPLICATION
+// ============================================
+window.filterFunctions = {
+  applyFilters: function() {
+	document.getElementById('applyFiltersBtn')?.click();
+  },
+  clearFilters: function() {
+	document.getElementById('clearFiltersBtn')?.click();
+  },
+  resetSearch: function() {
+	document.getElementById('searchInput').value = '';
+  }
+};
 
 
 

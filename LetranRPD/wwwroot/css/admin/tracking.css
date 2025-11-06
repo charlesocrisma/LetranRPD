@@ -117,7 +117,7 @@ body {
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
     margin-bottom: 2rem;
-    overflow: hidden;
+    overflow: visible !important;
 }
 
 .filter-toggle {
@@ -250,12 +250,10 @@ body {
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
     overflow: hidden;
-    overflow: visible !important;
 }
 
 .table-container {
     width: 100%;
-    overflow: visible !important;
 }
 
 .table-header {
@@ -1140,15 +1138,19 @@ body {
 /* FIX: Make filter-content always visible */
 .filter-content {
     display: block !important;
-    max-height: 2000px;
-    overflow: visible;
-    transition: all 0.3s ease;
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
 }
 
 .filter-section.collapsed .filter-content {
     display: none !important;
     max-height: 0;
     overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .filter-section .filter-toggle {
@@ -1177,13 +1179,10 @@ body {
     font-family: inherit;
     cursor: pointer;
     transition: all 0.2s ease;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231f2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 12px;
-    padding-right: 2.5rem;
+    position: relative;
+    z-index: 1000;
 }
+
 
     .filter-dropdown:hover,
     .bulk-status-dropdown:hover {
@@ -1438,7 +1437,7 @@ body {
 .filter-section.collapsed .filter-content {
     display: none !important;
     max-height: 0;
-    overflow: hidden;
+    overflow: visible !important;
     opacity: 0;
     padding: 0 1rem;
 }
@@ -1807,9 +1806,9 @@ td.checkbox-cell {
 }
 
     .bulk-status-dropdown:focus {
-        outline: none;
-        border-color: var(--primary-blue);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
     }
 
 .apply-bulk-btn {
@@ -1965,32 +1964,23 @@ td.checkbox-cell {
     }
 
     .bulk-status-dropdown option {
-        padding: 0.75rem 1rem;
-        background: white;
-        color: #1f2937;
-        margin: 0.5rem 0;
+        padding: 0.75rem 1rem !important;
+        background: white !important;
+        color: #1f2937 !important;
+        border: none !important;
+        margin: 0.5rem 0 !important;
     }
 
 .bulk-actions-section {
     overflow: visible !important;
     position: relative;
+    z-index: 999;
 }
 
 .bulk-actions-controls {
     overflow: visible !important;
     position: relative;
-}
-
-.table-wrapper {
-    overflow: visible !important;
-}
-
-.table-container {
-    overflow: visible !important;
-}
-
-.filter-section {
-    overflow: visible !important;
+    z-index: 999;
 }
 
 

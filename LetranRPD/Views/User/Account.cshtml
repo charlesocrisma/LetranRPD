@@ -39,12 +39,7 @@
                             <span style="padding-left:10px;">Account</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="#academic" class="nav-link">
-                            <i class="fa-solid fa-certificate"></i>
-                            <span style="padding-left:10px;">Certificates</span>
-                        </a>
-                    </li>
+                   
                     <li class="nav-item">
                         <a href="#security" class="nav-link">
                             <i class="fa-solid fa-lock"></i>
@@ -86,37 +81,6 @@
                     <button class="save-btn">Save Changes</button>
                 </section>
 
-				<!-- Certificates -->
-                <section id="academic" class="settings-section">
-                        <h2 class="section-title">Certificates</h2>
-
-                        <div class="certificate-container">
-
-                            <div class="certificate-tile" id="cert1" onclick="downloadPDF('cert1','SR02A - Ocrisma.pdf')">
-                                <div class="certificate-content">
-                                    <h3>SAMPLE SERVICE</h3>
-                                <p class="subtitle">I/We hereby declare that this submission entitled</p>
-                                    <div class="research-name">SAMPLE TITLE</div>
-                                    <p class="subtitle">has successfully completed by</p>
-                                    <div class="authors-name">
-                                    <p style="margin-bottom:2px;">Ocrisma, Charles Dominick A.</p>
-                                    <p style="margin-bottom:2px;">Penalber, Ace V.</p>
-                                    <p style="margin-bottom:2px;">Bonifacio, Luiz</p>
-                                </div>
-                                    <p class="subtitle">with a similarity index of</p>
-                                    <div class="grade">7%</div>                                    
-                                    <div class="completion-date">
-                                        <p>Completed on: August 19, 2025</p>
-                                        <p>CLICK TILE TO DOWNLOAD PDF</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                          
-
-
-
-                </section>
 
                 <!-- Security Section -->
                 <section id="security" class="settings-section">
@@ -208,19 +172,3 @@
     });
 </script>
 
-<!-- Certificate Download Tile -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>
-    function downloadPDF(elementId, filename) {
-      const element = document.getElementById(elementId);
-      const opt = {
-        margin:       0.5,
-        filename:     filename,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
-    }
-</script>
