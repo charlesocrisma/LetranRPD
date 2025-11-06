@@ -1270,6 +1270,28 @@ body {
         color: #3b82f6;
     }
 
+.apply-filters-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .apply-filters-button:hover {
+        background-color: #f3f4f6;
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
 /* Bulk Actions Bar */
 .bulk-actions-bar {
     display: none;
