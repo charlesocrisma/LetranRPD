@@ -62,15 +62,30 @@ namespace LetranRPD.Controllers
             }
             return View();
         }
+        public IActionResult Ethics_Review()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
 
         [HttpPost]
         public async Task<IActionResult> OriginalityButton(ServiceInformation viewModel)
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
 
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             var ServiceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
-                Email = viewModel.Email,
+                Email = currentUser.Email,
                 ServiceType = "Originality Check",
                 Title = viewModel.Title,
                 Author = viewModel.Author,
@@ -100,11 +115,16 @@ namespace LetranRPD.Controllers
         [HttpPost]
         public async Task<IActionResult> InstrumentButton(ServiceInformation viewModel)
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
 
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             var ServiceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
-                Email = viewModel.Email,
+                Email = currentUser.Email,
                 ServiceType = "Instrument Validation",
                 Title = viewModel.Title,
                 Author = viewModel.Author,
@@ -132,11 +152,16 @@ namespace LetranRPD.Controllers
         [HttpPost]
         public async Task<IActionResult> LanguageButton(ServiceInformation viewModel)
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
 
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             var ServiceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
-                Email = viewModel.Email,
+                Email = currentUser.Email,
                 ServiceType = "Language Editing",
                 Title = viewModel.Title,
                 Author = viewModel.Author,
@@ -165,11 +190,17 @@ namespace LetranRPD.Controllers
         [HttpPost]
         public async Task<IActionResult> DataButton(ServiceInformation viewModel)
         {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
             var ServiceInformation = new ServiceInformation
             {
                 StudentNumber = viewModel.StudentNumber,
-                Email = viewModel.Email,
+                Email = currentUser.Email,
                 ServiceType = "Data Analysis",
                 Title = viewModel.Title,
                 Author = viewModel.Author,
@@ -195,7 +226,85 @@ namespace LetranRPD.Controllers
             await dBContext.SaveChangesAsync();
 
             return RedirectToAction("Services", "Home");
+
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> StudentClearance()
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var ServiceInformation = new ServiceInformation
+            {
+                StudentNumber = currentUser.StudentNumber,
+                Email = currentUser.Email,
+                Author = currentUser.FirstName +" "+currentUser.LastName,
+                ServiceType = "Student Research Clearance",
+                ServiceProgress = new ServiceProgress
+                {
+                    Progress1 = 1,
+                    Progress2 = 0,
+
+                    AppliedDate = DateTime.Now
+                }
+
+            };
+
+            await dBContext.ServiceInformations.AddAsync(ServiceInformation);
+
+            await dBContext.SaveChangesAsync();
+
+            return RedirectToAction("Services", "Home");
+        }
+        [HttpPost]
+        public async Task<IActionResult> EthicsReview(ServiceInformation viewModel)
+        {
+            var currentUser = HttpContext.Session.GetObject<Account>("account");
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var ServiceInformation = new ServiceInformation
+            {
+                StudentNumber = viewModel.StudentNumber,
+                Email = currentUser.Email,
+                ServiceType = "Ethics Review",
+                Title = viewModel.Title,
+                Author = viewModel.Author,
+                ContactPerson = viewModel.ContactPerson,
+                ContactNumber = viewModel.ContactNumber,
+                ResearchAdviser = viewModel.ResearchAdviser,
+                Subject = viewModel.Subject,
+                OC_ManuscriptType = viewModel.OC_ManuscriptType,
+                ServiceProgress = new ServiceProgress
+                {
+                    Progress1 = 1,
+                    Progress2 = 0,
+                    Progress3 = 0,
+                    Progress4 = 0,
+                    Progress5 = 0,
+                    Progress6 = 0,
+                    AppliedDate = DateTime.Now
+                }
+
+
+            };
+
+            await dBContext.ServiceInformations.AddAsync(ServiceInformation);
+
+            await dBContext.SaveChangesAsync();
+
+            return RedirectToAction("Services", "Home");
+        }
+
 
     }
 }

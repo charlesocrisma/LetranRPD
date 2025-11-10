@@ -1,5 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentUser = Context.Session.GetObject<Account>("account") ?? null;
 }
 <link href="~/css/services.css" rel="stylesheet" />
 
@@ -15,45 +16,47 @@
             Each service we offer is a testament to our commitment to support scholarly pursuits and elevate the standards of research and publication.
         </p>
     </div>
-   
+
     <div class="services-grid">
 
         <a href="/ServiceForm/Originality_Check" class="btn-avail">
-        <div class="service-card">
-            <img src="~/Services/orig_check.png" alt="Originality Check">
-            <h2>Originality Checking </h2>
-            <div class="divider"></div>
-       
-        </div></a>
+            <div class="service-card">
+                <img src="~/Services/orig_check.png" alt="Originality Check">
+                <h2>Originality Checking </h2>
+                <div class="divider"></div>
+
+            </div>
+        </a>
 
         <a href="/ServiceForm/Instrument_Validation" class="btn-avail">
-        <div class="service-card">
-            <img src="~/Services/inst_val.png" alt="Instrument Validation">
-            <h2>Instrument Validation </h2>
-            <div class="divider"></div>
-        
-        </div></a>
+            <div class="service-card">
+                <img src="~/Services/inst_val.png" alt="Instrument Validation">
+                <h2>Instrument Validation </h2>
+                <div class="divider"></div>
+
+            </div>
+        </a>
 
         <a href="/ServiceForm/Language_Editing" class="btn-avail">
-        <div class="service-card">
-            <img src="~/Services/lang_check.png" alt="Language Check">
-            <h2>Language Editing </h2>
-            <div class="divider"></div>
-          
-        </div></a>
+            <div class="service-card">
+                <img src="~/Services/lang_check.png" alt="Language Check">
+                <h2>Language Editing </h2>
+                <div class="divider"></div>
+
+            </div>
+        </a>
 
         <a href="/ServiceForm/Data_Analysis" class="btn-avail">
-        <div class="service-card">
-            <img src="~/Services/data_analysis.png" alt="Data Analysis">
-            <h2>Data Analysis </h2>
-            <div class="divider"></div>
-           
-        </div></a>
+            <div class="service-card">
+                <img src="~/Services/data_analysis.png" alt="Data Analysis">
+                <h2>Data Analysis </h2>
+                <div class="divider"></div>
+
+            </div>
+        </a>
 
 
-        <!--For modals mga toh kasi di sila need ng forms-->
-        <a href="#" class="btn-avail"
-           style="pointer-events: none; opacity: 0.5; filter: grayscale(100%); cursor: not-allowed;">
+        <a href="#" class="btn-avail modal-trigger">
             <div class="service-card">
                 <img src="~/Services/stud_clearance.png" alt="Student Research Clearance">
                 <h2>Student Research Clearance</h2>
@@ -61,8 +64,7 @@
             </div>
         </a>
 
-        <a href="#" class="btn-avail"
-           style="pointer-events: none; opacity: 0.5; filter: grayscale(100%); cursor: not-allowed;">
+        <a href="/ServiceForm/Ethics_Review" class="btn-avail">
             <div class="service-card">
                 <img src="~/Services/ethics_review.png" alt="Ethics Review">
                 <h2>Ethics Review</h2>
@@ -70,9 +72,100 @@
             </div>
         </a>
 
-       
+    </div>
+
+    <form id="student-clearance-form"
+          action="/ServiceForm/StudentClearance"
+          method="post">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div id="service-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            @if (currentUser != null)
+            {
+                <h3 id="modal-service-name">Confirm Service</h3>
+                <p>Do you want to proceed with this service?</p>
+                <div class="modal-footer">
+                    <button id="modal-btn-no" class="modal-btn modal-btn-no">No</button>
+                    <button id="modal-btn-yes" class="modal-btn modal-btn-yes">Yes</button>
+                </div>
+            }
+            else
+            {
+                <h3 id="modal-service-name">Not logged in!</h3>
+                <p>Login to use this service</p>
+                <div class="modal-footer">
+                    <button id="modal-btn-no" class="modal-btn modal-btn-no">No</button>
+                    <button id="modal-btn-login" class="modal-btn modal-btn-yes">Login</button>
+                </div>
+            }
+        </div>
     </div>
 
 
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const modalOverlay = document.getElementById('service-modal-overlay');
+        const modalServiceName = document.getElementById('modal-service-name');
+        const btnNo = document.getElementById('modal-btn-no');
+        const btnYes = document.getElementById('modal-btn-yes');
+        const btnLogin = document.getElementById('modal-btn-login');
+        const modalTriggers = document.querySelectorAll('.modal-trigger');
+
+        let targetFormId = '';
+
+        const openModal = (e) => {
+            e.preventDefault();
+            const serviceCard = e.currentTarget.querySelector('.service-card');
+            const serviceName = serviceCard.querySelector('h2').innerText;
+
+            if (serviceName.includes('Student Research Clearance')) {
+                targetFormId = 'student-clearance-form';
+            } else if (serviceName.includes('Ethics Review')) {
+                targetFormId = 'ethics-review-form';
+            } else {
+                targetFormId = '';
+            }
+
+            modalServiceName.innerText = serviceName;
+            modalOverlay.classList.add('active');
+        };
+
+        const closeModal = () => {
+            modalOverlay.classList.remove('active');
+            targetFormId = '';
+        };
+
+        modalTriggers.forEach(trigger => {
+            trigger.addEventListener('click', openModal);
+        });
+
+        btnNo.addEventListener('click', closeModal);
+
+        if (btnYes) {
+            btnYes.addEventListener('click', () => {
+                if (targetFormId) {
+                    document.getElementById(targetFormId).submit();
+                }
+                closeModal();
+            });
+        }
+
+        if (btnLogin) {
+            btnLogin.addEventListener('click', () => {
+                window.location.href = "/account/login";
+                closeModal();
+            });
+        }
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    });
+</script>

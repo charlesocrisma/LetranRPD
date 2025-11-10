@@ -7,27 +7,34 @@
     background-color: whitesmoke;
     position: relative;
     z-index: 1000;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    box-sizing: border-box;
 }
-
 
 .nav-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 0 20px;
-    padding-right: 45px;
 }
-
 
 .left-nav-links,
 .right-nav-links {
     display: flex;
     align-items: center;
     gap: 30px;
-    margin-right: -250px;
-    margin-left: -250px;
+    flex-grow: 1!important;
+}
+
+.left-nav-links {
+    justify-content: flex-start;
+}
+
+.right-nav-links {
+    justify-content: flex-end;
 }
 
     .left-nav-links a,
@@ -40,6 +47,7 @@
         position: relative;
         padding-bottom: 5px;
         transition: all 0.3s ease;
+        white-space: nowrap;
     }
 
         .left-nav-links a::after,
@@ -81,16 +89,17 @@
                 background-color: #1A1F70;
             }
 
-
 .logo-container {
-    flex-grow: 1;
+    flex-shrink: 0 !important;
     text-align: center;
+    padding: 0 20px;
 }
 
 .logo-top {
     margin-bottom: 5px;
     padding-right: 10px;
 }
+
 .logo-text {
     font-size: 22px;
     font-weight: 600;
@@ -98,7 +107,6 @@
     letter-spacing: 1.5px;
     text-transform: none;
 }
-
 
 .dropdown {
     position: relative;
@@ -151,13 +159,16 @@
     margin-top: 2rem;
     border-top: 3px solid red;
     font-family: 'Arial', sans-serif;
-    width: 100%;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    box-sizing: border-box;
 }
 
 .footer-content {
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;
+    padding: 0 20px;
 }
 
 .footer p {
@@ -167,6 +178,10 @@
 }
 
 @media (max-width: 992px) {
+    .main-nav-container {
+        padding: 20px 0;
+    }
+
     .nav-row {
         flex-direction: column;
         gap: 15px;
@@ -175,6 +190,9 @@
     .left-nav-links,
     .right-nav-links {
         gap: 15px;
+        justify-content: center;
+        flex-grow: 0;
+        width: 100%;
     }
 
     .logo-text {
@@ -188,8 +206,19 @@
     .right-nav-links {
         flex-wrap: wrap;
         justify-content: center;
-        gap: 10px;
+        gap: 10px 15px;
     }
+
+        .left-nav-links a,
+        .right-nav-links a {
+            font-size: 12px;
+            padding-bottom: 2px;
+        }
+
+            .left-nav-links a::after,
+            .right-nav-links a::after {
+                height: 1px;
+            }
 
     .profile-circle {
         margin-left: 0;

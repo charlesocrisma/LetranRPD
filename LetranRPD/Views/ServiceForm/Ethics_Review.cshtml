@@ -1,44 +1,56 @@
-﻿@{
-	ViewBag.Title = "Instrument Validation";
+﻿ @{
+	ViewBag.Title = "Originality";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 	var currentUser = Context.Session.GetObject<Account>("account");
+
 	@model LetranRPD.Models.ServiceInformation
 }
-
+<a href="f:\letranrpd\letranrpd\views\serviceform\ethics-review.cshtml">f:\letranrpd\letranrpd\views\serviceform\ethics-review.cshtml</a>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="~/css/Forms.css" asp-append-version="true" />
 
 <div class="main-content">
 	<div class="form-container">
-		<h1>INSTRUMENT VALIDATION FORM</h1>
-		<form asp-action="InstrumentButton" method="post">
+		<h1>ETHICAL REVIEW FORM</h1>
+		<form asp-action="EthicsReview" method="post">
+
 			<input type="hidden" asp-for="StudentNumber" value="@currentUser.StudentNumber" />
+
 			<div class="form-group full-width">
 				<label for="researchTitle">Thesis Title</label>
-				<input type="text" id="researchTitle"  asp-for="Title" placeholder="Research Title">
+				<input type="text" asp-for="Title" placeholder="Research Title">
 			</div>
 			<div class="form-group full-width">
 				<label for="author">Proponent(s)/Author(s)</label>
-				<input type="text" id="author"  asp-for="Author" placeholder="Name(s)">
+				<input type="text" asp-for="Author" placeholder="Name(s)">
 			</div>
 			<div class="form-group full-width">
 				<label for="contact_person">Contact Person</label>
-				<input type="text" id="contact_person"  asp-for="ContactPerson" placeholder="Name">
+				<input type="text" asp-for="ContactPerson" placeholder="Name">
 			</div>
 			<div class="form-group full-width">
 				<label for="contact_number">Contact Number</label>
-				<input type="text" id="contact_number"  asp-for="ContactNumber" placeholder="e.g.09124567890">
+				<input type="text" asp-for="ContactNumber" placeholder="e.g.09124567890">
 			</div>
 
 			<div class="form-group full-width">
 				<label for="adviser">Research Adviser</label>
-				<input type="text" id="adviser"  asp-for="ResearchAdviser" placeholder="Name">
+				<input type="text" asp-for="ResearchAdviser" placeholder="Name">
+			</div>
+
+			<div class="form-group full-width">
+				<label>Service Type</label>
+				<select required asp-for="ER_ServiceType">
+					<option disabled selected>Select your manuscript type</option>
+					<option>Expedited</option>
+					<option>Full Review</option>
+				</select>
 			</div>
 
 			<div class="form-group full-width">
 				<label>Thesis Subject</label>
-				<select required  asp-for="Subject">
+				<select required asp-for="Subject">
 					<option disabled selected>Select your Subject</option>
 					<option>Thesis 1/RM 1/Research 1</option>
 					<option>Thesis 2/RM 2/Research 2</option>

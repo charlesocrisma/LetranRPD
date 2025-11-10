@@ -1,4 +1,4 @@
-﻿    @{
+﻿@{
     ViewData["Title"] = "Downloads";
 }
 @{
@@ -6,45 +6,670 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloads</title>
-    <link rel="stylesheet" href="~/css/Downloads.css" asp-append-version="true" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Downloads</title>
+<link rel="stylesheet" href="~/css/Downloads.css" asp-append-version="true" />
 
 <div id="downloads-page-content" class="downloads-container">
-        <h1>DOWNLOADS</h1>
+    <h1>DOWNLOADS</h1>
+    <h2>SR Forms</h2>
+    <div class="container">
 
-        <div class="downloads-section">
-            <h2>Student Research Forms</h2>
-            <ul class="download-list">
-                <li class="download-item">
-                    <div class="platform">
+        <!-- Form Item 1 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">SR01 - Originality Checking Service Form</div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
                     </div>
-                    <div class="details">
-                        <div class="title-version">
-						<div class="title"> No Downloads Available</div>                         
-                </li>
-            </ul>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR01 - Originality Checking Service Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR01.Docx" download="SR01.docx" file-card" onclick="downloadFile('SR01 - Originality Checking Service Form');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">SR01-Application Form.docx </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- Form Item 2 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">SR03 - Instrument Validation Service Form</div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR03 - Instrument Validation Service Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR03.Docx" download="SR03.Docx" onclick="downloadFile('SR03.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">SR03-Application Form.docx</div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>12435esd
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 3 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">ERB01 - Guidelines and Application for Ethics Review Form</div>
+                        <div class="form-date">Posted Jul 29</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the ERB01 - Guidelines and Application for Ethics Review Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/ERB01.Docx" download="ERB01.Docx" onclick="downloadFile('ERB01.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        ERB01-Ethics Review Application Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 4 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">ERB02 - Ethics Review Application Submission Checklist Form</div>
+                        <div class="form-date">Posted Jul 29</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the ERB02 - Ethics Review Application Submission Checklist Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/ERB02.Docx" download="ERB02.Docx" onclick="downloadFile('ERB02.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        ERB02-Ethics Review Application Submission Checklist Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 5 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">ERB03 - Guidelines for Exemption from Institutional Ethics Review</div>
+                        <div class="form-date">Posted Jul 29</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the ERB03 - Guidelines for Exemption from Institutional Ethics Review, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/ERB03.Docx" download="ERB03.Docx" onclick="downloadFile('ERB03.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        ERB03-Application for Ethics Review Exemption Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 6 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">ERB04 - Guidelines for Expedited Ethics Review</div>
+                        <div class="form-date">Posted Jul 29</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the ERB04 - Guidelines for Expedited Ethics Review, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/ERB04.Docx" download="ERB04.Docx" onclick="downloadFile('ERB04.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        ERB04-Application for Expedited Ethics Review Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 7 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">SR07 - Language Editing Service Form</div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR07 - Language Editing Service Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR07.Docx" download="SR07.Docx" onclick="downloadFile('SR07.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR07- Language Editing Service Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 8 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">SR09 - Student Research Clearance</div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        <ul>
+                            To acquire the SR09- Student Research Clearance, please submit the following certificates to research@letran.edu.ph:
+                            <li>SR02A and SR02B: Certificates of Originality Check (BOTH proposal/Thesis 1 and final/Thesis 2)</li>
+                            <li>SR04: Certificate of Instrument Validation/Exemption, whatever applicable</li>
+                            <li>SR06: Certificate of Statistical Analysis for quantitative papers</li>
+                            <li>SR08: Certificate of Language Editing</li>
+                            <li>Final IMRaD Format of research paper (incorporating the language-edited manuscript)</li>
+                        </ul>
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR09.Docx" download="SR09.Docx" onclick="downloadFile('SR09.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR09 - Student Research Clearance.pdf
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 9 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">SR05 - Data Analysis Service Form</div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR05 - Data Analysis Service Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR05.Docx" download="SR05.Docx" onclick="downloadFile('SR05.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR05- Data Analysis Service Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 10 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">SR10 - Adviser Consultation Form</div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR10 - Adviser Consultation Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR10.Docx" download="SR10.Docx" onclick="downloadFile('SR10.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR10 - Adviser Consultation Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 11 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">
+                            SR11 - Adviser Endorsement Form
+                        </div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR11 - Adviser Endorsement Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR11.Docx" download="SR11.Docx" onclick="downloadFile('SR11.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR11 - Adviser Endorsement Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 12 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">
+                            SR12 - Approval Sheet
+                        </div>
+                        <div class="form-date">Edited Jan 12, 2024</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR12 - Approval Sheet, please download it in MS Word Format or PDF Format.
+                        <br />
+
+                        Please be reminded that the SR12A - Approval Sheet is for Proposal Defense while SR12B - Approval Sheet is for Final Defense, for your strict compliance.
+
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR12A.Docx" download="SR12A.Docx" onclick="downloadFile('SR12A.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR12A - Approval Sheet for Proposal Manuscript.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                    </div>
+
+                    </a>
+                    <br />
+                    <br />
+                    <div class="file-list">
+                        <a href="/Downloads/SR12B.Docx" download="SR12B.Docx" onclick="downloadFile('SR12B.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR12B - Approval Sheet for Final Manuscript.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Form Item 13 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">
+                            SR13 - Research Proposal Manuscript Evaluation Form
+                        </div>
+                        <div class="form-date">Edited Jul 10, 2023</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR13 - Research Proposal Manuscript Evaluation Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR13.Docx" download="SR13.Docx" onclick="downloadFile('SR13.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR13 - Research Proposal Manuscript Evaluation Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Form Item 14 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">
+                            SR14 - Research Final Manuscript Evaluation Form
+                        </div>
+                        <div class="form-date">Edited Nov 15, 2024</div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR14 - Research Final Manuscript Evaluation Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR14.Docx" download="SR14.Docx" onclick="downloadFile('SR14.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR14 - Research Final Manuscript Evaluation Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Item 15 -->
+        <div class="form-item">
+            <div class="form-item-header" onclick="toggleDrawer(this)">
+                <div class="form-item-left">
+                    <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                    <div class="form-info">
+                        <div class="form-title">
+                            SR15 - Student Oral Presentation Evaluation Form
+                        </div>
+                        <div class="form-date">Posted Jul 10, 2023 </div>
+                    </div>
+                </div>
+                <button class="menu-button">
+                    <i class="fa-solid fa-caret-down"></i>
+                </button>
+            </div>
+            <div class="drawer">
+                <div class="drawer-content">
+                    <div class="drawer-description">
+                        To edit the SR15 - Student Oral Presentation Evaluation Form, please download it in MS Word Format or PDF Format.
+                    </div>
+                    <div class="file-list">
+                        <a href="/Downloads/SR15.Docx" download="SR15.Docx" onclick="downloadFile('SR15.docx');">
+                            <div class="file-preview">
+                                <div class="form-icon"><i class="fa-solid fa-file"></i></div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        SR15- Student Oral Presentation Evaluation Form.docx
+                                    </div>
+                                    <div class="file-type">Microsoft Word</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="view-more-container">
+            <button id="viewMoreBtn" onclick="toggleViewMore()">View More</button>
+        </div>
+
+
+        <script>
+            function toggleDrawer(header) {
+                const drawer = header.parentElement.querySelector('.drawer');
+                const chevron = header.querySelector('.chevron');
+                const allDrawers = document.querySelectorAll('.drawer');
+                const allChevrons = document.querySelectorAll('.chevron');
+
+                // Close all other drawers
+                allDrawers.forEach(d => {
+                    if (d !== drawer) {
+                        d.classList.remove('open');
+                    }
+                });
+
+                allChevrons.forEach(c => {
+                    if (c !== chevron) {
+                        c.classList.remove('rotated');
+                    }
+                });
+
+                // Toggle current drawer
+                drawer.classList.toggle('open');
+                chevron.classList.toggle('rotated');
+            }
+
+                    let showingAll = false;
+
+                function toggleViewMore() {
+                    const items = document.querySelectorAll('.form-item');
+                    const btn = document.getElementById('viewMoreBtn');
+
+                    if (!showingAll) {
+                        items.forEach(item => item.style.display = 'block');
+                        btn.textContent = 'View Less';
+                        showingAll = true;
+                    } else {
+                        items.forEach((item, index) => {
+                            if (index >= 5) item.style.display = 'none'; // show only first 5 items initially
+                        });
+                        btn.textContent = 'View More';
+                        showingAll = false;
+                    }
+                }
+
+                // Initially hide items beyond the first 5
+                document.addEventListener('DOMContentLoaded', () => {
+                    const items = document.querySelectorAll('.form-item');
+                    items.forEach((item, index) => {
+                        if (index >= 5) item.style.display = 'none';
+                    });
+                });
+        </script>
+
+        <br />
+        <br />
 
         <div class="downloads-section">
             <h2>Employee Research Forms</h2>
             <ul class="download-list">
                 <li class="download-item">
+                  
                     <div class="platform">
                     </div>
                     <div class="details">
                         <div class="title-version">
-                        <div class="title">ER101 - Employee Researcher Information Sheet</div>
+                            <div class="title">ER101 - Employee Researcher Information Sheet</div>
                         </div>
-                        <div class="meta">                       
+                        <div class="meta">
                             <span class="file-size">File Size: 187 KB</span>
                             <span class="date">Date: 01/04/2025</span>
                         </div>
                     </div>
                     <div class="download-button">
-                    <a href="/Downloads/ER101.pdf" class="button">Download</a>
+                        <a href="/Downloads/ER101.pdf" class="button">Download</a>
                     </div>
                 </li>
 
@@ -55,7 +680,7 @@
                     </div>
                     <div class="details">
                         <div class="title-version">
-                        <div class="title">ER102 - Employee Research Capsule</div>
+                            <div class="title">ER102 - Employee Research Capsule</div>
                         </div>
                         <div class="meta">
                             <span class="file-size">File Size: 159 KB</span>
@@ -63,16 +688,16 @@
                         </div>
                     </div>
                     <div class="download-button">
-                    <a href="/Downloads/ER102.pdf" class="button">Download</a>
+                        <a href="/Downloads/ER102.pdf" class="button">Download</a>
                     </div>
                 </li>
 
-                  <li class="download-item">
+                <li class="download-item">
                     <div class="platform">
                     </div>
                     <div class="details">
                         <div class="title-version">
-                        <div class="title">ER103 - Employee Research Budget Proposal</div>
+                            <div class="title">ER103 - Employee Research Budget Proposal</div>
                         </div>
                         <div class="meta">
                             <span class="file-size">File Size: 230 KB</span>
@@ -80,44 +705,44 @@
                         </div>
                     </div>
                     <div class="download-button">
-                    <a href="/Downloads/ER103.pdf" class="button">Download</a>
+                        <a href="/Downloads/ER103.pdf" class="button">Download</a>
                     </div>
                 </li>
 
-            <li class="download-item">
-                <div class="platform">
-                </div>
-                <div class="details">
-                    <div class="title-version">
-                        <div class="title">ER104 - Employee Research Gantt Chart</div>
+                <li class="download-item">
+                    <div class="platform">
                     </div>
-                    <div class="meta">
-                        <span class="file-size">File Size: 184 KB</span>
-                        <span class="date">Date: 10/03/2025</span>
+                    <div class="details">
+                        <div class="title-version">
+                            <div class="title">ER104 - Employee Research Gantt Chart</div>
+                        </div>
+                        <div class="meta">
+                            <span class="file-size">File Size: 184 KB</span>
+                            <span class="date">Date: 10/03/2025</span>
+                        </div>
                     </div>
-                </div>
-                <div class="download-button">
-                    <a href="/Downloads/ER104.pdf" class="button">Download</a>
-                </div>
-            </li>
+                    <div class="download-button">
+                        <a href="/Downloads/ER104.pdf" class="button">Download</a>
+                    </div>
+                </li>
 
-            <li class="download-item">
-                <div class="platform">
-                </div>
-                <div class="details">
-                    <div class="title-version">
-                        <div class="title">Guide for ER102 Employee Research Capsule</div>
+                <li class="download-item">
+                    <div class="platform">
                     </div>
-                    <div class="meta">
-                        <span class="file-size">File Size: 107 KB</span>
-                        <span class="date">Date: 10/03/2025</span>
+                    <div class="details">
+                        <div class="title-version">
+                            <div class="title">Guide for ER102 Employee Research Capsule</div>
+                        </div>
+                        <div class="meta">
+                            <span class="file-size">File Size: 107 KB</span>
+                            <span class="date">Date: 10/03/2025</span>
+                        </div>
                     </div>
-                </div>
-                <div class="download-button">
-                    <a href="/Downloads/ER102-Guide.pdf" class="button">Download</a>
-                </div>
-            </li>
+                    <div class="download-button">
+                        <a href="/Downloads/ER102-Guide.pdf" class="button">Download</a>
+                    </div>
+                </li>
 
             </ul>
         </div>
-    </div>
+

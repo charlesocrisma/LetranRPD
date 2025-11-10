@@ -34,6 +34,10 @@ namespace LetranRPD.Models
         public List<string>? Progress3files { get; set; }
         public int Progress4 { get; set; } = 0;
         public List<string>? Progress4files { get; set; }
+        public int Progress5 { get; set; } = 0;
+        public List<string>? Progress5files { get; set; }
+        public int Progress6 { get; set; } = 0;
+        public List<string>? Progress6files { get; set; }
 
         public DateTime AppliedDate { get; set; }
         public int RunCount { get; set; } = 1;
@@ -47,14 +51,16 @@ namespace LetranRPD.Models
         public string ServiceType { get; set; } = "";
         public string StudentNumber { get; set; } = "";
         public string Email { get; set; } = "";
-        public string Title { get; set; } = "";
-        public string Author { get; set; } = "";
-        public string ContactPerson { get; set; } = "";
-        public string ContactNumber { get; set; } = "";
-        public string ResearchAdviser { get; set; } = "";
-        public string Subject { get; set; } = "";
+        public string? Title { get; set; } = "";
+        public string? Author { get; set; } = "";
+        public string? ContactPerson { get; set; } = "";
+        public string? ContactNumber { get; set; } = "";
+        public string? ResearchAdviser { get; set; } = "";
+        public string? Subject { get; set; } = "";
 
         public string? OC_ManuscriptType { get; set; }
+        public string? ER_ServiceType { get; set; }
+        
         public string? LE_Index { get; set; }
         public int? LE_Pages { get; set; }
         public string? DA_Variable { get; set; }

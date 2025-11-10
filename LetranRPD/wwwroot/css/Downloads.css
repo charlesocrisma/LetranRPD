@@ -63,13 +63,13 @@
         margin-right: 15px;
     }
 
-        #downloads-page-content .icon.windows::before {
-            content: "";
-        }
+    #downloads-page-content .icon.windows::before {
+        content: "";
+    }
 
-        #downloads-page-content .icon.apple::before {
-            content: "";
-        }
+    #downloads-page-content .icon.apple::before {
+        content: "";
+    }
 
     #downloads-page-content .details {
         flex-grow: 1;
@@ -151,3 +151,214 @@
         margin-top: 10px;
     }
 }
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 50px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-icon {
+    width: 40px;
+    height: 40px;
+    background: #5f6368;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    margin-right: 12px;
+}
+
+.header-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: #202124;
+}
+
+.form-item {
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .form-item:hover {
+        background-color: #f8f9fa;
+    }
+
+.form-item-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    justify-content: space-between;
+}
+
+.form-item-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.form-icon {
+    width: 40px;
+    height: 40px;
+    background: #dadce0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    font-size: 20px;
+}
+
+.form-info {
+    flex: 1;
+}
+
+.form-title {
+    font-size: 14px;
+    color: #202124;
+    margin-bottom: 4px;
+}
+
+.form-date {
+    font-size: 12px;
+    color: #5f6368;
+}
+
+.menu-button {
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #5f6368;
+}
+
+    .menu-button:hover {
+        background-color: #f1f3f4;
+    }
+
+.drawer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: #fafafa;
+}
+
+    .drawer.open {
+        max-height: 500px;
+    }
+
+.drawer-content {
+    padding: 20px;
+}
+
+.drawer-description {
+    margin-bottom: 20px;
+    color: #5f6368;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.file-list {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.file-card {
+    flex: 1;
+    min-width: 250px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    padding: 16px;
+    background: white;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s;
+}
+
+    .file-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+.file-preview {
+    width: 300px;
+    height: 80px;
+    background: #e8eaed;
+    border-radius: 4px;
+    margin-right: 16px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    gap: 50px;
+    margin-left: 20px;
+}
+
+.file-info {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.file-name {
+    font-size: 14px;
+    color: #1967d2;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.file-type {
+    font-size: 12px;
+    color: #5f6368;
+}
+
+.chevron {
+    transition: transform 0.3s;
+    display: inline-block;
+}
+
+    .chevron.rotated {
+        transform: rotate(180deg);
+    }
+
+
+.view-more-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#viewMoreBtn {
+    background-color: #004aad;
+    color: #fff;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+    #viewMoreBtn:hover {
+        background-color: #003580;
+    }
