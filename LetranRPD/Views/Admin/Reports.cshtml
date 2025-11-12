@@ -1,733 +1,676 @@
-﻿@{
+﻿@*
+    This is a refactored version of Tracking.cshtml.
+
+    KEY CHANGES:
+    1.  FILTERING MOVED TO SERVER: The JavaScript `filterTable()` function has been REMOVED.
+        Filtering is now handled by submitting a <form> to the server.
+    2.  HTML FORM: The filter controls are wrapped in a <form method="get">. The inputs
+        (search, status, dates) now have `name` attributes.
+    3.  BUTTONS: The "Apply Filter" button is now a `type="submit"` for the form.
+        The "Reset" button is now a simple link `<a>` that reloads the page without parameters.
+    4.  JAVASCRIPT OPTIMIZED: The *remaining* JavaScript (for modals, bulk actions) has been
+        kept, but optimized to use event delegation. This is more efficient.
+    5.  CLEANER MODALS: Buttons for "Update" and "Archive" now use `data-*` attributes
+        to pass all necessary info to the JavaScript, making it cleaner and more robust.
+*@
+
+@* These C# helper functions are great and remain unchanged. *@
+@{
     Layout = "~/Views/Shared/_AdminNav.cshtml";
+    var currentUser = Context.Session.GetObject<Account>("account");
+
+    Func<int, string> GetStatusClass = (status) =>
+    {
+        switch (status)
+        {
+            case 0: return "pending";   // Not yet started
+            case 1: return "active";    // In progress
+            case 2: return "completed"; // Finished
+            case 3: return "failed";    // Failed
+            case 4: return "archived";  // Archived
+            default: return "pending";
+        }
+    };
+
+    Func<int, string> GetStatusText = (status) =>
+    {
+        switch (status)
+        {
+            case 0: return "Pending";
+            case 1: return "Processing";
+            case 2: return "Completed";
+            case 3: return "Failed";
+            case 4: return "Archived";
+            default: return "Pending";
+        }
+    };
+
+    Func<string, string> GetServiceCode = (serviceName) =>
+    {
+        switch (serviceName)
+        {
+            case "Originality Check": return "oc";
+            case "Instrument Validation": return "iv";
+            case "Language Editing": return "le";
+            case "Data Analysis": return "da";
+            case "Research Consultation": return "rc";
+            case "Statistical Software Assistance": return "ssa";
+            default: return "unknown";
+        }
+    };
+
+    // --- REQUIRED FOR SERVER-SIDE FILTERING ---
+    // We get the current filter values from the query string to set the
+    // default state of the filter inputs. Your PageModel/Controller will
+    // also use these values to filter the `Model`.
+    var searchTerm = Context.Request.Query["SearchTerm"];
+    var statusFilter = Context.Request.Query["Status"];
+    var startDate = Context.Request.Query["StartDate"];
+    var endDate = Context.Request.Query["EndDate"];
 }
-<link href="/css/admin/dashboard.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="~/css/admin/Reports.css">
+@using LetranRPD.Models
+@model List<ServiceInformation>
+@Html.AntiForgeryToken()
 
-<div class="container">
-    <div class="header">
+<div class="container-fluid tracking-page">
 
-        <h1>AUDIT LOG</h1>
+    <!-- Bulk Action Bar -->
+    <div id="bulk-action-bar" class="bulk-action-bar" style="display: none;">
+        <span id="selected-count">0</span> selected
+        <button class="btn btn-sm btn-outline-danger" id="bulk-archive-btn">Archive Selected</button>
+        <!-- Add other bulk actions here -->
     </div>
 
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search by Student Name, ID Number, or Service..." onkeyup="performSearch()">
-        <button class="btn btn-primary" onclick="performSearch()">
-            <span>🔍</span> Search
-        </button>
-        <button class="btn btn-secondary" onclick="clearSearch()">Clear</button>
-    </div>
-
-    <div class="controls">
-        <div class="control-group">
-            <label for="dateRange">Date Range</label>
-            <select id="dateRange" onchange="handleDateRangeChange()">
-                <option value="7d">Last 7 Days</option>
-                <option value="1m">Last 1 Month</option>
-                <option value="3m">Last 3 Months</option>
-                <option value="6m">Last 6 Months</option>
-                <option value="1y">Last 1 Year</option>
-                <option value="custom">Custom</option>
+    <!-- Filter Controls - NOW A FORM -->
+    <form method="get" class="filter-controls">
+        <div class="search-bar">
+            <input type="text" id="search-input" name="SearchTerm" class="form-control" placeholder="Search by name, service, or requester..." value="@searchTerm">
+        </div>
+        <div class="filter-options">
+            <select id="status-filter" name="Status" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="0" selected="@(statusFilter == "0")">Pending</option>
+                <option value="1" selected="@(statusFilter == "1")">Processing</option>
+                <option value="2" selected="@(statusFilter == "2")">Completed</option>
+                <option value="3" selected="@(statusFilter == "3")">Failed</option>
+                <option value="4" selected="@(statusFilter == "4")">Archived</option>
             </select>
+            <input type="date" id="start-date" name="StartDate" class="form-control" value="@startDate">
+            <input type="date" id="end-date" name="EndDate" class="form-control" value="@endDate">
+
+            @* This is now a submit button for the form *@
+            <button type="submit" id="apply-filter-btn" class="btn btn-primary">Apply Filter</button>
+
+            @* This is now a simple link to clear the filters. 
+               It assumes the current page is /Admin/Tracking. Update path if needed. *@
+            <a href="/Admin/Tracking" id="reset-filter-btn" class="btn btn-outline-secondary">Reset</a>
         </div>
+    </form>
 
-        <div class="control-group" id="customDateGroup" style="display: none;">
-            <label for="customStartDate">Start Date</label>
-            <input type="date" id="customStartDate">
-        </div>
-
-        <div class="control-group" id="customEndDateGroup" style="display: none;">
-            <label for="customEndDate">End Date</label>
-            <input type="date" id="customEndDate">
-        </div>
-
-        <div class="control-group">
-            <label for="section">Department</label>
-            <select id="section" onchange="filterAuditLogs()">
-                <option value="">All Department</option>
-                <option value="Senior High School Department">Senior High School Department</option>
-                <option value="College of Education, Liberal Arts, and Sciences">College of Education Liberal Arts and Sciences</option>
-                <option value="College of Business Administration and Accountancy">College of Business Administration and Accountancy</option>
-                <option value="College of Engineering and Information Technology">College of Engineering and Information Technology</option>
-                <option value="College of Education">College of Education</option>
-                <option value="Research and Publication Department">Research and Publication Department</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label for="eventType">Type of Service</label>
-            <select id="eventType" onchange="filterAuditLogs()">
-                <option value="">All Services</option>
-                <option value="Originality Check">Originality Checking</option>
-                <option value="Language Editing">Language Editing</option>
-                <option value="Ethical Review">Ethical Review</option>
-                <option value="Data Analysis">Data Analysis</option>
-                <option value="Instrument Validation">Instrument Validation</option>
-                <option value="Student Research Clearance">Student Research Clearance</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label for="resultType">Result</label>
-            <select id="resultType" onchange="filterAuditLogs()">
-                <option value="">All Results</option>
-                <option value="Success">Success</option>
-                <option value="Failed">Failed</option>
-                <option value="Revision">Revision</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label for="attemptType">Attempts</label>
-            <select id="attemptType" onchange="filterAuditLogs()">
-                <option value="">All Attempts</option>
-                <option value="1">1st Attempt</option>
-                <option value="2">2nd Attempt</option>
-                <option value="3">3rd Attempt</option>
-                <option value="4+">4+ Attempts</option>
-            </select>
-        </div>
-
-        <div class="button-group">
-            <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
-        </div>
-
-
-    </div>
-
-    <div class="table-wrapper">
-        <div class="header-actions">
-            <span class="selected-count">
-                <span id="checkedCount">0</span> selected
-            </span>
-            <div class="action-buttons">
-                <button class="btn btn-sm btn-secondary" onclick="selectAll()">Select All</button>
-                <button class="btn btn-sm btn-secondary" onclick="deselectAll()">Deselect</button>
-                <button class="btn btn-sm btn-warning" onclick="editSelected()">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteSelected()">Delete</button>
-                <button class="btn btn-sm btn-primary" onclick="exportSelected()">Export</button>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="table-container">
-        <table id="auditTable">
+    <!-- Services Table -->
+    <div class="table-responsive">
+        <table class="table table-hover" id="services-table">
             <thead>
                 <tr>
-                    <th>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
-                        </div>
-                    </th>
-                    <th class="sortable" onclick="sortTable('Department')">Department</th>
-                    <th class="sortable" onclick="sortTable('Service')">Service</th>
-                    <th class="sortable" onclick="sortTable('result')">Result</th>
-                    <th class="sortable" onclick="sortTable('Student')">Student Name</th>
-                    <th class="sortable" onclick="sortTable('IDNo')">ID No.</th>
-                    <th class="sortable" onclick="sortTable('attempts')">Run Count</th>
-                    <th class="sortable" onclick="sortTable('submissionDate')">Date Applied</th>
-
+                    <th><input type="checkbox" id="select-all"></th>
+                    <th>Service ID</th>
+                    <th>Service Name</th>
+                    <th>Requester</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="auditBody">
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var service in Model)
+                    {
+                        <tr class="data-row" data-date="@service.ServiceProgress.AppliedDate.ToString("yyyy-MM-dd")">
+                            <td><input type="checkbox" class="row-checkbox" data-id="@service."></td>
+                            <td>@GetServiceCode(service.ServiceType)-@service.ServiceId</td>
+                            <td>@service.ServiceType</td>
+                            <td>@service.Author</td>
+                            <td>@service.ServiceProgress.AppliedDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @* <span class="status-badge @GetStatusClass(service.Stat)"> *@
+                                @*     @GetStatusText(service.Status) *@
+                                @* </span> *@
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        Actions
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @*
+                                            OPTIMIZATION: Added data-* attributes to pass all info to JS.
+                                            This avoids reading from table cells, which is brittle.
+                                        *@
+                                        <li>
+                                            <button class="dropdown-item update-btn"
+                                                    data-id="@service.ServiceId"
+                                                    @* data-status="@service.Status" *@
+                                                    data-remarks="@service.ServiceProgress.Remarks">
+                                                Update Status
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item view-details-btn"
+                                                    data-id="@service.ServiceId">
+                                                View Details
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item archive-btn"
+                                                    data-id="@service.ServiceId"
+                                                    data-name="@(GetServiceCode(service.ServiceType))-@service.ServiceId">
+                                                Archive
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr id="no-data-row">
+                        <td colspan="7" class="text-center">No services found matching your criteria.</td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
-    <div id="emptyState" class="empty-state" style="display: none;">
-        <p>No audit logs found for the selected filters.</p>
-    </div>
-</div>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" class="modal" style="display: none;">
+<!-- Modals (HTML is unchanged) -->
+<!-- Update Status Modal -->
+<div id="updateModal" class="modal-backdrop" style="display: none;">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Edit Audit Log</h2>
-            <span class="close" onclick="closeEditModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="editForm">
-                <input type="hidden" id="editId">
+        <span class="modal-close" data-modal-close>&times;</span>
+        <h4>Update Service Status</h4>
+        <form id="updateForm">
+            <input type="hidden" id="update-service-id">
+            <div class="form-group">
+                <label for="update-status">Status</label>
+                <select id="update-status" class="form-control">
+                    <option value="0">Pending</option>
+                    <option value="1">Processing</option>
+                    <option value="2">Completed</option>
+                    <option value="3">Failed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="update-remarks">Remarks (Optional)</label>
+                <textarea id="update-remarks" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
 
-                <div class="form-group">
-                    <label for="editDepartment">Department</label>
-                    <select id="editDepartment" required>
-                        <option value="Senior High School Department">Senior High School Department</option>
-                        <option value="College of Education, Liberal Arts, and Sciences">College of Education Liberal Arts and Sciences</option>
-                        <option value="College of Business Administration and Accountancy">College of Business Administration and Accountancy</option>
-                        <option value="College of Engineering and Information Technology">College of Engineering and Information Technology</option>
-                        <option value="College of Education">College of Education</option>
-                        <option value="Research and Publication Department">Research and Publication Department</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="editService">Service</label>
-                    <select id="editService" required>
-                        <option value="Originality Check">Originality Checking</option>
-                        <option value="Language Editing">Language Editing</option>
-                        <option value="Ethical Review">Ethical Review</option>
-                        <option value="Data Analysis">Data Analysis</option>
-                        <option value="Instrument Validation">Instrument Validation</option>
-                        <option value="Student Research Clearance">Student Research Clearance</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="editResult">Result</label>
-                    <select id="editResult" required>
-                        <option value="Success">Success</option>
-                        <option value="Failed">Failed</option>
-                        <option value="Revision">Revision</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="editStudent">Student Name</label>
-                    <input type="text" id="editStudent" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="editIDNo">ID Number</label>
-                    <input type="text" id="editIDNo" maxlength="7" pattern="[0-9]{7}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="editAttempts">Attempts</label>
-                    <input type="number" id="editAttempts" min="1" max="10" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="editSubmissionDate">Submission Date</label>
-                    <input type="datetime-local" id="editSubmissionDate" required>
-                </div>
-
-
-
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+        <span class="modal-close" data-modal-close>&times;</span>
+        <h4 id="confirmation-title">Confirm Action</h4>
+        <p id="confirmation-message">Are you sure?</p>
+        <div class="modal-actions">
+            <button id="cancel-action-btn" class="btn btn-outline-secondary" data-modal-close>Cancel</button>
+            <button id="confirm-action-btn" class="btn btn-danger">Confirm</button>
         </div>
     </div>
 </div>
+
+<!-- Toast Notification -->
+<div id="toast-notification" class="toast-notification">
+    <span id="toast-message"></span>
+</div>
+
+
+@*
+    *****************************************************************
+    REFACTORED JAVASCRIPT
+    *****************************************************************
+
+    - The `filterTable()` function has been completely REMOVED.
+    - All code is wrapped in `DOMContentLoaded` to ensure the page is loaded.
+    - Event listeners are now "delegated" from a single parent element.
+      This is more efficient and works even if rows are added dynamically.
+*@
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
 
+        // --- CONSTANTS & STATE ---
+        const table = document.getElementById('services-table');
+        const selectAllCheckbox = document.getElementById('select-all');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const bulkActionBar = document.getElementById('bulk-action-bar');
+        const selectedCountEl = document.getElementById('selected-count');
 
-               let allLogs = [];
-        let filteredLogs = [];
-        let selectedLogs = new Set();
-        let currentSort = { column: 'appliedDate', direction: 'desc' };
+        // Modals
+        const updateModal = document.getElementById('updateModal');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const updateForm = document.getElementById('updateForm');
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            await fetchAuditLogs();
-            filterAuditLogs(); // Render table after data loads
+        // Confirmation modal elements
+        const confirmBtn = document.getElementById('confirm-action-btn');
+        const confirmationMessage = document.getElementById('confirmation-message');
+
+        // Store data for confirmation modal
+        let confirmationData = {};
+
+        // --- HELPER FUNCTIONS ---
+
+        // Show/Hide Modals
+        const showModal = (modal) => modal.style.display = 'flex';
+        const hideModal = (modal) => modal.style.display = 'none';
+
+        // Show Toast Notification
+        const showToast = (message, isError = false) => {
+            const toast = document.getElementById('toast-notification');
+            const toastMessage = document.getElementById('toast-message');
+
+            toastMessage.textContent = message;
+            toast.className = 'toast-notification show';
+            if (isError) {
+                toast.classList.add('error');
+            }
+
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        };
+
+        // Update Bulk Action Bar
+        const updateBulkBar = () => {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            const count = checkedBoxes.length;
+
+            if (count > 0) {
+                selectedCountEl.textContent = count;
+                bulkActionBar.style.display = 'flex';
+            } else {
+                bulkActionBar.style.display = 'none';
+            }
+
+            // Update "Select All" checkbox state
+            selectAllCheckbox.checked = count > 0 && count === rowCheckboxes.length;
+            selectAllCheckbox.indeterminate = count > 0 && count < rowCheckboxes.length;
+        };
+
+        // Get Anti-Forgery Token
+        const getAFToken = () => {
+            const tokenInput = document.getElementsByName('__RequestVerificationToken')[0];
+            return tokenInput ? tokenInput.value : '';
+        };
+
+        // --- MAIN EVENT LISTENER (EVENT DELEGATION) ---
+        // A single listener on the document handles clicks for modals, table buttons, etc.
+
+        document.addEventListener('click', (e) => {
+
+            // --- Modal Close Buttons ---
+            if (e.target.dataset.modalClose !== undefined || e.target.classList.contains('modal-backdrop')) {
+                e.target.closest('.modal-backdrop').style.display = 'none';
+            }
+
+            // --- Checkbox clicks (Select All & Row) ---
+            if (e.target.id === 'select-all') {
+                const isChecked = e.target.checked;
+                rowCheckboxes.forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+                updateBulkBar();
+            }
+
+            if (e.target.classList.contains('row-checkbox')) {
+                updateBulkBar();
+            }
+
+            // --- Update Status Button Click ---
+            if (e.target.classList.contains('update-btn')) {
+                const btn = e.target;
+                document.getElementById('update-service-id').value = btn.dataset.id;
+                document.getElementById('update-status').value = btn.dataset.status;
+                document.getElementById('update-remarks').value = btn.dataset.remarks || '';
+                showModal(updateModal);
+            }
+
+            // --- Archive Button Click ---
+            if (e.target.classList.contains('archive-btn')) {
+                const btn = e.target;
+                confirmationMessage.textContent = `Are you sure you want to archive service ${btn.dataset.name}?`;
+                // Store data needed for the fetch call
+                confirmationData = {
+                    id: btn.dataset.id,
+                    action: 'archive'
+                };
+                showModal(confirmationModal);
+            }
+
+            // --- Bulk Archive Button Click ---
+            if (e.target.id === 'bulk-archive-btn') {
+                const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+                const ids = Array.from(checkedBoxes).map(cb => cb.dataset.id);
+                confirmationMessage.textContent = `Are you sure you want to archive ${ids.length} selected services?`;
+                // Store data needed for the fetch call
+                confirmationData = {
+                    ids: ids, // Note: server must be able to handle an array of 'ids'
+                    action: 'bulk-archive'
+                };
+                showModal(confirmationModal);
+            }
+
+            // --- Confirmation Modal "Confirm" Button ---
+            if (e.target.id === 'confirm-action-btn') {
+                handleConfirmation(confirmationData);
+            }
         });
 
-        async function fetchAuditLogs() {
-            try {
-                const response = await fetch('/Admin/GetAuditLogs');
-                const data = await response.json();
 
-                // Convert date strings to Date objects
-                allLogs = data.map((log, index) => ({
-                    id: index,
-                    Department: log.department || 'N/A',
-                    Service: log.service || 'N/A',
-                    ServiceName: log.service || 'N/A',
-                    result: log.result || 'Pending',
-                    Student: log.student || 'N/A',
-                    IDNo: log.idNo || 'N/A',
-                    attempts: log.attempts || 1,
-                    submissionDate: log.appliedDate ? new Date(log.appliedDate) : null,
-                    completionDate: log.completionDate ? new Date(log.completionDate) : new Date(log.submissionDate),
-                    time: log.appliedDate ? new Date(log.appliedDate) : null
-                }));
+        // --- FORM SUBMISSION HANDLERS ---
 
-                filteredLogs = [...allLogs];
-                renderTable();
-            } catch (error) {
-                console.error('Error fetching audit logs:', error);
-            }
-        }
+        // Handle Update Status Form
+        updateForm.addEventListener('submit', (e) => {
+            e.preventDefault();
 
+            const formData = new FormData();
+            formData.append('Id', document.getElementById('update-service-id').value);
+            formData.append('Status', document.getElementById('update-status').value);
+            formData.append('Remarks', document.getElementById('update-remarks').value);
+            formData.append('__RequestVerificationToken', getAFToken());
 
-
-            function handleDateRangeChange() {
-                const dateRange = document.getElementById('dateRange').value;
-                const customDateGroup = document.getElementById('customDateGroup');
-                const customEndDateGroup = document.getElementById('customEndDateGroup');
-
-                if (dateRange === 'custom') {
-                    customDateGroup.style.display = 'flex';
-                    customEndDateGroup.style.display = 'flex';
+            fetch('/Admin/UpdateServiceStatus', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Status updated successfully.');
+                    // Reloading is the simplest way to show changes.
+                    // A more advanced way would be to update the row in-place.
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    customDateGroup.style.display = 'none';
-                    customEndDateGroup.style.display = 'none';
-                    filterAuditLogs();
+                    showToast(data.message || 'Failed to update status.', true);
                 }
-            }
-
-            function getDateRangeFilter() {
-                const dateRange = document.getElementById('dateRange').value;
-                const now = new Date();
-                let startDate = new Date(now);
-
-                switch(dateRange) {
-                    case '7d':
-                        startDate.setDate(now.getDate() - 7);
-                        break;
-                    case '1m':
-                        startDate.setMonth(now.getMonth() - 1);
-                        break;
-                    case '3m':
-                        startDate.setMonth(now.getMonth() - 3);
-                        break;
-                    case '6m':
-                        startDate.setMonth(now.getMonth() - 6);
-                        break;
-                    case '1y':
-                        startDate.setFullYear(now.getFullYear() - 1);
-                        break;
-                    case 'custom':
-                        const customStart = document.getElementById('customStartDate').value;
-                        const customEnd = document.getElementById('customEndDate').value;
-                        if (customStart && customEnd) {
-                            return {
-                                start: new Date(customStart),
-                                end: new Date(customEnd)
-                            };
-                        }
-                        return null;
-                    default:
-                        return null;
-                }
-                     if (!startDate || isNaN(startDate)) return null;
-
-            return { start: startDate, end: now };
-
-            }
-
-            function filterAuditLogs() {
-        const section = document.getElementById('section').value.trim();
-        const eventType = document.getElementById('eventType').value.trim();
-        const resultType = document.getElementById('resultType').value.trim();
-        const attemptType = document.getElementById('attemptType').value.trim();
-        const dateRange = getDateRangeFilter();
-
-        filteredLogs = allLogs.filter(log => {
-            let matches = true;
-
-            // Normalize strings
-            const dept = (log.Department || '').toLowerCase();
-            const service = (log.Service || '').toLowerCase();
-            const result = (log.result || '').toLowerCase();
-            const student = (log.Student || '').toLowerCase();
-            const idno = (log.IDNo || '').toLowerCase();
-
-            // 🔍 Search filter
-            if (searchTerm) {
-                const s = searchTerm.toLowerCase();
-                matches = matches && (
-                    student.includes(s) ||
-                    idno.includes(s) ||
-                    service.includes(s) ||
-                    dept.includes(s)
-                );
-            }
-
-            // 🏛 Department filter
-            if (section) {
-                matches = matches && dept === section.toLowerCase();
-            }
-
-            // 🧾 Type of Service filter
-            if (eventType) {
-                const serviceMap = {
-                    'Originality Check': 'originality check',
-                        'Language Editing': 'language editing',
-                        'Ethical Review': 'ethical review',
-                        'Data Analysis': 'data analysis',
-                        'Student Research Clearance': 'student research clearance'
-                };
-                const selectedService = serviceMap[eventType] || eventType.toLowerCase();
-                matches = matches && service.includes(selectedService);
-            }
-
-            // 🧩 Result filter
-            if (resultType) {
-                matches = matches && result === resultType.toLowerCase();
-            }
-
-            // 🔁 Attempt filter
-            if (attemptType) {
-                if (attemptType === '4+') {
-                    matches = matches && log.attempts >= 4;
-                } else {
-                    matches = matches && log.attempts === parseInt(attemptType);
-                }
-            }
-
-
-                // 📅 Date range filter (use Applied Date)
-        if (dateRange && log.submissionDate) {
-            const applied = new Date(log.submissionDate);
-            if (isNaN(applied)) return false;
-            matches = matches && applied >= dateRange.start && applied <= dateRange.end;
-        }
-
-
-
-            return matches;
-        });
-
-        console.log('Filtered results:', filteredLogs.length, 'logs');
-        sortTable(currentSort.column, false);
-        renderTable();
-    }
-
-
-               function sortTable(column, toggle = true) {
-                if (toggle && currentSort.column === column) {
-                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-                } else {
-                    currentSort.column = column;
-                    currentSort.direction = 'desc';
-                }
-
-                filteredLogs.sort((a, b) => {
-                    let aVal = a[column];
-                    let bVal = b[column];
-
-                    if (column === 'time' || column === 'submissionDate' || column === 'completionDate') {
-                        aVal = a[column].getTime();
-                        bVal = b[column].getTime();
-                    }
-
-                    if (typeof aVal === 'string') {
-                        aVal = aVal.toLowerCase();
-                        bVal = bVal.toLowerCase();
-                    }
-
-                    if (currentSort.direction === 'asc') {
-                        return aVal > bVal ? 1 : -1;
-                    } else {
-                        return aVal < bVal ? 1 : -1;
-                    }
-                });
-
-                updateSortHeaders();
-                renderTable();
-            }
-
-            function updateSortHeaders() {
-                document.querySelectorAll('th.sortable').forEach(th => {
-                    th.classList.remove('sorted-asc', 'sorted-desc');
-                });
-
-                const headers = document.querySelectorAll('th.sortable');
-                headers.forEach(th => {
-                    if (th.textContent.toLowerCase().includes(currentSort.column.toLowerCase())) {
-                        th.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
-                    }
-                });
-            }
-
-                   function renderTable() {
-                const tbody = document.getElementById('auditBody');
-                const emptyState = document.getElementById('emptyState');
-
-                if (filteredLogs.length === 0) {
-                    tbody.innerHTML = '';
-                    emptyState.style.display = 'block';
-                    return;
-                }
-
-                emptyState.style.display = 'none';
-                tbody.innerHTML = filteredLogs.map(log => {
-                    let resultBadgeClass = 'success-badge';
-                    if (log.result === 'Revision') resultBadgeClass = 'warn-badge';
-                    if (log.result === 'Failed') resultBadgeClass = 'error-badge';
-
-                    // Highlight search terms
-                    let studentName = log.Student;
-                    let idNo = log.IDNo;
-                    let serviceName = log.ServiceName;
-
-                    if (searchTerm) {
-                        const regex = new RegExp(`(${searchTerm})`, 'gi');
-                        studentName = studentName.replace(regex, '<mark>$1</mark>');
-                        idNo = idNo.replace(regex, '<mark>$1</mark>');
-                        serviceName = serviceName.replace(regex, '<mark>$1</mark>');
-                    }
-
-                    return `
-                    <tr class="${selectedLogs.has(log.id) ? 'selected' : ''}" data-id="${log.id}">
-                        <td>
-                            <div class="checkbox-wrapper">
-                                <input type="checkbox"
-                                    ${selectedLogs.has(log.id) ? 'checked' : ''}
-                                    onchange="toggleRowSelection(${log.id})">
-                            </div>
-                        </td>
-                        <td><span class="area-badge">${log.Department}</span></td>
-                        <td><span class="event-text">${serviceName}</span></td>
-                        <td><span class="${resultBadgeClass}">${log.result}</span></td>
-                        <td>${studentName}</td>
-                        <td><span class="ip-text">${idNo}</span></td>
-                        <td><span class="attempts-badge">${log.attempts}</span></td>
-                        <td><span class="time-text">${formatDate(log.submissionDate)}</span></td>
-
-                    </tr>
-                `}).join('');
-
-                updateSortHeaders();
-                updateCheckedCount();
-            }
-
-            function toggleRowSelection(logId) {
-                if (selectedLogs.has(logId)) {
-                    selectedLogs.delete(logId);
-                } else {
-                    selectedLogs.add(logId);
-                }
-                renderTable();
-            }
-
-            function toggleSelectAll() {
-                const checkbox = document.getElementById('selectAllCheckbox');
-
-                if (checkbox.checked) {
-                    filteredLogs.forEach(log => selectedLogs.add(log.id));
-                } else {
-                    filteredLogs.forEach(log => selectedLogs.delete(log.id));
-                }
-                renderTable();
-            }
-
-            function selectAll() {
-                filteredLogs.forEach(log => selectedLogs.add(log.id));
-                document.getElementById('selectAllCheckbox').checked = true;
-                renderTable();
-            }
-
-            function deselectAll() {
-                selectedLogs.clear();
-                document.getElementById('selectAllCheckbox').checked = false;
-                renderTable();
-            }
-
-            function updateCheckedCount() {
-                document.getElementById('checkedCount').textContent = selectedLogs.size;
-            }
-
-               function editSelected() {
-                if (selectedLogs.size === 0) {
-                    alert('Please select at least one row to edit');
-                    return;
-                }
-
-                if (selectedLogs.size > 1) {
-                    alert('Please select only one row to edit');
-                    return;
-                }
-
-                const logId = Array.from(selectedLogs)[0];
-                const log = allLogs.find(l => l.id === logId);
-
-                if (!log) return;
-
-                // Format dates for datetime-local input
-                const formatDateForInput = (date) => {
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${year}-${month}-${day}T${hours}:${minutes}`;
-                };
-
-                // Populate the modal with current values
-                document.getElementById('editId').value = log.id;
-                document.getElementById('editDepartment').value = log.Department;
-                document.getElementById('editService').value = log.Service;
-                document.getElementById('editResult').value = log.result;
-                document.getElementById('editStudent').value = log.Student;
-                document.getElementById('editIDNo').value = log.IDNo;
-                document.getElementById('editAttempts').value = log.attempts;
-                document.getElementById('editSubmissionDate').value = formatDateForInput(log.submissionDate);
-
-
-                // Show modal
-                document.getElementById('editModal').style.display = 'flex';
-            }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-
-        // Handle form submission
-            document.addEventListener('DOMContentLoaded', function() {
-                document.getElementById('editForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    const id = parseInt(document.getElementById('editId').value);
-                    const serviceCode = document.getElementById('editService').value;
-                    const serviceNames = {
-                        'Oc': 'Originality Checking',
-                        'Le': 'Language Editing',
-                        'Er': 'Ethical Review',
-                        'Da': 'Data Analysis',
-                        'SRC': 'Student Research Clearance'
-                    };
-
-                    const submissionDate = new Date(document.getElementById('editSubmissionDate').value);
-
-
-
-
-
-                    // Find and update the log
-                    const logIndex = allLogs.findIndex(l => l.id === id);
-                    if (logIndex !== -1) {
-                        allLogs[logIndex] = {
-                            ...allLogs[logIndex],
-                            Department: document.getElementById('editDepartment').value,
-                            Service: serviceCode,
-                            ServiceName: serviceNames[serviceCode],
-                            result: document.getElementById('editResult').value,
-                            Student: document.getElementById('editStudent').value,
-                            IDNo: document.getElementById('editIDNo').value,
-                            attempts: parseInt(document.getElementById('editAttempts').value),
-                            submissionDate: submissionDate,
-
-                            time: submissionDate
-                        };
-
-                        // Call your C# API here to update in database
-                        // fetch('/api/audit-logs/update', { method: 'PUT', body: JSON.stringify(allLogs[logIndex]) })
-
-                        filterAuditLogs();
-                        closeEditModal();
-                        deselectAll();
-                        alert('Log updated successfully!');
-                    }
-                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred.', true);
+            })
+            .finally(() => {
+                hideModal(updateModal);
             });
-            function deleteSelected() {
-                if (selectedLogs.size === 0) {
-                    alert('Please select at least one row to delete');
-                    return;
-                }
+        });
 
-                if (confirm(`Are you sure you want to delete ${selectedLogs.size} row(s)?`)) {
-                    const idsToDelete = Array.from(selectedLogs);
-                    console.log('Deleting IDs:', idsToDelete);
+        // Handle Confirmation Modal (Archive / Bulk Archive)
+        const handleConfirmation = (data) => {
+            let url = '';
+            let body = new FormData();
+            body.append('__RequestVerificationToken', getAFToken());
 
-                    // Call your C# API here
-                    // Example: fetch('/api/audit-logs/delete', { method: 'POST', body: JSON.stringify(idsToDelete) })
+            if (data.action === 'archive' && data.id) {
+                url = '/Admin/ArchiveService';
+                body.append('Id', data.id);
+            } else if (data.action === 'bulk-archive' && data.ids) {
+                url = '/Admin/ArchiveBulk'; // <-- NOTE: This is a new endpoint you'd need to create
+                // FormData doesn't nicely support arrays. Send as JSON.
+                body = JSON.stringify({ Ids: data.ids });
 
-                    selectedLogs.forEach(id => {
-                        allLogs = allLogs.filter(log => log.id !== id);
-                    });
-                    selectedLogs.clear();
-                    filterAuditLogs();
-                    alert('Rows deleted successfully');
-                }
-            }
+                // We need to adjust fetch headers for JSON
+                const token = getAFToken(); // Get token manually
 
-                   function exportSelected() {
-                if (selectedLogs.size === 0) {
-                    alert('Please select at least one row to export');
-                    return;
-                }
-
-                const selectedData = filteredLogs.filter(log => selectedLogs.has(log.id));
-
-                // Use the convertToCSV function which has the correct headers
-                const csv = convertToCSV(selectedData);
-
-                // Download CSV first, then user can import to Google Sheets
-                downloadCSV(csv);
-
-                // Alert user with instructions
-                setTimeout(() => {
-                    if (confirm('CSV downloaded! Would you like to open Google Sheets to import it?\n\nClick OK to open Google Sheets, then:\n1. Click File > Import\n2. Upload the downloaded CSV file')) {
-                        const googleSheetsUrl = `https://docs.google.com/spreadsheets/create?usp=sheets_web#gid=0`;
-                        window.open(googleSheetsUrl, '_blank');
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token // Send token in header
+                    },
+                    body: body
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showToast('Services archived successfully.');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast(result.message || 'Failed to archive services.', true);
                     }
-                }, 500);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred.', true);
+                })
+                .finally(() => {
+                    hideModal(confirmationModal);
+                    confirmationData = {};
+                });
+                return; // Exit function since we used a different fetch
+            } else {
+                return; // No valid action
             }
 
-                function convertToCSV(data) {
-                const headers = ['Department', 'Service', 'Result', 'Student Name', 'ID No.', 'Attempts', 'Submission Date', 'Completion Date'];
-                const rows = data.map(log => [
-                    log.Department,
-                    log.ServiceName,
-                    log.result,
-                    log.Student,
-                    log.IDNo,
-                    log.attempts,
-                    formatDate(log.submissionDate),
-                    formatDate(log.completionDate)
-                ]);
+            // Standard FormData fetch for single archive
+            fetch(url, {
+                method: 'POST',
+                body: body
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showToast('Service archived successfully.');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast(result.message || 'Failed to archive service.', true);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred.', true);
+            })
+            .finally(() => {
+                hideModal(confirmationModal);
+                confirmationData = {};
+            });
+        };
 
-                const csvContent = [
-                    headers.join(','),
-                    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-                ].join('\n');
+        // --- INITIALIZATION ---
+        updateBulkBar();
 
-                return csvContent;
-            }
-
-            function downloadCSV(csv) {
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `audit-log-${new Date().toISOString().split('T')[0]}.csv`;
-                a.click();
-                window.URL.revokeObjectURL(url);
-            }
-
-            function formatDate(date) {
-                const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-                return date.toLocaleDateString('en-US', options);
-            }
-
-                function resetFilters() {
-                document.getElementById('dateRange').value = '7d';
-                document.getElementById('section').value = '';
-                document.getElementById('eventType').value = '';
-                document.getElementById('resultType').value = '';
-                document.getElementById('attemptType').value = '';
-                document.getElementById('customStartDate').value = '';
-                document.getElementById('customEndDate').value = '';
-                document.getElementById('customDateGroup').style.display = 'none';
-                document.getElementById('customEndDateGroup').style.display = 'none';
-
-                filteredLogs = [...allLogs];
-                currentSort = { column: 'time', direction: 'desc' };
-                deselectAll();
-                sortTable(currentSort.column, false);
-                renderTable();
-            }
-
-                let searchTerm = '';
-
-            function performSearch() {
-                searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-                console.log('Searching for:', searchTerm);
-                filterAuditLogs();
-            }
-
-            function clearSearch() {
-                document.getElementById('searchInput').value = '';
-                searchTerm = '';
-                filterAuditLogs();
-            }
+    });
 </script>
 
+<style>
+    /* Styles are copied from your original, but consolidated and cleaned up */
+
+    /* Page layout */
+    .tracking-page {
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+    /* Bulk Action Bar */
+    .bulk-action-bar {
+        display: none; /* Hidden by default */
+        align-items: center;
+        gap: 15px;
+        padding: 10px 15px;
+        background-color: #e6f7ff;
+        border: 1px solid #b3e0ff;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+        .bulk-action-bar span {
+            font-weight: 600;
+        }
+
+    /* Filter Controls */
+    .filter-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+        .filter-controls .search-bar {
+            flex-grow: 1;
+            min-width: 250px;
+        }
+
+        .filter-controls .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex-grow: 2;
+        }
+
+        .filter-controls .form-control,
+        .filter-controls .btn {
+            height: 38px;
+        }
+
+    /* Table */
+    .table-responsive {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        overflow-x: auto;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table thead th {
+            background-color: #f8f9fa;
+            border-top: none;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f3f5;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 0.3em 0.6em;
+        font-size: 0.85em;
+        font-weight: 600;
+        border-radius: 20px;
+        color: #fff;
+        text-transform: capitalize;
+    }
+
+        .status-badge.pending {
+            background-color: #6c757d;
+        }
+
+        .status-badge.active {
+            background-color: #007bff;
+        }
+
+        .status-badge.completed {
+            background-color: #28a745;
+        }
+
+        .status-badge.failed {
+            background-color: #dc3545;
+        }
+
+        .status-badge.archived {
+            background-color: #343a40;
+        }
+
+    /* Modals */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #888;
+        cursor: pointer;
+    }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+    .modal-content h4 {
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    .modal-content .form-group {
+        margin-bottom: 15px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    /* Toast Notification */
+    .toast-notification {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 25px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        z-index: 1100;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.3s ease-in-out;
+    }
+
+        .toast-notification.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .toast-notification.error {
+            background-color: #dc3545;
+        }
+</style>

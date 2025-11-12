@@ -20,6 +20,8 @@ namespace LetranRPD.Controllers
         public int Progress2 { get; set; }
         public int Progress3 { get; set; }
         public int Progress4 { get; set; }
+        public int Progress5 { get; set; }
+        public int Progress6 { get; set; }
         public int RunCount { get; set; }
         public string? Remarks { get; set; }
     }
@@ -341,12 +343,16 @@ namespace LetranRPD.Controllers
                 Progress2files = existingRecord.Progress2files,
                 Progress3files = existingRecord.Progress3files,
                 Progress4files = existingRecord.Progress4files,
+                Progress5files = existingRecord.Progress5files,
+                Progress6files = existingRecord.Progress6files,
 
                 // Update the values from the model
                 Progress1 = model.Progress1,
                 Progress2 = model.Progress2,
                 Progress3 = model.Progress3,
                 Progress4 = model.Progress4,
+                Progress5 = model.Progress5,
+                Progress6 = model.Progress6,
                 RunCount = model.RunCount,
                 Remarks = model.Remarks,
                 AdminToStudentFiles = savedFileNames.Any() ? savedFileNames : existingRecord.AdminToStudentFiles
