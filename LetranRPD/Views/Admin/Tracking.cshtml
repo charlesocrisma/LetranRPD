@@ -165,35 +165,6 @@
 		</div>
 
 
-		<div class="bulk-actions-section" id="bulkActionsSection">
-			<div class="bulk-actions-content">
-				<div class="selection-count">
-					<i class="fas fa-check-square"></i>
-					<span id="selectedCount">0</span> submission(s) selected
-				</div>
-
-				<div class="bulk-actions-controls">
-					<label for="bulkStatusSelect" class="sr-only">Change Status To</label>
-					<select id="bulkStatusSelect" class="bulk-status-dropdown">
-						<option value="">Change Status To...</option>
-						<option value="1">Processing</option>
-						<option value="2">Complete</option>
-						<option value="3">Failed</option>
-						<option value="4">Archived</option>
-					</select>
-
-					<button id="applyBulkStatus" class="apply-bulk-btn">
-						<i class="fas fa-check"></i> Apply
-					</button>
-
-					<button id="clearSelections" class="clear-selections-btn">
-						<i class="fas fa-times"></i> Clear
-					</button>
-				</div>
-			</div>
-		</div>
-
-
 		<!-- Students Table Container -->
 		<div class="table-wrapper" id="submissionsTableContainer">
 		</div>
@@ -288,86 +259,90 @@
 
 
 
-											// --- DATA TRANSFORMATION ---
+														function transformDbData(si) {
+				// DEFENSIVE CHECK: Handle null prog by using an empty object
+				const prog = si.serviceProgress || {};
 
-													function transformDbData(si) {
-														// DEFENSIVE CHECK: Handle null prog by using an empty object
-														const prog = si.serviceProgress || {};
+				// 1. Determine total steps based on service type
+				let totalStepsForService = 4; // Default
+				const serviceType = si.serviceType || "";
+			if (serviceType === "Ethics Review") {
+					totalStepsForService = 6;
+				} else if (serviceType === "Student Research Clearance") {
+					totalStepsForService = 2;
+				}
 
-														// 1. Determine total steps based on service type
-														let totalStepsForService = 4; // Default
+				// 2. Dynamically build stepStatuses and file arrays
+				const stepStatuses = [];
+				const allReceivedFiles = [];
+			for (let i = 1; i <= totalStepsForService; i++) {
+					stepStatuses.push(getStepStatus(prog[`progress${i}`]));
+			allReceivedFiles.push(...(prog[`progress${i}files`] || []));
+				}
 
-														// DEFENSIVE CHECK: Handle null serviceType by using an empty string
-														const serviceType = si.serviceType || "";
+				// --- NEW LOGIC START ---
 
-														if (serviceType === "Ethics Review") {
-															totalStepsForService = 6;
-														} else if (serviceType === "Student Research Clearance") {
-															totalStepsForService = 2;
-														}
+				// 3. Determine *underlying* operational status
+				let status = "processing"; // Default
+				const allStepsComplete = stepStatuses.length > 0 && stepStatuses.every(s => s === "complete");
 
-														// 2. Dynamically build stepStatuses and file arrays based on total steps
-														const stepStatuses = [];
-														const allReceivedFiles = [];
-														for (let i = 1; i <= totalStepsForService; i++) {
-															// This is now safe: prog[`progress${i}`] will be 'undefined' if prog is {}
-															// and getStepStatus() is expected to handle 'undefined' (likely as "pending")
-															stepStatuses.push(getStepStatus(prog[`progress${i}`]));
+				if (stepStatuses.includes("revision")) {
+			status = "failed";
+				} else if (allStepsComplete) {
+			status = "complete";
+				} else if (si.status === 0 || (stepStatuses.every(s => s === "pending") && stepStatuses.length > 0)) {
+					status = "pending";
+				}
 
-															// This is also safe, as (undefined || []) becomes []
-															allReceivedFiles.push(...(prog[`progress${i}files`] || []));
-														}
+				// 4. Determine 'isArchived' flag based on YOUR NEW RULES
+				const runCount = prog.runCount || 1;
+				const isArchived = allStepsComplete || (runCount >= 4);
 
-														// 3. Determine overall status
-														let status = "processing";
-														if (stepStatuses.includes("revision")) {
-															status = "failed";
-														} else if (stepStatuses.every(s => s === "complete")) {
-															status = "complete";
-														}
+				// --- NEW LOGIC END ---
 
-														// 4. Find current step
-														let currentStep = stepStatuses.findIndex(s => s === "current") + 1;
-														if (currentStep === 0 && status !== 'complete' && status !== 'failed') {
-															currentStep = stepStatuses.findIndex(s => s === "pending") + 1;
-														}
-														if (currentStep === 0 && status === 'complete') {
-															currentStep = stepStatuses.length;
-														}
-														// Fix for brand-new items
-														if (currentStep === 0 && status === 'processing') {
-															currentStep = 1;
-														}
+				// 5. Find current step
+				let currentStep = stepStatuses.findIndex(s => s === "current") + 1;
+			if (currentStep === 0 && status !== 'complete' && status !== 'failed') {
+					currentStep = stepStatuses.findIndex(s => s === "pending") + 1;
+				}
+			if (currentStep === 0 && status === 'complete') {
+					currentStep = stepStatuses.length;
+				}
+				if (currentStep === 0 && status === 'processing') {
+			currentStep = 1;
+				}
 
-														// 5. Use the safe 'serviceType' variable
-														const serviceKey = serviceType.toLowerCase().replace(/ /g, '-');
-														const allSentFiles = [
-															...(prog.AdminToStudentFiles || [])
-														];
+				const serviceKey = serviceType.toLowerCase().replace(/ /g, '-');
+				const allSentFiles = [ ...(prog.AdminToStudentFiles || []) ];
 
-														// 6. Return the new object
-														return {
-															"id": si.serviceId,
-															"name": si.author,
-															"studentNumber": si.studentNumber,
-															"department": si.subject,
-															"course": si.email,
-															"service": serviceKey,
-															"serviceName": si.serviceType, // Use original for display
-															"title": si.title,
-															"status": status,
-															"currentStep": currentStep,
-															"totalSteps": totalStepsForService, // <-- USES THE NEW VARIABLE
-															"runCount": prog.runCount || 1,
-															"dateSubmitted": prog.appliedDate,
-															"lastUpdated": prog.appliedDate,
-															"receivedFiles": allReceivedFiles,     // <-- USES THE NEW DYNAMIC ARRAY
-															"sendFiles": 0,
-															"remarks": prog.remarks || "",
-															"stepStatuses": stepStatuses,          // <-- USES THE NEW DYNAMIC ARRAY
-															"sendFilesStaged": allSentFiles,
-														};
-												}
+			// 6. Return the new object
+				return {
+					"id": si.serviceId,
+					"name": si.author,
+					"studentNumber": si.studentNumber,
+					"department": si.subject,
+					"course": si.email,
+					"service": serviceKey,
+					"serviceName": si.serviceType,
+					"title": si.title,
+
+					// --- UPDATED PROPERTIES ---
+					"status": status,          // 'pending', 'processing', 'complete', or 'failed'
+					"isArchived": isArchived,    // New property: true or false
+					// --- END UPDATED ---
+
+					"currentStep": currentStep,
+					"totalSteps": totalStepsForService,
+			"runCount": prog.runCount || 1,
+					"dateSubmitted": prog.appliedDate,
+					"lastUpdated": prog.appliedDate,
+					"receivedFiles": allReceivedFiles,
+					"sendFiles": 0,
+			"remarks": prog.remarks || "",
+					"stepStatuses": stepStatuses,
+					"sendFilesStaged": allSentFiles,
+				};
+			}
 
 								// --- APPLICATION STATE (RENAMED) ---
 
@@ -1019,15 +994,7 @@
 											</div>
 											<table class="students-table">
 												<thead>
-													<tr>
-														<th style="width:50px;text-align:center;">
-															<input
-																type="checkbox"
-																id="selectAllCheckbox"
-																style="width:18px;height:18px;cursor:pointer;"
-																title="Select All"
-															/>
-														</th>
+													<tr>					
 														<th>Author(s)</th>
 														<th>Subject</th>
 														<th>Research Title</th>														
@@ -1062,12 +1029,6 @@
 							return `
 								<!-- REMOVED onclick from <tr> -->
 								<tr class="student-row" data-service-id="${submission.id}">
-
-									<!-- CHECKBOX CELL - NO onclick -->
-									<td onclick="event.stopPropagation();" style="text-align:center;">
-										<input type="checkbox" class="bulk-checkbox" data-id="${submission.id}"
-											   style="width:18px;height:18px;cursor:pointer;" />
-									</td>
 
 									<!-- CONTENT CELLS - ADD onclick to each -->
 									<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">

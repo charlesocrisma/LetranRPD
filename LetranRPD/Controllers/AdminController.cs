@@ -834,7 +834,7 @@ namespace LetranRPD.Controllers
                     .Where(id => !string.IsNullOrEmpty(id.Trim()))
                     .ToList();
 
-                // Map status to numeric value
+                // This converts the string status (e.g., "2" or "complete") into a number
                 int statusValue = request.Status switch
                 {
                     "1" or "processing" => 1,
@@ -852,21 +852,46 @@ namespace LetranRPD.Controllers
                 {
                     if (int.TryParse(idStr.Trim(), out int serviceId))
                     {
+                        // Get the submission AND its progress.
+                        // Entity Framework will track these objects for changes.
                         var submission = await _context.ServiceInformations
                             .Include(si => si.ServiceProgress)
                             .FirstOrDefaultAsync(si => si.ServiceId == serviceId);
 
                         if (submission != null && submission.ServiceProgress != null)
                         {
-                            submission.ServiceProgress.Progress1 = statusValue;
-                            _context.ServiceInformations.Update(submission);
+                            // === THIS IS THE CORRECT LOGIC ===
+                            // We modify the properties based on the status value.
+                            // EF will automatically detect these changes.
+                            switch (statusValue)
+                            {
+                                case 1: // Processing
+                                    submission.ServiceProgress.Progress4 = 1;
+                                    break;
+
+                                case 2: // Complete
+                                        // Sets "Evaluation" (Progress4) to 'complete'
+                                    submission.ServiceProgress.Progress4 = 2;
+                                    break;
+
+                                case 3: // Failed
+                                    submission.ServiceProgress.RunCount = 4;
+                                    submission.ServiceProgress.Progress4 = 3;
+                                    break;
+
+                                case 4: // Archived
+                                    submission.ServiceProgress.Progress4 = 4;
+                                    break;
+                            }
                             updatedCount++;
                         }
                     }
                 }
 
+                // Only save to the database if we actually changed anything
                 if (updatedCount > 0)
                 {
+                    // This one call saves all the changes EF has tracked.
                     await _context.SaveChangesAsync();
                     _logger.LogInformation($"Bulk update completed: {updatedCount} submissions updated to status {statusValue}");
                 }
@@ -879,6 +904,7 @@ namespace LetranRPD.Controllers
             }
             catch (Exception ex)
             {
+                // Log the error and return a helpful message
                 _logger.LogError(ex, "Error during bulk status update");
                 return Json(new
                 {
@@ -888,7 +914,7 @@ namespace LetranRPD.Controllers
             }
         }
 
-      
+
 
     }
 }

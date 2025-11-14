@@ -534,6 +534,13 @@ mark {
 }
 
 @media (max-width: 1024px) {
+    /* === RESPONSIVE FIX === */
+    /* This allows the container to center itself when the sidebar is hidden */
+    .container {
+        margin-left: auto;
+        padding: 1.5rem;
+    }
+
     .controls {
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }

@@ -1,4 +1,6 @@
-﻿body {
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
+
+body {
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
@@ -9,6 +11,8 @@
     background: url('../BG/letran-BG.png') no-repeat;
     background-size: cover;
     margin-right: 0px;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 .text-danger {
@@ -28,9 +32,14 @@
     color: black;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     animation: fadeIn 1.2s ease-in-out;
+ 
     position: absolute;
     top: 5px;
     left: 10px;
+
+    max-width: 100%;
+    max-height: 100%;
+    overflow: auto;
 }
 
     .login-container h2 {
@@ -91,4 +100,49 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+
+
+@media (max-width: 768px) {
+    .login-container {
+        height: auto;
+        padding: 40px;
+        width: 90%;
+        max-width: 400px;
+    }
+
+        .login-container h2 {
+            font-size: 24px;
+        }
+}
+
+@media (max-width: 480px) {
+    body {
+        align-items: flex-start;
+        padding-top: 10vh; 
+    }
+
+    .login-container {
+        padding: 30px 25px;
+        width: 100%;
+        box-shadow: none;
+    }
+
+        .login-container h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            box-sizing: border-box; 
+        }
+
+        .login-container button {
+            padding: 14px;
+            font-size: 16px;
+        }
 }
