@@ -109,7 +109,6 @@
 
 				<!-- Filters Grid -->
 				<div class="filters-grid">
-					<!-- Status Filter (NEW - Dropdown) -->
 					<div class="filter-group">
 						<label for="statusFilter" class="filter-label">Status:</label>
 						<select id="statusFilter" class="filter-dropdown">
@@ -121,7 +120,7 @@
 						</select>
 					</div>
 
-					<!-- Sort by Date (NEW - Dropdown) -->
+
 					<div class="filter-group">
 						<label for="dateSortFilter" class="filter-label">Sort by Date:</label>
 						<select id="dateSortFilter" class="filter-dropdown">
@@ -130,31 +129,17 @@
 						</select>
 					</div>
 
-					<!-- Date Range Filter (NEW) -->
-					<div class="filter-group date-range-group">
-						<label class="filter-label">Date Range:</label>
-						<div class="date-range-inputs">
-							<input type="date" id="dateFromFilter" class="filter-date-input" />
-							<span class="date-separator">to</span>
-							<input type="date" id="dateToFilter" class="filter-date-input" />
-						</div>
-					</div>
-
-					<!-- Department Filter (EXISTING) -->
+					
 					<div class="filter-group">
-						<label class="filter-label">Department:</label>
+						<label class="filter-label">Thesis Subject:</label>
 						<div class="filter-tabs" id="departmentTabs">
 							<select id="departmentFilter" class="filter-dropdown">
-								<option value="all">All Department</option>
-								<option value="CEIT">College of Engineering and Information Technology</option>
-								<option value="CBAA">College of Business Administration and Accountancy</option>
-								<option value="CELAS">College of Education, Liberal Arts, and Sciences</option>
-								<option value="SHS">Senior High School Department</option>
+
 							</select>
 						</div>
 					</div>
 
-					<!-- Service Filter (EXISTING) -->
+
 					<div class="filter-group">
 						<label class="filter-label">Service:</label>
 						<div class="filter-tabs" id="serviceTabs">
@@ -170,26 +155,16 @@
 						</div>
 					</div>
 
-					<!-- Clear Filters Button (NEW) -->
-					<!-- Clear Filters Button -->
 					<div class="filter-group">
 						<button id="clearFiltersBtn" class="clear-filters-button" type="button">
 							<i class="fas fa-redo"></i> Reset Filters
 						</button>
-					</div>
-
-					<!-- NEW: Apply Filters Button -->
-					<div class="filter-group">
-						<button id="applyFiltersBtn" class="apply-filters-button" type="button">
-							<i class="fas fa-check"></i> Apply Filters
-						</button>
-					</div>
+					</div>			
 				</div>
 			</div>
 		</div>
 
 
-		<!-- BULK ACTIONS SECTION -->
 		<div class="bulk-actions-section" id="bulkActionsSection">
 			<div class="bulk-actions-content">
 				<div class="selection-count">
@@ -221,7 +196,6 @@
 
 		<!-- Students Table Container -->
 		<div class="table-wrapper" id="submissionsTableContainer">
-			<!-- Table will be populated by JavaScript -->
 		</div>
 
 		<!-- Service Steps Modal -->
@@ -232,7 +206,6 @@
 					<span class="close" onclick="closeServiceStepsModal()">&times;</span>
 				</div>
 				<div class="modal-body" id="modalBody">
-					<!-- Service steps will be populated here -->
 				</div>
 			</div>
 		</div>
@@ -409,7 +382,8 @@
 									"generalStatusTypes": [
 										{ "key": "processing", "name": "Processing", "color": "#3b82f6" },
 										{ "key": "complete", "name": "Complete", "color": "#10b981" },
-										{ "key": "failed", "name": "Failed", "color": "#ef4444" }
+										{ "key": "failed", "name": "Failed", "color": "#ef4444" },
+										{ "key": "archived", "name": "Archived", "color": "#808080" }
 									],
 									"stepStatusTypes": [
 										{ "key": "pending", "name": "PENDING", "color": "#94a3b8" },
@@ -546,7 +520,7 @@
 								const departmentFilter = document.getElementById('departmentFilter');
 								if (departmentFilter) {
 									// Clear existing options except the first one
-									departmentFilter.innerHTML = '<option value="all">All Departments</option>';
+									departmentFilter.innerHTML = '<option value="all">All Subjects</option>';
 									applicationData.departments.forEach(dept => {
 										const option = document.createElement('option');
 										option.value = dept;
@@ -655,19 +629,19 @@
 
 											function clearAllFilters() {
 											currentDepartment = 'all'; 
-			currentService = 'all';   
-			currentStatusFilter = 'all';
-			currentSortOrder = 'desc';
-			currentStartDate = null;
-			currentEndDate = null;
+											currentService = 'all';   
+											currentStatusFilter = 'all';
+											currentSortOrder = 'desc';
+											currentStartDate = null;
+											currentEndDate = null;
 
-												document.getElementById('departmentFilter').value = 'all'; // Use correct ID
-			document.getElementById('serviceFilter').value = 'all';     // Use correct ID
-			document.getElementById('statusFilter').value = 'all';               // Use correct ID
-			document.getElementById('dateSortFilter').value = 'desc';            // Use correct ID
-			document.getElementById('dateFromFilter').value = '';                // Use correct ID
-			document.getElementById('dateToFilter').value = '';                  // Use correct ID
-			document.getElementById('searchInput').value = '';
+											document.getElementById('departmentFilter').value = 'all'; // Use correct ID
+											document.getElementById('serviceFilter').value = 'all';     // Use correct ID
+											document.getElementById('statusFilter').value = 'all';               // Use correct ID
+											document.getElementById('dateSortFilter').value = 'desc';            // Use correct ID
+											document.getElementById('dateFromFilter').value = '';                // Use correct ID
+											document.getElementById('dateToFilter').value = '';                  // Use correct ID
+											document.getElementById('searchInput').value = '';
 
 										filteredSubmissions = [...applicationData.submissions];
 										applyFilters();
@@ -1056,8 +1030,7 @@
 														</th>
 														<th>Author(s)</th>
 														<th>Subject</th>
-														<th>Research Title</th>
-														<th>Department</th>
+														<th>Research Title</th>														
 														<th>Service</th>
 														<th>Status</th>
 														<th>Progress</th>
@@ -1115,10 +1088,7 @@
 										<span class="department-text">${submission.title}</span>
 									</td>
 
-									<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
-										<span class="department-text">${submission.department}</span>
-									</td>
-
+				
 									<td onclick="event.stopPropagation(); toggleSubmissionDetails('${submission.id}');">
 										<span class="service-badge">${submission.serviceName}</span>
 									</td>
@@ -1383,8 +1353,8 @@
 
 								// --- LOCAL DATA UPDATES (RENAMED) ---
 
-								function updateGeneralStatus(serviceId, newStatus) { // RENAMED
-										 const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId)); // RENAMED
+								function updateGeneralStatus(serviceId, newStatus) { 
+										 const submission = applicationData.submissions.find(s => s.id === parseInt(serviceId));
 									if (submission) {
 										submission.status = newStatus;
 										submission.lastUpdated = new Date().toISOString(); // More precise
@@ -1552,21 +1522,13 @@
 			if (submission.totalSteps > 2) {
 				formData.append('progress3', convertJsStatusToDbInt(submission.stepStatuses[2]));
 				formData.append('progress4', convertJsStatusToDbInt(submission.stepStatuses[3]));
-			} else {
-				// Send empty string to bind as null for int?
-				formData.append('progress3', '');
-				formData.append('progress4', '');
 			}
 
 			// Append progress 5 & 6 (ONLY for Ethics Review)
 			if (submission.serviceName === "Ethics Review") {
 				formData.append('progress5', convertJsStatusToDbInt(submission.stepStatuses[4]));
 				formData.append('progress6', convertJsStatusToDbInt(submission.stepStatuses[5]));
-			} else {
-				// Send empty string to bind as null for int?
-				formData.append('progress5', '');
-				formData.append('progress6', '');
-			}
+			} 
 
 								// 3. APPEND ALL STAGED FILES (Crucial step)
 								if (submission.sendFilesStaged.length > 0) {
@@ -1632,7 +1594,7 @@
 
 								// --- STATS & MODAL (RENAMED) ---
 
-								function updateStatistics(submissions = applicationData.submissions) { // RENAMED
+								function updateStatistics(submissions = applicationData.submissions) {
 									const stats = {
 										total: submissions.length,
 										processing: submissions.filter(s => s.status === 'processing').length,

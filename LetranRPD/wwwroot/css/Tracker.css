@@ -21,7 +21,8 @@
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     margin-top: -3rem;
     margin-bottom: 0rem;
-
+    /* Ensure container itself doesn't overflow */
+    overflow-x: hidden;
 }
 
 .header {
@@ -66,7 +67,8 @@
     gap: 20px;
     width: 100%;
     padding: 30px;
-
+    /* Fix for flexbox + padding */
+    box-sizing: border-box;
 }
 
 .sidebar {
@@ -76,6 +78,8 @@
     padding: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     height: fit-content;
+    /* Allow sidebar to shrink */
+    flex-shrink: 0;
 }
 
     .sidebar h3 {
@@ -122,8 +126,10 @@
     border-radius: 12px;
     padding: 50px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    width: 850px;
-
+    /* Remove fixed width */
+    /* width: 850px; */
+    /* Ensure content area can shrink and grow */
+    min-width: 0;
 }
 
 .service-header {
@@ -133,11 +139,17 @@
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 2px solid #ecf0f1;
+    /* Allow wrapping */
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .service-title {
     color: #2c3e50;
-    width: 40rem;
+    /* Remove fixed width */
+    /* width: 40rem; */
+    flex: 1; /* Allow to grow */
+    min-width: 250px; /* Prevent shrinking too much */
 }
 
 .service-status {
@@ -146,6 +158,7 @@
     font-size: 12px;
     font-weight: bold;
     text-transform: uppercase;
+    flex-shrink: 0;
 }
 
 .status-pending {
@@ -157,6 +170,7 @@
     background: #d4edda;
     color: #155724;
 }
+
 .status-On-going {
     background: #d4edda;
     color: #155724;
@@ -171,6 +185,7 @@
     background: #f8d7da;
     color: #721c24;
 }
+
 .status-Failed {
     background: #f8d7da;
     color: #721c24;
@@ -185,11 +200,14 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .status-badges {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .status-badge {
@@ -237,7 +255,8 @@
         left: 15px;
         top: 30px;
         width: 2px;
-        height: 40px;
+        /* Let height be calculated by step content */
+        height: calc(100% - 10px);
         background: #e9ecef;
         z-index: 1;
     }
@@ -258,7 +277,7 @@
 }
 
     .step-circle.completed {
-        background: #28a745;       
+        background: #28a745;
         color: white;
     }
 
@@ -371,12 +390,15 @@
     border: 1px solid #e9ecef;
     border-radius: 4px;
     font-size: 14px;
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 10px;
 }
 
 .file-info {
     display: flex;
     align-items: center;
     flex: 1;
+    min-width: 200px; /* Prevent info from getting too squished */
 }
 
 .file-icon {
@@ -391,6 +413,8 @@
 .file-name {
     font-weight: 500;
     color: #2c3e50;
+    /* Allow long file names to break */
+    word-break: break-all;
 }
 
 .file-size {
@@ -407,6 +431,7 @@
     cursor: pointer;
     font-size: 12px;
     transition: background 0.3s ease;
+    flex-shrink: 0; /* Don't let button shrink */
 }
 
     .remove-file:hover {
@@ -434,13 +459,13 @@
     transition: width 0.3s ease;
 }
 
-        .received-files-section {
-            margin: 30px 0;
-            padding: 20px;
-            background: #e8f4fd;
-            border: 1px solid #b3d9f2;
-            border-radius: 8px;
-        }
+.received-files-section {
+    margin: 30px 0;
+    padding: 20px;
+    background: #e8f4fd;
+    border: 1px solid #b3d9f2;
+    border-radius: 8px;
+}
 
 
 .received-files-header {
@@ -465,12 +490,15 @@
     border: 1px solid #b3d9f2;
     border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 10px;
 }
 
 .received-file-info {
     display: flex;
     align-items: center;
     flex: 1;
+    min-width: 200px;
 }
 
 .received-file-icon {
@@ -487,6 +515,7 @@
     font-weight: 600;
     color: #2c3e50;
     margin-bottom: 2px;
+    word-break: break-all;
 }
 
 .received-file-meta {
@@ -504,6 +533,7 @@
     font-size: 12px;
     margin-right: 5px;
     transition: background 0.3s ease;
+    flex-shrink: 0;
 }
 
     .download-btn:hover {
@@ -590,35 +620,6 @@
 }
 
 
-
-
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        padding: 10px;
-    }
-
-    .main-content {
-        flex-direction: column;
-        margin-top: 60px;
-    }
-
-    .sidebar {
-        width: 100%;
-        order: 2;
-    }
-
-    .progress-steps {
-        flex-wrap: wrap;
-        gap: 20px;
-    }
-
-    .legend {
-        position: relative;
-        margin-top: 20px;
-    }
-}
-
 .service-detail {
     display: none;
 }
@@ -626,3 +627,234 @@
     .service-detail.active {
         display: block;
     }
+
+
+/* ======================================= */
+/* === RESPONSIVE ENHANCEMENT SUGGESTIONS === */
+/* ======================================= */
+
+/*
+ * 1. For tablets and small desktops (<= 1024px)
+ *
+ * This stacks the main layout.
+ */
+@media (max-width: 1024px) {
+    .main-content {
+        /* Stack sidebar and content area */
+        flex-direction: column;
+        padding: 20px;
+        /* Adjust for fixed header */
+        margin-top: 60px;
+    }
+
+    .sidebar {
+        width: 100%;
+        /* Move sidebar to the top on mobile */
+        order: -1;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+    }
+
+    .content-area {
+        /* Remove the fixed width */
+        width: 100%;
+        padding: 30px;
+        box-sizing: border-box;
+    }
+
+    .service-title {
+        /* Remove the fixed width */
+        width: auto;
+        font-size: 1.25rem; /* Slightly smaller title */
+    }
+}
+
+/*
+ * 2. For mobile devices (<= 768px)
+ *
+ * This query fine-tunes padding and font sizes.
+ */
+@media (max-width: 768px) {
+    .container {
+        /* Remove negative margin and padding */
+        margin-top: 0;
+        padding: 0;
+        width: 100%;
+        box-shadow: none;
+    }
+
+    .header {
+        /* Reduce padding, allow wrapping */
+        padding: 10px 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+        /* Ensure header doesn't get pushed by margin */
+        position: fixed;
+    }
+
+    .main-content {
+        /* Adjust for header height */
+        margin-top: 80px;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+        /* Stack sidebar below content */
+        order: 2;
+        margin-bottom: 0;
+    }
+
+    .content-area {
+        width: 100%; /* Already set, but good to be explicit */
+        padding: 15px; /* Significantly reduce padding */
+        order: 1; /* Show content first */
+    }
+
+    .service-header {
+        /* Stack title and status badge */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+
+    .service-title {
+        font-size: 1.1rem;
+    }
+
+    .progress-header {
+        /* Stack header items */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .status-badges {
+        flex-wrap: wrap;
+    }
+
+    .progress-steps {
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 10px;
+    }
+
+    .step {
+        /* Ensure step content can wrap */
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+        /* Adjust the step connector line */
+        .step:not(:last-child)::after {
+            height: calc(100% + 10px); /* Make it full height of the step gap */
+            top: 30px;
+        }
+
+    .step-title {
+        font-size: 0.9rem;
+    }
+
+    .step-details {
+        font-size: 0.8rem;
+    }
+
+    .file-item, .received-file-item {
+        /* Stack file info and buttons on small screens */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .remove-file {
+        /* Position remove button at top right */
+        align-self: flex-end;
+        margin-top: -35px; /* Position over padding */
+        margin-right: -5px;
+    }
+
+    .download-btn {
+        margin-right: 0;
+    }
+
+    .upload-section {
+        padding: 15px;
+    }
+
+    .upload-btn, .submit-btn {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        box-sizing: border-box;
+    }
+
+    .received-files-section {
+        padding: 15px;
+    }
+
+    .placeholder {
+        /* Reduce the large top margin on mobile */
+        margin-top: 40px;
+        padding: 20px 0; /* Add some vertical padding */
+    }
+}
+
+/*
+ * 3. For small mobile phones (<= 480px)
+ *
+ * This query fine-tunes the smallest elements.
+ */
+@media (max-width: 480px) {
+    .main-content {
+        /* Adjust for potentially taller wrapped header */
+        margin-top: 100px;
+        padding: 5px;
+    }
+
+    .sidebar {
+        padding: 10px;
+    }
+
+    .content-area {
+        padding: 10px;
+    }
+
+    .service-item {
+        padding: 10px;
+    }
+
+        .service-item h4 {
+            font-size: 0.9rem;
+        }
+
+    .upload-btn, .submit-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    .received-files-section {
+        padding: 10px;
+    }
+
+    .file-item, .received-file-item {
+        padding: 10px;
+    }
+
+    .received-file-name, .file-name {
+        font-size: 0.9rem;
+    }
+
+    .panel-content {
+        padding: 10px;
+    }
+
+    .placeholder {
+        /* Reduce margin even more on small screens */
+        margin-top: 20px;
+    }
+}

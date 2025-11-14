@@ -22,6 +22,7 @@
     --status-pending: #94a3b8;
     --status-current: #3b82f6;
     --status-revision: #fd7e14;
+    --status-archived: #808080;
     /* Shadow */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -1262,6 +1263,7 @@ body {
     font-size: 0.9375rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-top:2rem;
 }
 
     .clear-filters-button:hover {
@@ -1488,7 +1490,6 @@ body {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-   
 }
 
 .students-table {
@@ -1674,7 +1675,7 @@ body {
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 2rem !important;    
+    padding: 2rem !important;
 }
 
 /* FIX 7: Filters Grid */
@@ -1753,7 +1754,7 @@ body {
     padding: 0 !important;
     width: 100% !important;
     overflow-x: auto;
-    margin-left:0rem !important;
+    margin-left: 0rem !important;
 }
 
 table {
@@ -2004,6 +2005,3 @@ td.checkbox-cell {
     position: relative;
     z-index: 999;
 }
-
-
-

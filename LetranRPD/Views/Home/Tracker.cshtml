@@ -1759,11 +1759,11 @@
 						<div class="step-content">
 							<div class="step-title">Submision of requirments
 								@{
-									if (p2 == "current")
+									if (p1 == "current")
 									{
 										<span class="service-status badge-current" style="opacity:70%;">! Kindly submit proof of payment as instructed below !</span>
 									}
-									else if (p2 == "revision")
+									else if (p1 == "revision")
 									{
 										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
 									}
@@ -1860,7 +1860,18 @@
 					<div class="step">
 						<div class="step-circle @p3">3</div>
 						<div class="step-content">
-							<div class="step-title">Wait for the Ethics Review Result</div>
+							<div class="step-title">
+								Wait for the Ethics Review Result 			@{
+									if (p3 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly wait for the results !</span>
+									}
+									else if (p3 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
 							<div class="step-details">
 								Note: Await the result, revision needed and approval of the ethics review. <b>ONCE APPROVED</b>, the Reviewer or the student researcher/s must forward the approved andsigned ERB02 and ERB03.
 								If <b>NOT APPROVED</b>, the student will receive an email
@@ -1914,7 +1925,19 @@
 					<div class="step">
 						<div class="step-circle @p5">5</div>
 						<div class="step-content">
-							<div class="step-title">Wait for the Ethics Review Result</div>
+							<div class="step-title">Wait for the Ethics Review Result
+								@{
+									if (p5 == "current")
+									{
+										<span class="service-status badge-current" style="opacity:70%;">! Kindly wait for the results !</span>
+									}
+									else if (p5 == "revision")
+									{
+										<span class="service-status badge-revision" style="opacity:70%;">! See the remarks at the bottom of the page !</span>
+									}
+								}
+							</div>
+							
 							<div class="step-details">
 								Note: Await the result, revision needed and approval of
 								the Ethics Reviewer.
@@ -1960,7 +1983,7 @@
 					<p style="color: #6c757d; margin-bottom: 15px;">Upload your research paper and any supporting documents</p>
 
 					<div class="files-container" id="filesContainer-@service.ServiceId" style="display: none;">
-						<!-- Files will be added here -->
+						
 					</div>
 
 					<div class="upload-progress" id="uploadProgress" style="display: none;">
