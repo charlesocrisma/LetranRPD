@@ -2,8 +2,8 @@
 	Layout = "~/Views/Shared/_AdminNav.cshtml";
 	var currentUser = Context.Session.GetObject<Account>("account");
 }
-							@using LetranRPD.Models
-							@model List<ServiceInformation>
+@using LetranRPD.Models
+@model List<ServiceInformation>
 @Html.AntiForgeryToken()
 
 
@@ -145,7 +145,7 @@
 						<label class="filter-label">Department:</label>
 						<div class="filter-tabs" id="departmentTabs">
 							<select id="departmentFilter" class="filter-dropdown">
-								<option value="all_department">All Department</option>
+								<option value="all">All Department</option>
 								<option value="CEIT">College of Engineering and Information Technology</option>
 								<option value="CBAA">College of Business Administration and Accountancy</option>
 								<option value="CELAS">College of Education, Liberal Arts, and Sciences</option>
@@ -159,7 +159,7 @@
 						<label class="filter-label">Service:</label>
 						<div class="filter-tabs" id="serviceTabs">
 							<select id="serviceFilter" class="filter-dropdown">
-								<option value="all_services">All Services</option>
+								<option value="all">All Services</option>
 								<option value="oc">Originality Check</option>
 								<option value="iv">Instrument Validation</option>
 								<option value="le">Language Editing</option>
@@ -520,66 +520,87 @@
 									if (filterToggle) {
 										filterToggle.addEventListener('click', toggleFilterSection);
 									}
+											const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+			if (applyFiltersBtn) {
+				applyFiltersBtn.addEventListener('click', handleApplyFilters);
+			}
 								}
 
+											function handleApplyFilters() {
+				// 1. Update global state from dropdowns
+				departmentFilter = document.getElementById('departmentFilter').value;
+				currentService = document.getElementById('serviceFilter').value;
+				currentStatusFilter = document.getElementById('statusFilter').value;
+				currentSortOrder = document.getElementById('dateSortFilter').value;
+				currentStartDate = document.getElementById('dateFromFilter').value;
+				currentEndDate = document.getElementById('dateToFilter').value;
 
+				// 2. Re-apply the filters
+				applyFilters();
+			}
 							function setupFilterTabs() {
+
+
+
 								// Setup Department Dropdown
-								const departmentDropdown = document.getElementById('departmentDropdown');
-								if (departmentDropdown) {
+								const departmentFilter = document.getElementById('departmentFilter');
+								if (departmentFilter) {
 									// Clear existing options except the first one
-									departmentDropdown.innerHTML = '<option value="all">All Departments</option>';
+									departmentFilter.innerHTML = '<option value="all">All Departments</option>';
 									applicationData.departments.forEach(dept => {
 										const option = document.createElement('option');
 										option.value = dept;
 										option.textContent = dept;
-										departmentDropdown.appendChild(option);
+										departmentFilter.appendChild(option);
 									});
-									departmentDropdown.value = currentDepartment;
-									departmentDropdown.addEventListener('change', (e) => filterByDepartment(e.target.value));
+									departmentFilter.value = "all";
+									departmentFilter.addEventListener('change', (e) => filterByDepartment(e.target.value));
 								}
 
 								// Setup Service Dropdown
-								const serviceDropdown = document.getElementById('serviceDropdown');
-								if (serviceDropdown) {
-									serviceDropdown.innerHTML = '<option value="all">All Services</option>';
+								const serviceFilter = document.getElementById('serviceFilter');
+								if (serviceFilter) {
+									serviceFilter.innerHTML = '<option value="all">All Services</option>';
 									applicationData.services.forEach(service => {
 										const option = document.createElement('option');
 										option.value = service.key;
 										option.textContent = service.name;
-										serviceDropdown.appendChild(option);
+										serviceFilter.appendChild(option);
 									});
-									serviceDropdown.value = currentService;
-									serviceDropdown.addEventListener('change', (e) => filterByService(e.target.value));
+									serviceFilter.value = "all";
+									serviceFilter.addEventListener('change', (e) => filterByService(e.target.value));
 								}
 
 								// Setup Status Dropdown
-								const statusDropdown = document.getElementById('statusDropdown');
-								if (statusDropdown) {
-									statusDropdown.addEventListener('change', (e) => filterByStatus(e.target.value));
+								const statusFilter = document.getElementById('statusFilter');
+								if (statusFilter) {
+									statusFilter.addEventListener('change', (e) => filterByStatus(e.target.value));
 								}
 
 								// Setup Sort Dropdown
-								const sortDropdown = document.getElementById('sortDropdown');
-								if (sortDropdown) {
-									sortDropdown.addEventListener('change', (e) => filterBySort(e.target.value));
+								const dateSortFilter = document.getElementById('dateSortFilter');
+								if (dateSortFilter) {
+									dateSortFilter.addEventListener('change', (e) => filterBySort(e.target.value));
 								}
 
 								// Setup Date Range Filters
-								const startDateFilter = document.getElementById('startDateFilter');
-								const endDateFilter = document.getElementById('endDateFilter');
-								if (startDateFilter) {
-									startDateFilter.addEventListener('change', (e) => {
-										currentStartDate = e.target.value;
-										applyFilters();
-									});
-								}
-								if (endDateFilter) {
-									endDateFilter.addEventListener('change', (e) => {
-										currentEndDate = e.target.value;
-										applyFilters();
-									});
-								}
+								const currentStartDate = document.getElementById('dateFromFilter');
+								const currentEndDate = document.getElementById('dateToFilter');
+
+											let selectedStartDate = null;
+											let selectedEndDate = null;
+											if (currentStartDate) {
+				currentStartDate.addEventListener('change', (e) => {
+					selectedStartDate = e.target.value;  // store YYYY-MM-DD
+					applyFilters();                      // re-filter results
+				});
+			}
+											if (currentEndDate) {
+				currentEndDate.addEventListener('change', (e) => {
+					selectedEndDate = e.target.value;    // store YYYY-MM-DD
+					applyFilters();                      // re-filter results
+				});
+			}
 
 								// Setup Clear Filters Button
 								const clearFiltersBtn = document.getElementById('clearFiltersBtn');
@@ -633,28 +654,30 @@
 									}
 
 											function clearAllFilters() {
-										currentDepartment = 'all';
-										currentService = 'all';
-										currentStatusFilter = 'all';
-										currentSortOrder = 'desc';
-										currentStartDate = null;
-										currentEndDate = null;
+											currentDepartment = 'all'; 
+			currentService = 'all';   
+			currentStatusFilter = 'all';
+			currentSortOrder = 'desc';
+			currentStartDate = null;
+			currentEndDate = null;
 
-										document.getElementById('departmentDropdown').value = 'all';
-										document.getElementById('serviceDropdown').value = 'all';
-										document.getElementById('statusDropdown').value = 'all';
-										document.getElementById('sortDropdown').value = 'desc';
-										document.getElementById('startDateFilter').value = '';
-										document.getElementById('endDateFilter').value = '';
-										document.getElementById('searchInput').value = '';
+												document.getElementById('departmentFilter').value = 'all'; // Use correct ID
+			document.getElementById('serviceFilter').value = 'all';     // Use correct ID
+			document.getElementById('statusFilter').value = 'all';               // Use correct ID
+			document.getElementById('dateSortFilter').value = 'desc';            // Use correct ID
+			document.getElementById('dateFromFilter').value = '';                // Use correct ID
+			document.getElementById('dateToFilter').value = '';                  // Use correct ID
+			document.getElementById('searchInput').value = '';
 
 										filteredSubmissions = [...applicationData.submissions];
 										applyFilters();
 									}
-
+									console.log(applicationData.submissions[0]);
 										function applyFilters() {
 										// Start from the latest search-filtered list
 										let filtered = [...filteredSubmissions];
+										let start = null;
+										let end = null;
 
 										// Department filter
 										if (currentDepartment !== 'all') {
@@ -675,6 +698,7 @@
 											filtered = filtered.filter(submission => submission.status === currentStatusFilter);
 										}
 
+
 										// Date range filter
 										if (currentStartDate) {
 											filtered = filtered.filter(submission => {
@@ -682,12 +706,15 @@
 												return submissionDate >= currentStartDate;
 											});
 										}
+
 										if (currentEndDate) {
 											filtered = filtered.filter(submission => {
 												const submissionDate = new Date(submission.dateSubmitted).toISOString().split('T')[0];
 												return submissionDate <= currentEndDate;
 											});
 										}
+						
+
 
 										// Sort by date
 										filtered.sort((a, b) => {
@@ -2089,15 +2116,11 @@
 						}
 
 						// ===== FILTER BY SERVICE FIX =====
-						function filterByService(element) {
-							if (!element) return;
-							document.querySelectorAll('#serviceTabs .filter-tab').forEach(t => t.classList.remove('active'));
-							element.classList.add('active');
-							// Your existing filter logic will be called
-							if (typeof applyFilters === 'function') {
-								applyFilters();
-							}
-						}
+									function filterByService(service) {
+				currentService = service;
+				applyFilters();
+			}
+
 
 						// ===== BULK ACTIONS BAR FIX =====
 						function updateBulkActionsUI() {
